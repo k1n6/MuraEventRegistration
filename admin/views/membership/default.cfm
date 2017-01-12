@@ -67,7 +67,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfif getMembershipOrganizations.RecordCount>
 					<tfoot>
 						<tr>
-							<td colspan="4">Add new Membership Organization not listed above by clicking <a href="#buildURL('admin:membership.addorganization')#" class="art-button">here</a></td>
+							<td colspan="4">Add new Membership Organization not listed above by clicking <a href="#buildURL('admin:membership.addorganization', cgi.path_info)#" class="art-button">here</a></td>
 						</tr>
 					</tfoot>
 					<tbody>
@@ -76,14 +76,14 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<td>#getMembershipOrganizations.OrganizationName#</td>
 							<td>#getMembershipOrganizations.OrganizationDomainName#</td>
 							<td><cfif getMembershipOrganizations.Active EQ 1>Yes<cfelse>No</cfif></td>
-							<td><a href="#buildURL('admin:membership.updateorganization')#&OrgID=#getMembershipOrganizations.TContent_ID#"><img src="/plugins/#variables.framework.package#/includes/assets/images/adminactions/imgUpdate.png" alt="Update Organization"></a><cfif getMembershipOrganizations.Active EQ 1><a href="#buildURL('admin:membership.updateorganization_deactivate')#&OrgID=#getMembershipOrganizations.TContent_ID#"><img src="/plugins/#variables.framework.package#/includes/assets/images/adminactions/imgDeActivate.png" alt="Deactivate Organization"></a><cfelse><a href="#buildURL('admin:membership.updateorganization_activate')#&OrgID=#getMembershipOrganizations.TContent_ID#"><img src="/plugins/#variables.framework.package#/includes/assets/images/adminactions/imgActivate.png" alt="Activate Organization"></a></cfif></td>
+							<td><a href="#buildURL('admin:membership.updateorganization', cgi.path_info)#&OrgID=#getMembershipOrganizations.TContent_ID#"><img src="/plugins/#variables.framework.package#/includes/assets/images/adminactions/imgUpdate.png" alt="Update Organization"></a><cfif getMembershipOrganizations.Active EQ 1><a href="#buildURL('admin:membership.updateorganization_deactivate', cgi.path_info)#&OrgID=#getMembershipOrganizations.TContent_ID#"><img src="/plugins/#variables.framework.package#/includes/assets/images/adminactions/imgDeActivate.png" alt="Deactivate Organization"></a><cfelse><a href="#buildURL('admin:membership.updateorganization_activate', cgi.path_info)#&OrgID=#getMembershipOrganizations.TContent_ID#"><img src="/plugins/#variables.framework.package#/includes/assets/images/adminactions/imgActivate.png" alt="Activate Organization"></a></cfif></td>
 							</tr>
 						</cfloop>
 					</tbody>
 				<cfelse>
 					<tbody>
 						<tr>
-							<td colspan="6"><div align="center" class="alert-box notice">No Member Organizations were located in the database. To add a member organization to the system click <a href="#buildURL('admin:membership.addorganization')#" class="art-button">here</a></div></td>
+							<td colspan="6"><div align="center" class="alert-box notice">No Member Organizations were located in the database. To add a member organization to the system click <a href="#buildURL('admin:membership.addorganization', cgi.path_info)#" class="art-button">here</a></div></td>
 						</tr>
 					</tbody>
 				</cfif>

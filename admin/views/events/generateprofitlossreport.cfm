@@ -92,7 +92,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 								<td style="Font-Family: Arial; Font-Size: 12px;">#DollarFormat(Session.getRegistrations.AttendeePrice)#</td>
 								<td style="Font-Family: Arial; Font-Size: 12px;">
 									<cfif Session.getRegistrations.AttendeePriceVerified EQ 0>
-										<a href="#buildURL('admin:events.updateparticipantcost')#&EventID=#URl.EventID#&RegistrationID=#Session.getRegistrations.TContent_ID#" class="art-button">Update Cost</a>
+										<a href="#buildURL('admin:events.updateparticipantcost', cgi.path_info)#&EventID=#URl.EventID#&RegistrationID=#Session.getRegistrations.TContent_ID#" class="art-button">Update Cost</a>
 									<cfelse>&nbsp;</cfif>
 								</td>
 							</tr>
@@ -112,13 +112,13 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<td style="Font-Family: Arial; Font-Size: 12px;">#DollarFormat(Variables.IncomeAmount)#</td>
 						</tr>
 						<tr>
-							<td colspan="6" style="Font-Family: Arial; Font-Size: 12px;"><a href="#buildURL('admin:events.updateeventexpenses')#&EventID=#URL.EventID#" class="art-button">Proceed to Event Expenses</a></td>
+							<td colspan="6" style="Font-Family: Arial; Font-Size: 12px;"><a href="#buildURL('admin:events.updateeventexpenses', cgi.path_info)#&EventID=#URL.EventID#" class="art-button">Proceed to Event Expenses</a></td>
 						</tr>
 					</tfoot>
 				<cfelse>
 					<!--- <tbody>
 						<tr>
-							<td colspan="6"><div align="center" class="alert-box notice">No Event Expenses have been located within the database. Please click <a href="#buildURL('admin:events.addeventexpenses')#&EventID=#URL.EventID#" class="art-button">here</a> to add a new expense for this event.</div></td>
+							<td colspan="6"><div align="center" class="alert-box notice">No Event Expenses have been located within the database. Please click <a href="#buildURL('admin:events.addeventexpenses', cgi.path_info)#&EventID=#URL.EventID#" class="art-button">here</a> to add a new expense for this event.</div></td>
 						</tr>
 					</tbody> --->
 				</cfif>

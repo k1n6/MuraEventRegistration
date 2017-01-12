@@ -302,12 +302,12 @@
 					<cfif Len(Session.EventInfo.SelectedEvent.Presenters)>
 						<tr>
 							<td style="width: 155px;"><span style="font-weight: bold;">Presenter(s)</span></td>
-							<td colspan="3" style="width: 740px;">#Session.EventInfo.EventPresenter.Fname# #Session.EventInfo.EventPresenter.Lname# &nbsp;&nbsp;&nbsp; <a href="#buildURL('public:contactus.sendfeedback')#&EventID=#URL.EventID#&SendTo=Presenter" class="btn btn-primary btn-sm">Have Questions</a></td>
+							<td colspan="3" style="width: 740px;">#Session.EventInfo.EventPresenter.Fname# #Session.EventInfo.EventPresenter.Lname# &nbsp;&nbsp;&nbsp; <a href="#buildURL('public:contactus.sendfeedback', cgi.path_info)#&EventID=#URL.EventID#&SendTo=Presenter" class="btn btn-primary btn-sm">Have Questions</a></td>
 						</tr>
 					</cfif>
 					<tr>
 						<td style="width: 155px;"><span style="font-weight: bold;">Facilitator:</span></td>
-						<td colspan="3" style="width: 740px;">#Session.EventInfo.EventFacilitator.FName# #Session.EventInfo.EventFacilitator.LName# &nbsp;&nbsp;&nbsp; <a href="#buildURL('public:contactus.sendfeedback')#&EventID=#URL.EventID#&SendTo=Facilitator" class="btn btn-primary btn-sm">Have Questions</a></td>
+						<td colspan="3" style="width: 740px;">#Session.EventInfo.EventFacilitator.FName# #Session.EventInfo.EventFacilitator.LName# &nbsp;&nbsp;&nbsp; <a href="#buildURL('public:contactus.sendfeedback', cgi.path_info)#&EventID=#URL.EventID#&SendTo=Facilitator" class="btn btn-primary btn-sm">Have Questions</a></td>
 					</tr>
 				</tbody>
 			</table>

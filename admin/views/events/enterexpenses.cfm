@@ -82,7 +82,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfif getAvailableEventExpenses.RecordCount>
 					<tfoot>
 						<tr>
-							<td colspan="3" style="Font-Family: Arial; Font-Size: 12px;">Add a new Expense for this event not listed above by clicking <a href="#buildURL('admin:events.addeventexpenses')#&EventID=#URL.EventID#" class="art-button">here</a> or to enter non-participant revenue click <a href="#buildURL('admin:events.addeventincome')#&EventID=#URL.EventID#" class="art-button">here</a></td>
+							<td colspan="3" style="Font-Family: Arial; Font-Size: 12px;">Add a new Expense for this event not listed above by clicking <a href="#buildURL('admin:events.addeventexpenses', cgi.path_info)#&EventID=#URL.EventID#" class="art-button">here</a> or to enter non-participant revenue click <a href="#buildURL('admin:events.addeventincome', cgi.path_info)#&EventID=#URL.EventID#" class="art-button">here</a></td>
 						</tr>
 					</tfoot>
 					<tbody>
@@ -99,7 +99,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfelse>
 					<tbody>
 						<tr>
-							<td colspan="6"><div align="center" class="alert-box notice">No Event Expenses have been located within the database. Please click <a href="#buildURL('admin:events.addeventexpenses')#&EventID=#URL.EventID#" class="art-button">here</a> to add a new expense for this event.</div></td>
+							<td colspan="6"><div align="center" class="alert-box notice">No Event Expenses have been located within the database. Please click <a href="#buildURL('admin:events.addeventexpenses', cgi.path_info)#&EventID=#URL.EventID#" class="art-button">here</a> to add a new expense for this event.</div></td>
 						</tr>
 					</tbody>
 				</cfif>

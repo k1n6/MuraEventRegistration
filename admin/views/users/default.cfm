@@ -102,7 +102,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 		<cfif rc.Query.RecordCount>
 			<tfoot>
 				<tr>
-					<td colspan="7">Add a new user not listed in the table above, click <a href="#buildURL('admin:users.adduser')#&PerformAction=AddUser" class="art-button">here</a></td>
+					<td colspan="7">Add a new user not listed in the table above, click <a href="#buildURL('admin:users.adduser', cgi.path_info)#&PerformAction=AddUser" class="art-button">here</a></td>
 				</tr>
 			</tfoot>
 			<tbody>
@@ -114,14 +114,14 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<td>#rc.Query.Email#</td>
 					<td>#rc.Query.Company#</td>
 					<td><cfswitch expression="#rc.Query.InActive#"><cfcase value="1">Yes</cfcase><cfcase value="0">No</cfcase></cfswitch></td>
-					<td><a href="#buildURL('admin:users.updateuser')#&PerformAction=Edit&RecNo=#rc.Query.UserID#" class="art-button">U</a>&nbsp;<a href="#buildURL('admin:users.updateuser')#&PerformAction=Delete&RecNo=#rc.Query.UserID#" class="art-button">D</a>&nbsp;<a href="#buildURL('admin:users.updateuser')#&PerformAction=LoginUser&RecNo=#rc.Query.UserID#" class="art-button">L</a>&nbsp;<a href="#buildURL('admin:users.updateuser')#&PerformAction=ChangePassword&RecNo=#rc.Query.UserID#" class="art-button">P</a></td>
+					<td><a href="#buildURL('admin:users.updateuser', cgi.path_info)#&PerformAction=Edit&RecNo=#rc.Query.UserID#" class="art-button">U</a>&nbsp;<a href="#buildURL('admin:users.updateuser', cgi.path_info)#&PerformAction=Delete&RecNo=#rc.Query.UserID#" class="art-button">D</a>&nbsp;<a href="#buildURL('admin:users.updateuser', cgi.path_info)#&PerformAction=LoginUser&RecNo=#rc.Query.UserID#" class="art-button">L</a>&nbsp;<a href="#buildURL('admin:users.updateuser', cgi.path_info)#&PerformAction=ChangePassword&RecNo=#rc.Query.UserID#" class="art-button">P</a></td>
 					</tr>
 				</cfloop>
 			</tbody>
 		<cfelse>
 			<tbody>
 				<tr>
-					<td colspan="7"><div align="center" class="alert-box notice">No Users have been entered into this application. Please click <a class="art-button" href="#buildURL('admin:users.adduser')#&PerformAction=AddUser">here</a> to add user to this system.</div></td>
+					<td colspan="7"><div align="center" class="alert-box notice">No Users have been entered into this application. Please click <a class="art-button" href="#buildURL('admin:users.adduser', cgi.path_info)#&PerformAction=AddUser">here</a> to add user to this system.</div></td>
 				</tr>
 			</tbody>
 		</cfif>

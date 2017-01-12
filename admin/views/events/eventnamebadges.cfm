@@ -28,7 +28,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 			<div class="art-blockcontent">
 				<div class="alert-box notice">Please select the Paper Template that you have to print name badges for event #getSelectedEvent.ShortTitle#</div>
 				<hr>
-				<uForm:form action="#buildURL('admin:events.eventnamebadges')#&EventID=#URL.EventID#" method="Post" id="PrintNameBadges" errors="#Session.FormErrors#" errorMessagePlacement="both"
+				<uForm:form action="#buildURL('admin:events.eventnamebadges', cgi.path_info)#&EventID=#URL.EventID#" method="Post" id="PrintNameBadges" errors="#Session.FormErrors#" errorMessagePlacement="both"
 					commonassetsPath="/plugins/EventRegistration/library/uniForm/" showCancel="yes" cancelValue="<--- Return to Menu" cancelName="cancelButton"
 					cancelAction="?#HTMLEditFormat(rc.pc.getPackage())#action=admin:events&compactDisplay=false"
 					submitValue="Generate Name Badges" loadValidation="true" loadMaskUI="true" loadDateUI="true" loadTimeUI="true">

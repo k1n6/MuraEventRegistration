@@ -105,6 +105,8 @@
 								</div>
 							</div>
 						</cfif>
+					<cfelse>
+						<cfinput type="hidden" name="stayformeal" value='0'>
 					</cfif>
 					<cfif isDate(Session.getSelectedEvent.EventDate1) or isDate(Session.getSelectedEvent.EventDate2) or isDate(Session.getSelectedEvent.EventDate3) or isDate(Session.getSelectedEvent.EventDate4) or isDate(Session.getSelectedEvent.EventDate5)>
 						<div class="form-group">
@@ -387,6 +389,8 @@
 								</div>
 							</div>
 						</cfif>
+					<cfelse>
+						<cfinput type="hidden" name='stayformeal' value='0'>
 					</cfif>
 					<cfif isDate(Session.getSelectedEvent.EventDate1) or isDate(Session.getSelectedEvent.EventDate2) or isDate(Session.getSelectedEvent.EventDate3) or isDate(Session.getSelectedEvent.EventDate4) or isDate(Session.getSelectedEvent.EventDate5)>
 						<div class="form-group">

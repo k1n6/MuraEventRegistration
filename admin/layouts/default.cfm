@@ -42,25 +42,25 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<div class="navbar navbar-murafw1">
 					<div class="navbar-inner">
 
-						<a class="plugin-brand" href="#buildURL('admin:main')#">#HTMLEditFormat(rc.pc.getPackage())#</a>
+						<a class="plugin-brand" href="#buildURL('admin:main', cgi.path_info)#">#HTMLEditFormat(rc.pc.getPackage())#</a>
 
 						<ul class="nav">
 							<li class="<cfif rc.action contains 'admin:main'>active</cfif>">
 								<a href="##" class="dropdown-toggle" data-toggle="dropdown">Main <b class="caret"></b></a>
 								<ul class="dropdown-menu">
 									<li class="<cfif rc.action eq 'admin:main.default'>active</cfif>">
-										<a href="#buildURL('admin:main')#"><i class="icon-home"></i> Home</a>
+										<a href="#buildURL('admin:main', cgi.path_info)#"><i class="icon-home"></i> Home</a>
 									</li>
 									<li class="<cfif rc.action contains 'admin:main.another'>active</cfif>">
-										<a href="#buildURL('admin:main.another')#"><i class="icon-leaf"></i> Another Page</a>
+										<a href="#buildURL('admin:main.another', cgi.path_info)#"><i class="icon-leaf"></i> Another Page</a>
 									</li>
 								</ul>
 							</li>
 							<li class="<cfif rc.action contains 'admin:license'>active</cfif>">
-								<a href="#buildURL('admin:license')#"><i class="icon-book"></i> License</a>
+								<a href="#buildURL('admin:license', cgi.path_info)#"><i class="icon-book"></i> License</a>
 							</li>
 							<li class="<cfif rc.action contains 'admin:instructions'>active</cfif>">
-								<a href="#buildURL('admin:instructions')#"><i class="icon-info-sign"></i> Instructions</a>
+								<a href="#buildURL('admin:instructions', cgi.path_info)#"><i class="icon-info-sign"></i> Instructions</a>
 							</li>
 						</ul><!--- /.nav --->
 
@@ -76,10 +76,10 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<div class="span3">
 						<ul class="nav nav-list murafw1-sidenav">
 							<li class="<cfif rc.action eq 'admin:main.default'>active</cfif>">
-								<a href="#buildURL('admin:main')#"><i class="icon-home"></i> Home</a>
+								<a href="#buildURL('admin:main', cgi.path_info)#"><i class="icon-home"></i> Home</a>
 							</li>
 							<li class="<cfif rc.action eq 'admin:main.another'>active</cfif>">
-								<a href="#buildURL('admin:main.another')#"><i class="icon-leaf"></i> Another Page</a>
+								<a href="#buildURL('admin:main.another', cgi.path_info)#"><i class="icon-leaf"></i> Another Page</a>
 							</li>
 						</ul>
 					</div>

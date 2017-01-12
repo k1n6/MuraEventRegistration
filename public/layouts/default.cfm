@@ -9,25 +9,25 @@
 					</div>
 					<ul class="nav navbar-nav">
 						<li class="<cfif rc.action eq 'public:main'>active</cfif> dropdown">
-							<a class="dropdown-toggle" data-toggle="dropdown" href="#buildURL('public:main')#">Home <span class="caret"></span></a>
+							<a class="dropdown-toggle" data-toggle="dropdown" href="#buildURL('public:main', cgi.path_info)#">Home <span class="caret"></span></a>
 							<ul class="dropdown-menu">
 								<cfif Session.Mura.IsLoggedIn EQ True>
-									<li class="<cfif rc.action eq 'public:main.login'>active</cfif>"><a href="#buildURL('public:main.default')#"><i class="icon-home"></i> Event Listing</a></li>
+									<li class="<cfif rc.action eq 'public:main.login'>active</cfif>"><a href="#buildURL('public:main.default', cgi.path_info)#"><i class="icon-home"></i> Event Listing</a></li>
 									<li class="<cfif rc.action eq 'public:main.login'>active</cfif>">
 										<a href="#CGI.Script_name##CGI.path_info#?doaction=logout"><i class="icon-home"></i> Account Logout</a>
 									</li>
 									<li class="<cfif rc.action eq 'public:main.login'>active</cfif>">
-										<a href="#buildURL('public:usermenu.editprofile')#"><i class="icon-home"></i> Manage Profile</a>
+										<a href="#buildURL('public:usermenu.editprofile', cgi.path_info)#"><i class="icon-home"></i> Manage Profile</a>
 									</li>
 								<cfelse>
 									<li class="<cfif rc.action eq 'public:main.login'>active</cfif>">
 										<a href="#CGI.Script_name##CGI.path_info#?display=login"><i class="icon-home"></i> Account Login</a>
 									</li>
 									<li class="<cfif rc.action eq 'public:register.account'>active</cfif>">
-										<a href="#buildURL('public:registeruser.default')#"><i class="icon-home"></i> Register Account</a>
+										<a href="#buildURL('public:registeruser.default', cgi.path_info)#"><i class="icon-home"></i> Register Account</a>
 									</li>
 									<li class="<cfif rc.action eq 'public:main.forgotpassword'>active</cfif>">
-										<a href="#buildURL('public:usermenu.forgotpassword')#"><i class="icon-leaf"></i> Forgot Password</a>
+										<a href="#buildURL('public:usermenu.forgotpassword', cgi.path_info)#"><i class="icon-leaf"></i> Forgot Password</a>
 									</li>
 								</cfif>
 							</ul>
@@ -37,10 +37,10 @@
 						<ul class="nav navbar-nav">
 							<cfif Session.Mura.EventCoordinatorRole EQ 0 and Session.Mura.EventPresenterRole EQ 0 and Session.Mura.SuperAdminRole EQ 0>
 							<li class="<cfif rc.action eq 'public:usermenu'>active</cfif> dropdown">
-								<a class="dropdown-toggle" data-toggle="dropdown" href="#buildURL('public:usermenu')#">User Menu<span class="caret"></span></a>
+								<a class="dropdown-toggle" data-toggle="dropdown" href="#buildURL('public:usermenu', cgi.path_info)#">User Menu<span class="caret"></span></a>
 								<ul class="dropdown-menu">
-									<li><a href="#buildURL('public:usermenu.eventhistory')#" class="active">My Event History</a></li>
-									<li><a href="#buildURL('public:usermenu.upcomingevents')#" class="active">My Upcoming Events</a></li>
+									<li><a href="#buildURL('public:usermenu.eventhistory', cgi.path_info)#" class="active">My Event History</a></li>
+									<li><a href="#buildURL('public:usermenu.upcomingevents', cgi.path_info)#" class="active">My Upcoming Events</a></li>
 								</ul>
 							</li>
 							</cfif>
@@ -48,10 +48,10 @@
 					</cfif>
 					<ul class="nav navbar-nav navbar-right">
 						<li class="<cfif rc.action contains 'public:faq'>active</cfif>">
-							<a href="#buildURL('public:faq.default')#"><i class="icon-info-sign"></i> Questions?</a>
+							<a href="#buildURL('public:faq.default', cgi.path_info)#"><i class="icon-info-sign"></i> Questions?</a>
 						</li>
 						<li class="<cfif rc.action contains 'public:contactus'>active</cfif>">
-							<a href="#buildURL('public:contactus.sendfeedback')#"><i class="icon-info-sign"></i> Contact Us</a>
+							<a href="#buildURL('public:contactus.sendfeedback', cgi.path_info)#"><i class="icon-info-sign"></i> Contact Us</a>
 						</li>
 					</ul>
 				</div>
@@ -63,7 +63,7 @@
 				</div>
 			<cfelse>
 				<div class="text-right">
-					Current User: Guest User <a href="#CGI.Script_name##CGI.path_info#?display=login" class="btn btn-sm btn-primary">Login</a> | <a href="#buildURL('public:registeruser.default')#" class="btn btn-sm btn-primary">Create Account</a>
+					Current User: Guest User <a href="#CGI.Script_name##CGI.path_info#?display=login" class="btn btn-sm btn-primary">Login</a> | <a href="#buildURL('public:registeruser.default', cgi.path_info)#" class="btn btn-sm btn-primary">Create Account</a>
 					<hr>
 				</div>
 			</cfif>

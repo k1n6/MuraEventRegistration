@@ -161,7 +161,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfif getAvailableEvents.RecordCount>
 					<tfoot>
 						<tr>
-							<td colspan="3">Add a new Event or Workshop to allow registrations not listed above by clicking <a href="#buildURL('admin:events.addevent')#" class="art-button">here</a></td>
+							<td colspan="3">Add a new Event or Workshop to allow registrations not listed above by clicking <a href="#buildURL('admin:events.addevent', cgi.path_info)#" class="art-button">here</a></td>
 						</tr>
 					</tfoot>
 					<tbody>
@@ -189,26 +189,26 @@ http://www.apache.org/licenses/LICENSE-2.0
 								<td width="50%">(<a href="http://#cgi.server_name#/?Info=#getAvailableEvents.TContent_ID#">#getAvailableEvents.TContent_ID#</a>) / #getAvailableEvents.ShortTitle#</td>
 								<td width="15%">#DateFormat(getAvailableEvents.EventDate, "mm/dd/yyyy")#</td>
 								<td>
-									<a href="#buildURL('admin:events.updateevent_review')#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Update</a>&nbsp;&nbsp;<a href="#buildURL('admin:events.cancelevent')#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Cancel</a>&nbsp;&nbsp;<a href="#buildURL('admin:events.emailregistered')#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Email Registered</a>&nbsp;&nbsp;<a href="#buildURL('admin:events.emailattended')#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Email Attended</a>&nbsp;&nbsp;<a href="#buildURL('admin:events.copypriorevent')#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Copy</a><br />
-									<a href="#buildURL('admin:events.geteventinfo')#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Info</a>&nbsp;&nbsp;<a href="#buildURL('admin:events.registeruserforevent')#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Register</a>
+									<a href="#buildURL('admin:events.updateevent_review', cgi.path_info)#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Update</a>&nbsp;&nbsp;<a href="#buildURL('admin:events.cancelevent', cgi.path_info)#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Cancel</a>&nbsp;&nbsp;<a href="#buildURL('admin:events.emailregistered', cgi.path_info)#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Email Registered</a>&nbsp;&nbsp;<a href="#buildURL('admin:events.emailattended', cgi.path_info)#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Email Attended</a>&nbsp;&nbsp;<a href="#buildURL('admin:events.copypriorevent', cgi.path_info)#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Copy</a><br />
+									<a href="#buildURL('admin:events.geteventinfo', cgi.path_info)#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Info</a>&nbsp;&nbsp;<a href="#buildURL('admin:events.registeruserforevent', cgi.path_info)#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Register</a>
 									<cfif getRegistrationsForEvent.RecordCount>
-										&nbsp;&nbsp;<a href="#buildURL('admin:events.deregisteruserforevent')#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">De-Register</a><br />
-										&nbsp;&nbsp;<a href="#buildURL('admin:events.eventsigninsheet')#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Sign-In Sheet</a>
-										&nbsp;&nbsp;<a href="#buildURL('admin:events.eventsigninparticipant')#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Sign-In Participant</a><br />
-										&nbsp;&nbsp;<a href="#buildURL('admin:events.eventnamebadges')#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Participant Name Badges</a><br />
+										&nbsp;&nbsp;<a href="#buildURL('admin:events.deregisteruserforevent', cgi.path_info)#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">De-Register</a><br />
+										&nbsp;&nbsp;<a href="#buildURL('admin:events.eventsigninsheet', cgi.path_info)#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Sign-In Sheet</a>
+										&nbsp;&nbsp;<a href="#buildURL('admin:events.eventsigninparticipant', cgi.path_info)#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Sign-In Participant</a><br />
+										&nbsp;&nbsp;<a href="#buildURL('admin:events.eventnamebadges', cgi.path_info)#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Participant Name Badges</a><br />
 									</cfif>
 									<cfif getAttendedParticipantsForEvent.RecordCount and getAvailableEvents.PGPAvailable EQ 1>
-										&nbsp;&nbsp;<a href="#buildURL('admin:events.sendpgpcertificates')#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Send PGP Certificates</a><br />
-										&nbsp;&nbsp;<a href="#buildURL('admin:events.enterexpenses')#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Enter Event Expenses</a><br />
-										&nbsp;&nbsp;<a href="#buildURL('admin:events.eventattendedsheet')#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Attended Participant Sheet</a><br />
+										&nbsp;&nbsp;<a href="#buildURL('admin:events.sendpgpcertificates', cgi.path_info)#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Send PGP Certificates</a><br />
+										&nbsp;&nbsp;<a href="#buildURL('admin:events.enterexpenses', cgi.path_info)#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Enter Event Expenses</a><br />
+										&nbsp;&nbsp;<a href="#buildURL('admin:events.eventattendedsheet', cgi.path_info)#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Attended Participant Sheet</a><br />
 									<cfelseif getAttendedParticipantsForEvent.RecordCount and getAvailableEvents.PGPAvailable EQ 0>
-										&nbsp;&nbsp;<a href="#buildURL('admin:events.enterexpenses')#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Enter Event Expenses</a><br />
-										&nbsp;&nbsp;<a href="#buildURL('admin:events.eventattendedsheet')#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Attended Participant Sheet</a><br />
+										&nbsp;&nbsp;<a href="#buildURL('admin:events.enterexpenses', cgi.path_info)#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Enter Event Expenses</a><br />
+										&nbsp;&nbsp;<a href="#buildURL('admin:events.eventattendedsheet', cgi.path_info)#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Attended Participant Sheet</a><br />
 									</cfif>
 									<cfif getEventExpenses.RecordCount>
-										&nbsp;&nbsp;<a href="#buildURL('admin:events.generateprofitlossreport')#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Generate Profit/Loss Report</a><br />
+										&nbsp;&nbsp;<a href="#buildURL('admin:events.generateprofitlossreport', cgi.path_info)#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Generate Profit/Loss Report</a><br />
 									</cfif>
-									<a href="#buildURL('admin:events.publishtofb')#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Post to Facebook</a>
+									<a href="#buildURL('admin:events.publishtofb', cgi.path_info)#&EventID=#getAvailableEvents.TContent_ID#" class="art-button">Post to Facebook</a>
 								</td>
 							</tr>
 						</cfloop>
@@ -216,7 +216,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfelse>
 					<tbody>
 						<tr>
-							<td colspan="6"><div align="center" class="alert-box notice">No Events have been located within the database with an event date after #DateFormat(Variables.PriorDate, "FULL")#. Please click <a href="#buildURL('admin:events.addevent')#" class="art-button">here</a> to add a new event or workshop.</div></td>
+							<td colspan="6"><div align="center" class="alert-box notice">No Events have been located within the database with an event date after #DateFormat(Variables.PriorDate, "FULL")#. Please click <a href="#buildURL('admin:events.addevent', cgi.path_info)#" class="art-button">here</a> to add a new event or workshop.</div></td>
 						</tr>
 					</tbody>
 				</cfif>

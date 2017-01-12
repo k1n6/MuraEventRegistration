@@ -149,9 +149,9 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<td>#DateFormat(getEvents.EventDate, "mm/dd/yyyy")#</td>
 							<td>#NumberFormat(getRegistrations.AttendeeRegistered, "99,999")#</td>
 							<td>#NumberFormat(getAttendeeAtEvent.AttendeeOnSite, "99,999")#</td>
-							<td><a href="#buildURL('admin:signin.addattendee')#&EventID=#getEvents.TContent_ID#" class="btn btn-success btn-sm">Sign In</a>
+							<td><a href="#buildURL('admin:signin.addattendee', cgi.path_info)#&EventID=#getEvents.TContent_ID#" class="btn btn-success btn-sm">Sign In</a>
 								
-								<!--- <a href="#buildURL('admin:users.updateuser')#&PerformAction=Edit&RecNo=#getAllUsers.UserID#" class="btn btn-warning btn-small">U</a>&nbsp;<a href="#buildURL('admin:users.updateuser')#&PerformAction=Delete&RecNo=#getAllUsers.UserID#" class="btn btn-danger btn-small">D</a>&nbsp;<a href="#buildURL('admin:users.updateuser')#&PerformAction=LoginUser&RecNo=#getAllUsers.UserID#" class="btn btn-success btn-small">L</a> --->
+								<!--- <a href="#buildURL('admin:users.updateuser', cgi.path_info)#&PerformAction=Edit&RecNo=#getAllUsers.UserID#" class="btn btn-warning btn-small">U</a>&nbsp;<a href="#buildURL('admin:users.updateuser', cgi.path_info)#&PerformAction=Delete&RecNo=#getAllUsers.UserID#" class="btn btn-danger btn-small">D</a>&nbsp;<a href="#buildURL('admin:users.updateuser', cgi.path_info)#&PerformAction=LoginUser&RecNo=#getAllUsers.UserID#" class="btn btn-success btn-small">L</a> --->
 							</td>
 							</tr>
 						</cfloop>	

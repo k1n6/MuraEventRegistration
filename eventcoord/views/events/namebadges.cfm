@@ -46,11 +46,11 @@ Line 42: Change to the Plugin Name for the cfimport line
 			<cfif ListLen(Session.SignInSheet.EventDates) GTE 2 and not isDefined("URL.EventDatePOS")>
 				<table class="table" width="100%" cellspacing="0" cellpadding="0">
 					<tr>
-						<cfif ListLen(Session.SignInSheet.EventDates) GTE 1><td><A Href="#buildURL('eventcoord:events.namebadges')#&EventID=#URL.EventID#&EventDatePos=1">SignIn Sheet Day 1</a></td></cfif>
-						<cfif ListLen(Session.SignInSheet.EventDates) GTE 2><td><A Href="#buildURL('eventcoord:events.namebadges')#&EventID=#URL.EventID#&EventDatePos=2">SignIn Sheet Day 2</a></td></cfif>
-						<cfif ListLen(Session.SignInSheet.EventDates) GTE 3><td><A Href="#buildURL('eventcoord:events.namebadges')#&EventID=#URL.EventID#&EventDatePos=3">SignIn Sheet Day 3</a></td></cfif>
-						<cfif ListLen(Session.SignInSheet.EventDates) GTE 4><td><A Href="#buildURL('eventcoord:events.namebadges')#&EventID=#URL.EventID#&EventDatePos=4">SignIn Sheet Day 4</a></td></cfif>
-						<cfif ListLen(Session.SignInSheet.EventDates) GTE 5><td><A Href="#buildURL('eventcoord:events.namebadges')#&EventID=#URL.EventID#&EventDatePos=5">SignIn Sheet Day 5</a></td></cfif>
+						<cfif ListLen(Session.SignInSheet.EventDates) GTE 1><td><A Href="#buildURL('eventcoord:events.namebadges', cgi.path_info)#&EventID=#URL.EventID#&EventDatePos=1">SignIn Sheet Day 1</a></td></cfif>
+						<cfif ListLen(Session.SignInSheet.EventDates) GTE 2><td><A Href="#buildURL('eventcoord:events.namebadges', cgi.path_info)#&EventID=#URL.EventID#&EventDatePos=2">SignIn Sheet Day 2</a></td></cfif>
+						<cfif ListLen(Session.SignInSheet.EventDates) GTE 3><td><A Href="#buildURL('eventcoord:events.namebadges', cgi.path_info)#&EventID=#URL.EventID#&EventDatePos=3">SignIn Sheet Day 3</a></td></cfif>
+						<cfif ListLen(Session.SignInSheet.EventDates) GTE 4><td><A Href="#buildURL('eventcoord:events.namebadges', cgi.path_info)#&EventID=#URL.EventID#&EventDatePos=4">SignIn Sheet Day 4</a></td></cfif>
+						<cfif ListLen(Session.SignInSheet.EventDates) GTE 5><td><A Href="#buildURL('eventcoord:events.namebadges', cgi.path_info)#&EventID=#URL.EventID#&EventDatePos=5">SignIn Sheet Day 5</a></td></cfif>
 					</tr>
 					<tr>
 						<td colspan="5"></td>
@@ -185,12 +185,12 @@ Line 42: Change to the Plugin Name for the cfimport line
 				</div>
 				<cfif isDefined("URL.EventDatePOS")>
 					<div class="panel-footer">
-						<a href="#buildurl('eventcoord:events.default')#" class="btn btn-primary pull-left">Back to Event Listing</a>
-						<a href="#buildurl('eventcoord:events.namebadges&EventID=#URL.EventID#')#" class="btn btn-primary pull-right">View Another Day's SignIn Sheet</a><br /><br />
+						<a href="#buildURL('eventcoord:events.default', cgi.path_info)#" class="btn btn-primary pull-left">Back to Event Listing</a>
+						<a href="#buildURL('eventcoord:events.namebadges&EventID=#URL.EventID#', cgi.path_info)#" class="btn btn-primary pull-right">View Another Day's SignIn Sheet</a><br /><br />
 					</div>
 				<cfelse>
 					<div class="panel-footer">
-						<a href="#buildurl('eventcoord:events.default')#" class="btn btn-primary pull-left">Back to Event Listing</a><br /><br />
+						<a href="#buildURL('eventcoord:events.default', cgi.path_info)#" class="btn btn-primary pull-left">Back to Event Listing</a><br /><br />
 					</div>
 				</cfif>
 			</cfif>

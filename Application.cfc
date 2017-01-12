@@ -257,13 +257,14 @@ component persistent="false" accessors="true" output="false" extends="includes.f
 		public any function onMissingView(any rc) {
 			rc.errors = [];
 			rc.isMissingView = true;
+		
 			// forward to appropriate error screen
 			if ( isFrontEndRequest() ) {
 				ArrayAppend(rc.errors, "The page you're looking for doesn't exist.");
-				redirect(action='app1:main.error', preserve='errors,isMissingView');
+				redirect(action='app1:main.error', preserve='errors,isMissingView', path=cgi.path_info);
 			} else {
 				ArrayAppend(rc.errors, "The page you're looking for <strong>#rc.action#</strong> doesn't exist.");
-				redirect(action='admin:main', preserve='errors,isMissingView');
+				redirect(action='admin:main', preserve='errors,isMissingView', path=cgi.path_info);
 			}
 		}
 
@@ -282,8 +283,7 @@ component persistent="false" accessors="true" output="false" extends="includes.f
 		}
 
 		public boolean function isAdminRequest() {
-			return false;
-			//return StructKeyExists(request, 'context') && ListFirst(request.context[variables.framework.action], ':') == 'admin' ? true : false;
+			return StructKeyExists(request, 'context') && ListFirst(request.context[variables.framework.action], ':') == 'admin' ? true : false;
 		}
 
 		public boolean function isFrontEndRequest() {

@@ -9,7 +9,7 @@
 
 		<cfif not isDefined("FORM.formSubmit")>
 			<cfquery name="Session.GetAllUsers" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-				Select UserID, Fname, LName, UserName, Email, SUBSTRING_INDEX(Email,"@",-1) AS Domain
+				Select UserID, Fname, LName, UserName, Email, dbo.SUBSTRING_INDEX(Email,'@',-1) AS Domain
 				From tusers
 			</cfquery>
 

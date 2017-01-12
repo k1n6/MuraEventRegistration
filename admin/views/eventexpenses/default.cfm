@@ -71,7 +71,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfif getAvailableEventExpenses.RecordCount>
 					<tfoot>
 						<tr>
-							<td colspan="3">Add a new Expense Caqtegory not listed above by clicking <a href="#buildURL('admin:eventexpenses.addexpense')#" class="art-button">here</a></td>
+							<td colspan="3">Add a new Expense Caqtegory not listed above by clicking <a href="#buildURL('admin:eventexpenses.addexpense', cgi.path_info)#" class="art-button">here</a></td>
 						</tr>
 					</tfoot>
 					<tbody>
@@ -79,9 +79,9 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<tr bgcolor="###iif(currentrow MOD 2,DE('ffffff'),DE('efefef'))#">
 								<td width="50%">#getAvailableEventExpenses.Expense_Name#</td>
 								<td width="15%"><cfif getAvailableEventExpenses.Active EQ 1>Yes<cfelse>No</cfif></td>
-								<td><a href="#buildURL('admin:eventexpenses.updateexpense')#&ExpenseID=#getAvailableEventExpenses.TContent_ID#" class="art-button">Update</a>&nbsp;&nbsp;
-									<cfif getAvailableEventExpenses.Active IS 1><a href="#buildURL('admin:eventexpenses.deactivateexpense')#&ExpenseID=#getAvailableEventExpenses.TContent_ID#" class="art-button">DeActivate</a></cfif>
-									<cfif getAvailableEventExpenses.Active IS 0><a href="#buildURL('admin:eventexpenses.activateexpense')#&ExpenseID=#getAvailableEventExpenses.TContent_ID#" class="art-button">Activate</a></cfif>
+								<td><a href="#buildURL('admin:eventexpenses.updateexpense', cgi.path_info)#&ExpenseID=#getAvailableEventExpenses.TContent_ID#" class="art-button">Update</a>&nbsp;&nbsp;
+									<cfif getAvailableEventExpenses.Active IS 1><a href="#buildURL('admin:eventexpenses.deactivateexpense', cgi.path_info)#&ExpenseID=#getAvailableEventExpenses.TContent_ID#" class="art-button">DeActivate</a></cfif>
+									<cfif getAvailableEventExpenses.Active IS 0><a href="#buildURL('admin:eventexpenses.activateexpense', cgi.path_info)#&ExpenseID=#getAvailableEventExpenses.TContent_ID#" class="art-button">Activate</a></cfif>
 								</td>
 
 							</tr>
@@ -90,7 +90,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfelse>
 					<tbody>
 						<tr>
-							<td colspan="6"><div align="center" class="alert-box notice">No Event Expenses have been located within the database. Please click <a href="#buildURL('admin:eventexpenses.addexpense')#" class="art-button">here</a> to add a new expense category.</div></td>
+							<td colspan="6"><div align="center" class="alert-box notice">No Event Expenses have been located within the database. Please click <a href="#buildURL('admin:eventexpenses.addexpense', cgi.path_info)#" class="art-button">here</a> to add a new expense category.</div></td>
 						</tr>
 					</tbody>
 				</cfif>

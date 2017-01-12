@@ -83,7 +83,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfif getAllFacilities.RecordCount>
 					<tfoot>
 						<tr>
-							<td colspan="6">Add a new Facility for an upcoming event that is not listed above by clicking <a href="#buildURL('admin:facilities.addfacility')#" class="art-button">here</a></td>
+							<td colspan="6">Add a new Facility for an upcoming event that is not listed above by clicking <a href="#buildURL('admin:facilities.addfacility', cgi.path_info)#" class="art-button">here</a></td>
 						</tr>
 					</tfoot>
 					<tbody>
@@ -94,14 +94,14 @@ http://www.apache.org/licenses/LICENSE-2.0
 								<td>#getAllFacilities.PhysicalCity#</td>
 								<td>#getAllFacilities.PhysicalState#</td>
 								<td>#getAllFacilities.PhysicalZipCode#</td>
-								<td><a href="#buildURL('admin:facilities.updatefacility')#&PerformAction=Edit&RecNo=#getAllFacilities.TContent_ID#" class="art-button">Update</a>&nbsp;&nbsp;<a href="#buildURL('admin:facilities.updatefacility')#&PerformAction=Delete&RecNo=#getAllFacilities.TContent_ID#" class="art-button">D</a>&nbsp;&nbsp;<a href="#buildURL('admin:facilities.managerooms')#&RecNo=#getAllFacilities.TContent_ID#" class="art-button">Rooms</a></td>
+								<td><a href="#buildURL('admin:facilities.updatefacility', cgi.path_info)#&PerformAction=Edit&RecNo=#getAllFacilities.TContent_ID#" class="art-button">Update</a>&nbsp;&nbsp;<a href="#buildURL('admin:facilities.updatefacility', cgi.path_info)#&PerformAction=Delete&RecNo=#getAllFacilities.TContent_ID#" class="art-button">D</a>&nbsp;&nbsp;<a href="#buildURL('admin:facilities.managerooms', cgi.path_info)#&RecNo=#getAllFacilities.TContent_ID#" class="art-button">Rooms</a></td>
 							</tr>
 						</cfloop>
 					</tbody>
 				<cfelse>
 					<tbody>
 						<tr>
-							<td colspan="6"><div align="center" class="alert-box notice">No Facilities are located within the database Please click <a href="#buildURL('admin:facilities.addfacility')#" class="art-button">here</a> to add one.</div></td>
+							<td colspan="6"><div align="center" class="alert-box notice">No Facilities are located within the database Please click <a href="#buildURL('admin:facilities.addfacility', cgi.path_info)#" class="art-button">here</a> to add one.</div></td>
 						</tr>
 					</tbody>
 				</cfif>

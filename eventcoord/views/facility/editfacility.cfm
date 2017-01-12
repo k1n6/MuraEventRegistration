@@ -188,7 +188,7 @@
 								</thead>
 								<tfoot>
 									<tr>
-										<td colspan="5">Add a new meeting room to this Facility by clicking <a href="#buildURL('eventcoord:facility.addfacilityroom')#&FacilityID=#URL.FacilityID#" class="btn btn-primary btn-small">here</a></td>
+										<td colspan="5">Add a new meeting room to this Facility by clicking <a href="#buildURL('eventcoord:facility.addfacilityroom', cgi.path_info)#&FacilityID=#URL.FacilityID#" class="btn btn-primary btn-small">here</a></td>
 									</tr>
 								</tfoot>
 								<tbody>
@@ -198,14 +198,14 @@
 											<td>#Session.getSelectedFacilityRooms.Capacity#</td>
 											<td>#Session.getSelectedFacilityRooms.RoomFees#</td>
 											<td><cfswitch expression="#Session.getSelectedFacilityRooms.Active#"><cfcase value="1">Yes</cfcase><cfdefaultcase>No</cfdefaultcase></cfswitch></td>
-											<td><a href="#buildURL('eventcoord:facility.editfacilityroom')#&FacilityID=#URL.FacilityID#&FacilityRoomID=#Session.getSelectedFacilityRooms.TContent_ID#" class="btn btn-primary btn-small">Update</a></td>
+											<td><a href="#buildURL('eventcoord:facility.editfacilityroom', cgi.path_info)#&FacilityID=#URL.FacilityID#&FacilityRoomID=#Session.getSelectedFacilityRooms.TContent_ID#" class="btn btn-primary btn-small">Update</a></td>
 										</tr>
 									</cfloop>
 								</tbody>
 							<cfelse>
 								<tfoot>
 									<tr>
-										<td colspan="5">Add a new meeting room to this Facility by clicking <a href="#buildURL('eventcoord:facility.addfacilityroom')#&FacilityID=#URL.FacilityID#" class="btn btn-primary btn-small">here</a></td>
+										<td colspan="5">Add a new meeting room to this Facility by clicking <a href="#buildURL('eventcoord:facility.addfacilityroom', cgi.path_info)#&FacilityID=#URL.FacilityID#" class="btn btn-primary btn-small">here</a></td>
 									</tr>
 								</tfoot>
 							</cfif>
@@ -357,7 +357,7 @@
 								</thead>
 								<tfoot>
 									<tr>
-										<td colspan="5">Add a new meeting room to this Facility by clicking <a href="#buildURL('eventcoord:facility.addfacilityroom')#&FacilityID=#URL.FacilityID#" class="btn btn-primary btn-small">here</a></td>
+										<td colspan="5">Add a new meeting room to this Facility by clicking <a href="#buildURL('eventcoord:facility.addfacilityroom', cgi.path_info)#&FacilityID=#URL.FacilityID#" class="btn btn-primary btn-small">here</a></td>
 									</tr>
 								</tfoot>
 								<tbody>
@@ -367,14 +367,14 @@
 											<td>#Session.getSelectedFacilityRooms.Capacity#</td>
 											<td>#Session.getSelectedFacilityRooms.RoomFees#</td>
 											<td><cfswitch expression="#Session.getSelectedFacilityRooms.Active#"><cfcase value="1">Yes</cfcase><cfdefaultcase>No</cfdefaultcase></cfswitch></td>
-											<td><a href="#buildURL('eventcoord:facility.editfacilityroom')#&FacilityID=#URL.FacilityID#&FacilityRoomID=#Session.getSelectedFacilityRooms.TContent_ID#" class="btn btn-primary btn-small">Update</a></td>
+											<td><a href="#buildURL('eventcoord:facility.editfacilityroom', cgi.path_info)#&FacilityID=#URL.FacilityID#&FacilityRoomID=#Session.getSelectedFacilityRooms.TContent_ID#" class="btn btn-primary btn-small">Update</a></td>
 										</tr>
 									</cfloop>
 								</tbody>
 							<cfelse>
 								<tfoot>
 									<tr>
-										<td colspan="5">Add a new meeting room to this Facility by clicking <a href="#buildURL('eventcoord:facility.addfacilityroom')#&FacilityID=#URL.FacilityID#" class="btn btn-primary btn-small">here</a></td>
+										<td colspan="5">Add a new meeting room to this Facility by clicking <a href="#buildURL('eventcoord:facility.addfacilityroom', cgi.path_info)#&FacilityID=#URL.FacilityID#" class="btn btn-primary btn-small">here</a></td>
 									</tr>
 								</tfoot>
 							</cfif>

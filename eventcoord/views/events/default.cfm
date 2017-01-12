@@ -8,16 +8,6 @@ Licensed under the Apache License, Version v2.0
 http://www.apache.org/licenses/LICENSE-2.0
 
 --->
-<cfset PriorDate = #CreateDate(2015, 07, 01)#>
-<cfquery name="Session.getAvailableEvents" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-	Select *
-	From eEvents
-	Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
-		EventDate >= <cfqueryparam value="#Variables.PriorDate#" cfsqltype="cf_sql_date"> and
-		EventCancelled = 0
-		Order by EventDate DESC
-</cfquery>
-
 </cfsilent>
 <cfoutput>
 	<div class="panel panel-default">
@@ -551,7 +541,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					</thead>
 					<tfoot>
 						<tr>
-							<td colspan="3">Add a new Event or Workshop to allow registrations not listed above by clicking <a href="#buildURL('eventcoord:events.addevent')#" class="btn btn-primary btn-small">here</a></td>
+							<td colspan="3">Add a new Event or Workshop to allow registrations not listed above by clicking <a href="#buildURL('eventcoord:events.addevent', cgi.path_info)#" class="btn btn-primary btn-small">here</a></td>
 						</tr>
 					</tfoot>
 					<tbody>
@@ -708,24 +698,24 @@ http://www.apache.org/licenses/LICENSE-2.0
 										After Event has Passed on All Dates, Grey Out De-Register and Post Facebook
 
 									--->
-									<a href="#buildURL('eventcoord:events.geteventinfo')#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Info</small></a>
-									<a href="#buildURL('eventcoord:events.registeruserforevent')#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Register</small></a>
-									<cfif getRegisteredParticipantsForEvent.RecordCount><a href="#buildURL('eventcoord:events.deregisteruserforevent')#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>De-Register</small></a><cfelse><button type="button" class="btn btn-secondary btn-small"><small>De-Register</small></button></cfif>
-									<a href="#buildURL('eventcoord:events.publishtofb')#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small small"><small>Post Facebook</small></a><br>
-									<cfif getRegisteredParticipantsForEvent.RecordCount><a href="#buildURL('eventcoord:events.emailregistered')#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Email Registered</small></a><cfelse><button type="button" class="btn btn-secondary btn-small"><small>Email Registered</small></button></cfif>
-									<cfif getAttendedParticipantsForEvent.RecordCount><a href="#buildURL('eventcoord:events.emailattended')#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Email Attended</small></a><cfelse><button type="button" class="btn btn-secondary btn-small"><small>Email Attended</small></button></cfif>
-									<cfif getAttendedParticipantsForEvent.RecordCount><cfif Session.getAvailableEvents.PGPAvailable EQ 1><a href="#buildURL('eventcoord:events.sendpgpcertificates')#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Send Certificates</small></a><cfelse><button type="button" class="btn btn-secondary btn-small"><small>Send Certificates</small></button></cfif><cfelse><button type="button" class="btn btn-secondary btn-small"><small>Send Certificates</small></button></CFIF><br>
-									<cfif getRegisteredParticipantsForEvent.RecordCount><a href="#buildURL('eventcoord:events.eventsigninsheet')#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Sign-In Sheet</small></a><cfelse><button type="button" class="btn btn-secondary btn-small"><small>Sign-In Sheet</small></button></cfif>
-									<cfif getRegisteredParticipantsForEvent.RecordCount><a href="#buildURL('eventcoord:events.namebadges')#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Name Badges</small></a><cfelse><button type="button" class="btn btn-secondary btn-small"><small>Name Badges</small></button></cfif>
-									<cfif getRegisteredParticipantsForEvent.RecordCount><a href="#buildURL('eventcoord:events.signinparticipant')#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Sign-In Participant</small></a><cfelse><button type="button" class="btn btn-secondary btn-small"><small>Sign-In Participant</small></button></cfif>
-									<a href="#buildURL('eventcoord:events.updateevent_review')#&EventID=#Session.getAvailableEvents.TContent_ID#" role="button" class="btn btn-primary btn-small"><small>Update Event</small></a>
-									<a href="#buildURL('eventcoord:events.cancelevent')#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Cancel Event</small></a>
-									<a href="#buildURL('eventcoord:events.copyevent')#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Copy Event</small></a><br>
-									<cfif getAttendedParticipantsForEvent.RecordCount and Session.getAvailableEvents.EventInvoicesGenerated EQ 0><a href="#buildURL('eventcoord:events.enterexpenses')#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Expenses</small></a><cfelse><button type="button" class="btn btn-secondary btn-small"><small>Expenses</small></button></cfif>
-									<cfif getAttendedParticipantsForEvent.RecordCount and Session.getAvailableEvents.EventInvoicesGenerated EQ 0><a href="#buildURL('eventcoord:events.enterrevenue')#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Revenue</small></a><cfelse><button type="button" class="btn btn-secondary btn-small"><small>Revenue</small></button></cfif>
+									<a href="#buildURL('eventcoord:events.geteventinfo', cgi.path_info)#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Info</small></a>
+									<a href="#buildURL('eventcoord:events.registeruserforevent', cgi.path_info)#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Register</small></a>
+									<cfif getRegisteredParticipantsForEvent.RecordCount><a href="#buildURL('eventcoord:events.deregisteruserforevent', cgi.path_info)#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>De-Register</small></a><cfelse><button type="button" class="btn btn-secondary btn-small"><small>De-Register</small></button></cfif>
+									<a href="#buildURL('eventcoord:events.publishtofb', cgi.path_info)#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small small"><small>Post Facebook</small></a><br>
+									<cfif getRegisteredParticipantsForEvent.RecordCount><a href="#buildURL('eventcoord:events.emailregistered', cgi.path_info)#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Email Registered</small></a><cfelse><button type="button" class="btn btn-secondary btn-small"><small>Email Registered</small></button></cfif>
+									<cfif getAttendedParticipantsForEvent.RecordCount><a href="#buildURL('eventcoord:events.emailattended', cgi.path_info)#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Email Attended</small></a><cfelse><button type="button" class="btn btn-secondary btn-small"><small>Email Attended</small></button></cfif>
+									<cfif getAttendedParticipantsForEvent.RecordCount><cfif Session.getAvailableEvents.PGPAvailable EQ 1><a href="#buildURL('eventcoord:events.sendpgpcertificates', cgi.path_info)#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Send Certificates</small></a><cfelse><button type="button" class="btn btn-secondary btn-small"><small>Send Certificates</small></button></cfif><cfelse><button type="button" class="btn btn-secondary btn-small"><small>Send Certificates</small></button></CFIF><br>
+									<cfif getRegisteredParticipantsForEvent.RecordCount><a href="#buildURL('eventcoord:events.eventsigninsheet', cgi.path_info)#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Sign-In Sheet</small></a><cfelse><button type="button" class="btn btn-secondary btn-small"><small>Sign-In Sheet</small></button></cfif>
+									<cfif getRegisteredParticipantsForEvent.RecordCount><a href="#buildURL('eventcoord:events.namebadges', cgi.path_info)#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Name Badges</small></a><cfelse><button type="button" class="btn btn-secondary btn-small"><small>Name Badges</small></button></cfif>
+									<cfif getRegisteredParticipantsForEvent.RecordCount><a href="#buildURL('eventcoord:events.signinparticipant', cgi.path_info)#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Sign-In Participant</small></a><cfelse><button type="button" class="btn btn-secondary btn-small"><small>Sign-In Participant</small></button></cfif>
+									<a href="#buildURL('eventcoord:events.updateevent_review', cgi.path_info)#&EventID=#Session.getAvailableEvents.TContent_ID#" role="button" class="btn btn-primary btn-small"><small>Update Event</small></a>
+									<a href="#buildURL('eventcoord:events.cancelevent', cgi.path_info)#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Cancel Event</small></a>
+									<a href="#buildURL('eventcoord:events.copyevent', cgi.path_info)#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Copy Event</small></a><br>
+									<cfif getAttendedParticipantsForEvent.RecordCount and Session.getAvailableEvents.EventInvoicesGenerated EQ 0><a href="#buildURL('eventcoord:events.enterexpenses', cgi.path_info)#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Expenses</small></a><cfelse><button type="button" class="btn btn-secondary btn-small"><small>Expenses</small></button></cfif>
+									<cfif getAttendedParticipantsForEvent.RecordCount and Session.getAvailableEvents.EventInvoicesGenerated EQ 0><a href="#buildURL('eventcoord:events.enterrevenue', cgi.path_info)#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>Revenue</small></a><cfelse><button type="button" class="btn btn-secondary btn-small"><small>Revenue</small></button></cfif>
 									<cfset IncomeCompleted = 0>
 									<cfif checkIncomeVerified.RecordCount EQ 1 and CheckIncomeVerified.AttendeePriceVerified EQ 1><cfset IncomeCOmpleted = 1></cfif>
-									<cfif getEventExpenses.RecordCount and Variables.IncomeCompleted EQ 1><a href="#buildURL('eventcoord:events.viewprofitlossreport')#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>View Profit/Loss Report</small></a><cfelse><button type="button" class="btn btn-secondary btn-small"><small>View Profit/Loss Report</small></button></cfif><br />
+									<cfif getEventExpenses.RecordCount and Variables.IncomeCompleted EQ 1><a href="#buildURL('eventcoord:events.viewprofitlossreport', cgi.path_info)#&EventID=#Session.getAvailableEvents.TContent_ID#" class="btn btn-primary btn-small"><small>View Profit/Loss Report</small></a><cfelse><button type="button" class="btn btn-secondary btn-small"><small>View Profit/Loss Report</small></button></cfif><br />
 								</td>
 							</tr>
 						</cfloop>

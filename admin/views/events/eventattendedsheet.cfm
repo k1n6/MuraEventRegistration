@@ -51,11 +51,11 @@ http://www.apache.org/licenses/LICENSE-2.0
 	<cfif ListLen(Variables.EventDates) GTE 2 and not isDefined("URL.EventDatePOS")>
 		<Table style="border-width: 3px; border-spacing: 1px; border-style: outset; border-color: gray; border-collapse: separate; background-color: ##EDEDED;" Align="Center" Width="100%">
 			<tr>
-				<cfif ListLen(Variables.EventDates) GTE 1><td Style="border-width: 0px; padding: 1px; border-style: inset; border-color: gray; background-color: ##EDEDED; -moz-border-radius: ; Font-Family: Arial; Font-Size: 14px; Font-Weight: Normal;"><A Href="#buildURL('admin:events.eventsigninsheet')#&EventID=#URL.EventID#&EventDatePos=1">SignIn Sheet Day 1</a></td></cfif>
-				<cfif ListLen(Variables.EventDates) GTE 2><td Style="border-width: 0px; padding: 1px; border-style: inset; border-color: gray; background-color: ##EDEDED; -moz-border-radius: ; Font-Family: Arial; Font-Size: 14px; Font-Weight: Normal;"><A Href="#buildURL('admin:events.eventsigninsheet')#&EventID=#URL.EventID#&EventDatePos=2">SignIn Sheet Day 2</a></td></cfif>
-				<cfif ListLen(Variables.EventDates) GTE 3><td Style="border-width: 0px; padding: 1px; border-style: inset; border-color: gray; background-color: ##EDEDED; -moz-border-radius: ; Font-Family: Arial; Font-Size: 14px; Font-Weight: Normal;"><A Href="#buildURL('admin:events.eventsigninsheet')#&EventID=#URL.EventID#&EventDatePos=3">SignIn Sheet Day 3</a></td></cfif>
-				<cfif ListLen(Variables.EventDates) GTE 4><td Style="border-width: 0px; padding: 1px; border-style: inset; border-color: gray; background-color: ##EDEDED; -moz-border-radius: ; Font-Family: Arial; Font-Size: 14px; Font-Weight: Normal;"><A Href="#buildURL('admin:events.eventsigninsheet')#&EventID=#URL.EventID#&EventDatePos=4">SignIn Sheet Day 4</a></td></cfif>
-				<cfif ListLen(Variables.EventDates) GTE 5><td Style="border-width: 0px; padding: 1px; border-style: inset; border-color: gray; background-color: ##EDEDED; -moz-border-radius: ; Font-Family: Arial; Font-Size: 14px; Font-Weight: Normal;"><A Href="#buildURL('admin:events.eventsigninsheet')#&EventID=#URL.EventID#&EventDatePos=5">SignIn Sheet Day 5</a></td></cfif>
+				<cfif ListLen(Variables.EventDates) GTE 1><td Style="border-width: 0px; padding: 1px; border-style: inset; border-color: gray; background-color: ##EDEDED; -moz-border-radius: ; Font-Family: Arial; Font-Size: 14px; Font-Weight: Normal;"><A Href="#buildURL('admin:events.eventsigninsheet', cgi.path_info)#&EventID=#URL.EventID#&EventDatePos=1">SignIn Sheet Day 1</a></td></cfif>
+				<cfif ListLen(Variables.EventDates) GTE 2><td Style="border-width: 0px; padding: 1px; border-style: inset; border-color: gray; background-color: ##EDEDED; -moz-border-radius: ; Font-Family: Arial; Font-Size: 14px; Font-Weight: Normal;"><A Href="#buildURL('admin:events.eventsigninsheet', cgi.path_info)#&EventID=#URL.EventID#&EventDatePos=2">SignIn Sheet Day 2</a></td></cfif>
+				<cfif ListLen(Variables.EventDates) GTE 3><td Style="border-width: 0px; padding: 1px; border-style: inset; border-color: gray; background-color: ##EDEDED; -moz-border-radius: ; Font-Family: Arial; Font-Size: 14px; Font-Weight: Normal;"><A Href="#buildURL('admin:events.eventsigninsheet', cgi.path_info)#&EventID=#URL.EventID#&EventDatePos=3">SignIn Sheet Day 3</a></td></cfif>
+				<cfif ListLen(Variables.EventDates) GTE 4><td Style="border-width: 0px; padding: 1px; border-style: inset; border-color: gray; background-color: ##EDEDED; -moz-border-radius: ; Font-Family: Arial; Font-Size: 14px; Font-Weight: Normal;"><A Href="#buildURL('admin:events.eventsigninsheet', cgi.path_info)#&EventID=#URL.EventID#&EventDatePos=4">SignIn Sheet Day 4</a></td></cfif>
+				<cfif ListLen(Variables.EventDates) GTE 5><td Style="border-width: 0px; padding: 1px; border-style: inset; border-color: gray; background-color: ##EDEDED; -moz-border-radius: ; Font-Family: Arial; Font-Size: 14px; Font-Weight: Normal;"><A Href="#buildURL('admin:events.eventsigninsheet', cgi.path_info)#&EventID=#URL.EventID#&EventDatePos=5">SignIn Sheet Day 5</a></td></cfif>
 			</tr>
 			<tr>
 				<td Style="border-width: thin; padding: 0px; border-style: inset; border-color: gray; background-color: ##EDEDED; -moz-border-radius: ; Font-Family: Arial; Font-Size: 14px; Font-Weight: Bold;" colspan="5"></td>
@@ -187,7 +187,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 									<td style="Font-Family: Arial; Font-Size: 12px;">#DollarFormat(Session.getAttendedParticipants.AttendeePrice)#</td>
 									<td style="Font-Family: Arial; Font-Size: 12px;">
 										<cfif Session.getAttendedParticipants.AttendeePriceVerified EQ 0>
-											<a href="#buildURL('admin:events.updateparticipantcost2')#&EventID=#URl.EventID#&RegistrationID=#Session.getAttendedParticipants.TContent_ID#" class="art-button">Update Cost</a>
+											<a href="#buildURL('admin:events.updateparticipantcost2', cgi.path_info)#&EventID=#URl.EventID#&RegistrationID=#Session.getAttendedParticipants.TContent_ID#" class="art-button">Update Cost</a>
 										<cfelse>&nbsp;</cfif>
 									</td>
 								</tr>
@@ -207,13 +207,13 @@ http://www.apache.org/licenses/LICENSE-2.0
 								<td style="Font-Family: Arial; Font-Size: 12px;">#DollarFormat(Variables.IncomeAmount)#</td>
 							</tr>
 							<tr>
-								<td colspan="6" style="Font-Family: Arial; Font-Size: 12px;"><a href="#buildURL('admin:events.eventattendedsheet')#&EventID=#URL.EventID#&AttendeePriceVerified=Yes" class="art-button">Proceed to Display Report</a></td>
+								<td colspan="6" style="Font-Family: Arial; Font-Size: 12px;"><a href="#buildURL('admin:events.eventattendedsheet', cgi.path_info)#&EventID=#URL.EventID#&AttendeePriceVerified=Yes" class="art-button">Proceed to Display Report</a></td>
 							</tr>
 						</tfoot>
 					<cfelse>
 						<!--- <tbody>
 							<tr>
-								<td colspan="6"><div align="center" class="alert-box notice">No Event Expenses have been located within the database. Please click <a href="#buildURL('admin:events.addeventexpenses')#&EventID=#URL.EventID#" class="art-button">here</a> to add a new expense for this event.</div></td>
+								<td colspan="6"><div align="center" class="alert-box notice">No Event Expenses have been located within the database. Please click <a href="#buildURL('admin:events.addeventexpenses', cgi.path_info)#&EventID=#URL.EventID#" class="art-button">here</a> to add a new expense for this event.</div></td>
 							</tr>
 						</tbody> --->
 					</cfif>

@@ -105,7 +105,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<tr bgcolor="###iif(currentrow MOD 2,DE('ffffff'),DE('efefef'))#">
 								<td width="50%">#Session.getAvailableEventExpenses.Expense_Name#</td>
 								<td width="15%">#DollarFormat(Session.getAvailableEventExpenses.Cost_Amount)#</td>
-								<td><A href="#buildURL('eventcoord:events.enterexpenses')#&EventID=#URL.EventID#&EventRecID=#Session.getAvailableEventExpenses.TContent_ID#&UserAction=UpdateExpense" class="btn btn-primary">Update</a> <A href="#buildURL('eventcoord:events.enterexpenses')#&EventID=#URL.EventID#&EventRecID=#Session.getAvailableEventExpenses.TContent_ID#&UserAction=DeleteExpense" class="btn btn-primary">Delete</a></td>
+								<td><A href="#buildURL('eventcoord:events.enterexpenses', cgi.path_info)#&EventID=#URL.EventID#&EventRecID=#Session.getAvailableEventExpenses.TContent_ID#&UserAction=UpdateExpense" class="btn btn-primary">Update</a> <A href="#buildURL('eventcoord:events.enterexpenses', cgi.path_info)#&EventID=#URL.EventID#&EventRecID=#Session.getAvailableEventExpenses.TContent_ID#&UserAction=DeleteExpense" class="btn btn-primary">Delete</a></td>
 							</tr>
 							</cfloop>
 						</tbody>
@@ -149,7 +149,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 												<option value="----">Select Expense Name from List?</option>
 											</cfselect>
 										</div>
-									<!--- <div align="center" class="alert-box notice">No Event Expenses have been located within the database. Please click <a href="#buildURL('eventcoord:events.addeventexpenses')#&EventID=#URL.EventID#" class="art-button">here</a> to add a new expense for this event.</div> --->
+									<!--- <div align="center" class="alert-box notice">No Event Expenses have been located within the database. Please click <a href="#buildURL('eventcoord:events.addeventexpenses', cgi.path_info)#&EventID=#URL.EventID#" class="art-button">here</a> to add a new expense for this event.</div> --->
 								</td>
 							</tr>
 							<tr>
@@ -157,7 +157,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 									<div class="form-group">
 										<label for="ExpenseAmount" class="control-label col-sm-3">Expense Amount:&nbsp;</label>
 										<div class="col-sm-8"><cfinput type="text" class="form-control" id="ExpenseAmount" value="#Session.getSelectedEventExpenses.Cost_Amount#" name="ExpenseAmount" required="no"></div>
-										<!--- <div align="center" class="alert-box notice">No Event Expenses have been located within the database. Please click <a href="#buildURL('eventcoord:events.addeventexpenses')#&EventID=#URL.EventID#" class="art-button">here</a> to add a new expense for this event.</div> --->
+										<!--- <div align="center" class="alert-box notice">No Event Expenses have been located within the database. Please click <a href="#buildURL('eventcoord:events.addeventexpenses', cgi.path_info)#&EventID=#URL.EventID#" class="art-button">here</a> to add a new expense for this event.</div> --->
 								</td>
 							</tr>
 						</tbody>
@@ -181,7 +181,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 												<option value="----">Select Expense Name from List?</option>
 											</cfselect>
 										</div>
-										<!--- <div align="center" class="alert-box notice">No Event Expenses have been located within the database. Please click <a href="#buildURL('eventcoord:events.addeventexpenses')#&EventID=#URL.EventID#" class="art-button">here</a> to add a new expense for this event.</div>--->
+										<!--- <div align="center" class="alert-box notice">No Event Expenses have been located within the database. Please click <a href="#buildURL('eventcoord:events.addeventexpenses', cgi.path_info)#&EventID=#URL.EventID#" class="art-button">here</a> to add a new expense for this event.</div>--->
 								</td>
 							</tr>
 							<tr>
@@ -189,7 +189,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 									<div class="form-group">
 										<label for="ExpenseAmount" class="control-label col-sm-3">Expense Amount:&nbsp;</label>
 										<div class="col-sm-8"><cfinput type="text" class="form-control" id="ExpenseAmount" name="ExpenseAmount" required="no"></div>
-										<!--- <div align="center" class="alert-box notice">No Event Expenses have been located within the database. Please click <a href="#buildURL('eventcoord:events.addeventexpenses')#&EventID=#URL.EventID#" class="art-button">here</a> to add a new expense for this event.</div> --->
+										<!--- <div align="center" class="alert-box notice">No Event Expenses have been located within the database. Please click <a href="#buildURL('eventcoord:events.addeventexpenses', cgi.path_info)#&EventID=#URL.EventID#" class="art-button">here</a> to add a new expense for this event.</div> --->
 								</td>
 							</tr>
 						</tfoot>
@@ -198,7 +198,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<tr bgcolor="###iif(currentrow MOD 2,DE('ffffff'),DE('efefef'))#">
 								<td width="50%">#Session.getAvailableEventExpenses.Expense_Name#</td>
 								<td width="15%">#DollarFormat(Session.getAvailableEventExpenses.Cost_Amount)#</td>
-								<td><A href="#buildURL('eventcoord:events.enterexpenses')#&EventID=#URL.EventID#&EventRecID=#Session.getAvailableEventExpenses.TContent_ID#&UserAction=UpdateExpense" class="btn btn-primary">Update</a> <A href="#buildURL('eventcoord:events.enterexpenses')#&EventID=#URL.EventID#&EventRecID=#Session.getAvailableEventExpenses.TContent_ID#&UserAction=DeleteExpense" class="btn btn-primary">Delete</a></td>
+								<td><A href="#buildURL('eventcoord:events.enterexpenses', cgi.path_info)#&EventID=#URL.EventID#&EventRecID=#Session.getAvailableEventExpenses.TContent_ID#&UserAction=UpdateExpense" class="btn btn-primary">Update</a> <A href="#buildURL('eventcoord:events.enterexpenses', cgi.path_info)#&EventID=#URL.EventID#&EventRecID=#Session.getAvailableEventExpenses.TContent_ID#&UserAction=DeleteExpense" class="btn btn-primary">Delete</a></td>
 							</tr>
 							</cfloop>
 						</tbody>
@@ -213,7 +213,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 												<option value="----">Select Expense Name from List?</option>
 											</cfselect>
 										</div>
-										<!--- <div align="center" class="alert-box notice">No Event Expenses have been located within the database. Please click <a href="#buildURL('eventcoord:events.addeventexpenses')#&EventID=#URL.EventID#" class="art-button">here</a> to add a new expense for this event.</div> --->
+										<!--- <div align="center" class="alert-box notice">No Event Expenses have been located within the database. Please click <a href="#buildURL('eventcoord:events.addeventexpenses', cgi.path_info)#&EventID=#URL.EventID#" class="art-button">here</a> to add a new expense for this event.</div> --->
 								</td>
 							</tr>
 							<tr>
@@ -221,7 +221,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 									<div class="form-group">
 										<label for="ExpenseAmount" class="control-label col-sm-3">Expense Amount:&nbsp;</label>
 										<div class="col-sm-8"><cfinput type="text" class="form-control" id="ExpenseAmount" name="ExpenseAmount" required="no"></div>
-										<!--- <div align="center" class="alert-box notice">No Event Expenses have been located within the database. Please click <a href="#buildURL('eventcoord:events.addeventexpenses')#&EventID=#URL.EventID#" class="art-button">here</a> to add a new expense for this event.</div> --->
+										<!--- <div align="center" class="alert-box notice">No Event Expenses have been located within the database. Please click <a href="#buildURL('eventcoord:events.addeventexpenses', cgi.path_info)#&EventID=#URL.EventID#" class="art-button">here</a> to add a new expense for this event.</div> --->
 								</td>
 							</tr>
 						</tbody>

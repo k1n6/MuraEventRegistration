@@ -61,7 +61,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfif getFacilityRooms.RecordCount>
 							<tfoot>
 								<tr>
-									<td colspan="6">Add a new room within the facility that is not listed above by clicking <a href="#buildURL('admin:facilities.managerooms')#&PerformAction=AddRoom&RecNo=#getFacility.TContent_ID#" class="art-button">here</a> <strong>or</strong> you can return to the listing of facilities by clicking <a href="#buildURL('admin:facilities')#" class="art-button">here</a></td>
+									<td colspan="6">Add a new room within the facility that is not listed above by clicking <a href="#buildURL('admin:facilities.managerooms', cgi.path_info)#&PerformAction=AddRoom&RecNo=#getFacility.TContent_ID#" class="art-button">here</a> <strong>or</strong> you can return to the listing of facilities by clicking <a href="#buildURL('admin:facilities', cgi.path_info)#" class="art-button">here</a></td>
 								</tr>
 							</tfoot>
 							<tbody>
@@ -70,14 +70,14 @@ http://www.apache.org/licenses/LICENSE-2.0
 										<td>#getFacilityRooms.RoomName#</td>
 										<td>#getFacilityRooms.Capacity#</td>
 										<td><cfswitch expression="#GetFacilityRooms.Active#"><cfcase value="1">Yes</cfcase><cfcase value="0">No</cfcase><cfdefaultcase>No</cfdefaultcase></cfswitch></td>
-										<td><a href="#buildURL('admin:facilities.managerooms')#&PerformAction=EditRoom&RecNo=#getFacility.TContent_ID#&RoomRecNo=#getFacilityRooms.TContent_ID#" class="art-button">Edit</a>&nbsp;&nbsp;<a href="#buildURL('admin:facilities.managerooms')#&PerformAction=DeleteRoom&RecNo=#getFacility.TContent_ID#&RoomRecNo=#getFacilityRooms.TContent_ID#" class="art-button">D</a></td>
+										<td><a href="#buildURL('admin:facilities.managerooms', cgi.path_info)#&PerformAction=EditRoom&RecNo=#getFacility.TContent_ID#&RoomRecNo=#getFacilityRooms.TContent_ID#" class="art-button">Edit</a>&nbsp;&nbsp;<a href="#buildURL('admin:facilities.managerooms', cgi.path_info)#&PerformAction=DeleteRoom&RecNo=#getFacility.TContent_ID#&RoomRecNo=#getFacilityRooms.TContent_ID#" class="art-button">D</a></td>
 									</tr>
 								</cfloop>
 							</tbody>
 						<cfelse>
 							<tbody>
 								<tr>
-									<td colspan="6"><div align="center" class="alert-box notice">No rooms within the facility were located in the database Please click <a href="#buildURL('admin:facilities.managerooms')#&PerformAction=AddRoom&RecNo=#getFacility.TContent_ID#" class="art-button">here</a> to add one.</div></td>
+									<td colspan="6"><div align="center" class="alert-box notice">No rooms within the facility were located in the database Please click <a href="#buildURL('admin:facilities.managerooms', cgi.path_info)#&PerformAction=AddRoom&RecNo=#getFacility.TContent_ID#" class="art-button">here</a> to add one.</div></td>
 								</tr>
 							</tbody>
 						</cfif>

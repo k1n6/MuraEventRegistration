@@ -16,8 +16,8 @@
 			<cfif UserMembershipQuery.GroupName EQ "Event Presentator"><cfset Session.Mura.EventPresenterRole = true></cfif>
 		</cfloop>
 		<cfif Session.Mura.Username EQ "admin"><cfset Session.Mura.SuperAdminRole = true></cfif>
-		<cfif Session.Mura.EventCoordinatorRole EQ "True"><cfoutput>#Variables.this.redirect("eventcoord:main.default")#</cfoutput></cfif>
-		<cfif Session.Mura.SuperAdminRole EQ "true"><cfoutput>#Variables.this.redirect("siteadmin:main.default")#</cfoutput></cfif>
+		<cfif Session.Mura.EventCoordinatorRole EQ "True"><cfoutput>#Variables.this.redirect(action = "eventcoord:main.default", path = cgi.path_info)#</cfoutput></cfif>
+		<cfif Session.Mura.SuperAdminRole EQ "true"><cfoutput>#Variables.this.redirect(action = "siteadmin:main.default", path = cgi.path_info)#</cfoutput></cfif>
 
 		<cfif isDefined("Session.UserRegistrationInfo")>
 			<cfif DateDiff("n", Session.UserRegistrationInfo.DateRegistered, Now()) LTE 15>
