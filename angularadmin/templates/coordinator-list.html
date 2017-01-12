@@ -1,0 +1,23 @@
+<div ng-controller="coordinatorListController" ng-show="eventid != -1">
+	<h2>Event Coordinator</h2>
+	<div ng-if="coordinators.length == 0"><h2>No Coordinators Present</h2></div>
+	
+	<div class="input-group col-centered custom-list-item " ng-repeat="coordinator in coordinators">
+		<a  class="form-control"  ui-sref="eventDetails.singlecoordinator({eventid: eventid, coordinator_id: coordinator.coordinator_id, subevent : coordinator.subevent})">
+				{{coordinator.coordinator_name}}
+
+		</a>
+		 <span class="input-group-btn">
+			<button id="deletecoordinatorbutton" ng-click="deletecoordinator(coordinator.coordinator_id, $event);" type="button" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span> Delete</button>
+		</span>
+	</div>
+
+		
+
+	<br>
+	<button id="AddAcoordinatorButton" class="btn btn-primary ng-scope" ui-sref="eventDetails.singlecoordinator({eventid: eventid, coordinator_id: -1, subevent : subevent})">Add A coordinator</button>
+
+
+</div>		
+
+		

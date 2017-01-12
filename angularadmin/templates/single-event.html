@@ -49,6 +49,15 @@
 					index="3"
 					heading="Reporting"></uib-tab>
 					
+				<uib-tab 
+
+					ng-click="setActiveTab(4)"
+					select = ""
+					ng-if="event.TContent_ID != -1" 
+					ui-sref=".coordinatorlist({eventid: event.TContent_ID, subevent: -1})" 
+					index="4"
+					heading="Coordinators"></uib-tab>
+					
 			</uib-tabset>	 
 
 

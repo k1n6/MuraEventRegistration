@@ -379,6 +379,85 @@ angular.module('eventsadmin')
 	});
 }])
 
+
+
+
+
+.controller('coordinatorListController', ['$scope', 'eventServices', '$stateParams', '$state', function($scope, eventServices, $stateParams, $state){
+	$scope.coordinators = [];
+	$scope.eventid = $stateParams.eventid;
+	$scope.subevent = $stateParams.subevent;
+	if(typeof $scope.subevent == 'undefined' || $scope.subevent == null){
+		$scope.subevent = -1;
+		$stateParams.subevent = -1;
+	}
+	console.log($scope.subevent);
+	
+	$scope.deletecoordinator = function(coordinator_id, $event){
+		eventServices.deletecoordinator(coordinator_id).then(function(res){
+			$state.go('eventDetails.coordinatorlist', {eventid: $stateParams.eventid, subevent: $scope.subevent}, {reload: true});
+		});
+		
+		$event.stopPropagation();
+		$event.preventDefault();
+		
+	}
+	data = eventServices.getcoordinators($stateParams.eventid,0, $scope.subevent);
+	data.then(function(resp){
+		$scope.coordinators = resp;
+	});
+}])
+
+.controller('singlecoordinatorController', ['$scope', 'eventServices', '$stateParams', '$state', function($scope, eventServices, $stateParams, $state){
+	$scope.coordinators = [];
+	//we need to figure out / decide if we are viewing a main events options for an acitivities events
+	$scope.eventid = $stateParams.eventid;
+	$scope.coordinator_id = $stateParams.coordinator_id;
+	$scope.subevent = $stateParams.subevent;
+	if(typeof $scope.subevent == 'undefined' || $scope.subevent == null){
+		$scope.subevent = -1;
+		$stateParams.subevent = -1;
+	}
+	
+	//here we load our form variables
+	$scope.coordinatorFields = 	[];
+	eventServices.getFormData('p_eventregistration_coordinator').then(function(d){
+		$scope.coordinatorFields = d;
+	});
+	
+	
+	$scope.updatecoordinatorData= function(){
+
+			data = eventServices.getcoordinators($scope.eventid, $scope.coordinator_id, $scope.subevent );
+			data.then(function(resp){
+				$scope.coordinators = resp;
+			});
+		}
+	$scope.updatecoordinatorData();
+	
+	$scope.savecoordinator = function(coordinator){
+		
+		coordinator.coordinator_id = $scope.coordinator_id;
+		coordinator.subevent = $scope.subevent;
+		coordinator.mainevent = $scope.eventid;
+		
+		eventServices.savecoordinator($scope.eventid, coordinator.coordinator_id, coordinator, coordinator.subevent ).then(function(d){
+
+				$state.go('eventDetails.coordinatorlist', 
+					{eventid: $scope.eventid, 
+					 subevent : $scope.subevent, 
+					 }	,
+						  {reload: true}
+						);
+		});
+	};	
+	
+}])
+
+		
+
+
+
 .controller('singlePriceController', ['$scope', 'eventServices', '$stateParams', '$state', function($scope, eventServices, $stateParams, $state){
 	$scope.eventPrices = [];
 	//we need to figure out / decide if we are viewing a main events options for an acitivities events

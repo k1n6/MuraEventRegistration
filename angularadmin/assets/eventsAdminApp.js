@@ -87,6 +87,18 @@ app
     templateUrl: 'templates/eventdetails.eventprices.html'
   }
   
+  
+   var singleCoordinator = {
+    name: 'eventDetails.singlecoordinator',
+    url: '/coordinator/:coordinator_id',
+    templateUrl: 'templates/single-coordinator.html'
+  }
+  var coordinatorList = {
+    name: 'eventDetails.coordinatorlist',
+    url: '/coordinatorlist/:subevent',
+    templateUrl: 'templates/coordinator-list.html'
+  }
+  
 
 	$stateProvider.state(eventListState);
 	$stateProvider.state(administrationState);
@@ -101,6 +113,9 @@ app
 	
 	$stateProvider.state(singlePrice);
 	$stateProvider.state(eventDetailsPriceList);
+	
+	$stateProvider.state(singleCoordinator);
+	$stateProvider.state(coordinatorList);
 	
 	$stateProvider.state(eventDetailsReporting);
 })

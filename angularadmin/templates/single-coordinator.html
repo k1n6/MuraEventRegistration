@@ -1,0 +1,14 @@
+<div ng-controller="singlecoordinatorController">
+	
+	<form  name="coordinatorForm" novalidate>
+		<formly-form model="coordinators[0]" fields="coordinatorFields" form="coordinatorForm">
+			<button id="savecoordinatorButton" type="button" ng-click="savecoordinator(coordinators[0]);" class="btn btn-primary" ng-disabled="coordinatorForm.$invalid">Save Coordinator</button>
+		</formly-form>
+	</form>
+	<!--
+		Here we need to list the existing option for this option group, and provide an add feature.	
+	-->
+		
+	</div>
+</div>
+		

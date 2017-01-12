@@ -249,6 +249,50 @@ angular.module('eventsadmin')
 			return promise;	
 			
 		}
+					,
+			getcoordinators : function(eventid, coordinator_id, subevent){
+				var promise;
+				 var url = '/Taffy/index.cfm/coordinator/' + coordinator_id + '/eventid/' + eventid + '/subevent/' + subevent;
+					promise = $http.get(url)
+					 .then(function (response) {
+						response = setBooleans(response);
+						return response.data;
+					});
+				return promise;
+
+			},
+			savecoordinator : function(eventid, coordinator_id, coordinator, subevent){
+				var promise;
+				var url = '/Taffy/index.cfm/coordinator/'+coordinator_id+'/eventid/' + eventid + '/subevent/' + subevent;
+				var wrapped_coordinator = {};
+				wrapped_coordinator.input_data = coordinator;
+				wrapped_coordinator.input_data.coordinator_id = coordinator_id;
+				wrapped_coordinator.input_data.eventid = eventid;
+				wrapped_coordinator.input_data.subevent = subevent;
+				var input_data = JSON.stringify(wrapped_coordinator);
+				promise = $http.put(url, input_data).then(function(response){
+					response = setBooleans(response);
+					return response.data;
+				});
+				return promise;
+
+			},
+			deletecoordinator : function(coordinator_id){
+				var promise;
+				var eventid = 0;
+				var subevent = 0;
+				 var url = '/Taffy/index.cfm/coordinator/'+coordinator_id + '/eventid/' + eventid + '/subevent/' + subevent;
+					promise = $http.delete(url)
+					 .then(function (response) {
+						response = setBooleans(response);
+						return response.data;
+					});
+				return promise;	
+
+			}
+
+
+
 		
 		
 	}
