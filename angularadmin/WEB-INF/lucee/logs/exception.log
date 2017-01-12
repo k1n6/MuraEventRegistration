@@ -1,0 +1,34 @@
+"Severity","ThreadID","Date","Time","Application","Message"
+"ERROR","ajp-nio-8009-exec-1","01/04/2017","15:32:42","",";key [_TAFFY] doesn't exist;key [_TAFFY] doesn't exist
+	at lucee.runtime.type.util.StructSupport.invalidKey(StructSupport.java:66):66
+	at lucee.runtime.type.StructImpl.get(StructImpl.java:120):120
+	at taffy.dashboard.dashboard_cfm$cf.call(F:\inetpub\eventsadmin\Taffy\dashboard\dashboard.cfm:23):23
+	at lucee.runtime.PageContextImpl.doInclude(PageContextImpl.java:951):951
+	at lucee.runtime.listener.ClassicAppListener._onRequest(ClassicAppListener.java:56):56
+	at lucee.runtime.listener.MixedAppListener.onRequest(MixedAppListener.java:36):36
+	at lucee.runtime.PageContextImpl.execute(PageContextImpl.java:2262):2262
+	at lucee.runtime.PageContextImpl.execute(PageContextImpl.java:2225):2225
+	at lucee.runtime.engine.CFMLEngineImpl.serviceCFML(CFMLEngineImpl.java:456):456
+	at lucee.loader.servlet.CFMLServlet.service(CFMLServlet.java:47):47
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:729):729
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:291):291
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:206):206
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:52):52
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:239):239
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:206):206
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:217):217
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:106):106
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:502):502
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:142):142
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:79):79
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:88):88
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:518):518
+	at org.apache.coyote.ajp.AbstractAjpProcessor.process(AbstractAjpProcessor.java:844):844
+	at org.apache.coyote.AbstractProtocol$AbstractConnectionHandler.process(AbstractProtocol.java:673):673
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1500):1500
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.run(NioEndpoint.java:1456):1456
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142):1142
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617):617
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61):61
+	at java.lang.Thread.run(Thread.java:745):745
+"

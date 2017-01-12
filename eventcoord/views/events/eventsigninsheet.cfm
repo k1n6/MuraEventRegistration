@@ -212,7 +212,7 @@ Line 42: Change to the Plugin Name for the cfimport line
 		</Table>
 	<cfelse>
 		<cfquery name="getRegisteredParticipants" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-			SELECT eRegistrations.RequestsMeal, eRegistrations.IVCParticipant, tusers.Fname, tusers.Lname, tusers.Company, tusers.Email, SUBSTRING_INDEX(tusers.Email,"@",-1) AS Domain, eEvents.ShortTitle, Date_FORMAT(eEvents.EventDate, "%a, %M %d, %Y") as EventDateFormat
+			SELECT eRegistrations.RequestsMeal, eRegistrations.IVCParticipant, tusers.Fname, tusers.Lname, tusers.Company, tusers.Email, dbo.SUBSTRING_INDEX(tusers.Email,'@',-1) AS Domain, eEvents.ShortTitle, dbo.date_FORMAT(eEvents.EventDate, '%a, %M %d, %Y') as EventDateFormat
 			FROM eRegistrations INNER JOIN tusers ON tusers.UserID = eRegistrations.User_ID INNER JOIN eEvents ON eEvents.TContent_ID = eRegistrations.EventID
 			WHERE eRegistrations.EventID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer"> and
 				eRegistrations.Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar">

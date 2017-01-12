@@ -21,7 +21,7 @@
 						<legend>Account Security</legend>
 					</fieldset>
 					<div class="form-group">
-						<div class="col-sm-6"><div class="g-recaptcha" data-sitekey="6Le6hw0UAAAAAHty8-RZLBzpnHjc348j7U0nrxdh"></div></div>
+						<div class="col-sm-6"><div class="g-recaptcha" data-sitekey="#$.siteConfig('recaptchasitekey')#"></div></div>
 						<!---
 						<label for="HumanChecker" class="control-label col-sm-3">In order to prevent abuse from automatic systems, please type the letters or numbers in the box below:&nbsp;</label>
 						<div class="col-sm-6">
@@ -112,7 +112,7 @@
 						<legend>Account Security</legend>
 					</fieldset>
 					<div class="form-group">
-						<div class="col-sm-6"><div class="g-recaptcha" data-sitekey="6Le6hw0UAAAAAHty8-RZLBzpnHjc348j7U0nrxdh"></div></div>
+						<div class="col-sm-6"><div class="g-recaptcha" data-sitekey="#$.siteConfig('recaptchasitekey')#"></div></div>
 						<!---
 						<label for="HumanChecker" class="control-label col-sm-3">In order to prevent abuse from automatic systems, please type the letters or numbers in the box below:&nbsp;</label>
 						<div class="col-sm-6">

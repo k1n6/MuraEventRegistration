@@ -1,0 +1,16 @@
+{
+  "name": "eventsadmin",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "angular-ui-bootstrap": "^2.4.0",
+    "angular-ui-router": "^0.3.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

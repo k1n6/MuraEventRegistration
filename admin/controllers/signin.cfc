@@ -54,7 +54,7 @@
 										UserID = <cfqueryparam value="#Variables.AttendeeToSignIn[i]#" cfsqltype="cf_sql_varchar">
 								</cfquery>
 								<cfquery name="getSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-									Select ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, EventFeatured, Featured_StartDate, Featured_EndDate, MemberCost, NonMemberCost,  EarlyBird_RegistrationAvailable, EarlyBird_RegistrationDeadline, EarlyBird_MemberCost, EarlyBird_NonMemberCost, ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints, MealProvided, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost, AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, MaxParticipants, LocationType, LocationID, LocationRoomID, Presenters, Facilitator
+									Select ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, EventFeatured, Featured_StartDate, Featured_EndDate, MemberCost, NonMemberCost,  EarlyBird_RegistrationAvailable, EarlyBird_RegistrationDeadline, EarlyBird_MemberCost, EarlyBird_NonMemberCost, ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints, MealAvailable, MealIncluded, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost, AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, MaxParticipants, LocationType, LocationID, LocationRoomID, Presenters, Facilitator
 									From eEvents
 									Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
 										TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
@@ -107,7 +107,7 @@
 									<cfabort>
 								</cfcatch>
 							</cftry>
-							<cfset Temp = #SendEmailCFC.SendEventRegistrationToSingleParticipant(insertNewRegistration.GENERATED_KEY)#>
+							<cfset Temp = #SendEmailCFC.SendEventRegistrationToSingleParticipant(insertNewRegistration.generatedkey)#>
 						</cfloop>
 						<cflocation url="?#HTMLEditFormat(rc.pc.getPackage())#action=admin:signin.addattendee&SuccessfullAttendeeSignin=True&&MultipleAttendee=True&EventID=#URL.EventID#" addtoken="false">
 					</cfif>
@@ -151,7 +151,7 @@
 									UserID = <cfqueryparam value="#FORM.AttendeeUserID#" cfsqltype="cf_sql_varchar">
 							</cfquery>
 							<cfquery name="getSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-								Select ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, EventFeatured, Featured_StartDate, Featured_EndDate, MemberCost, NonMemberCost,  EarlyBird_RegistrationAvailable, EarlyBird_RegistrationDeadline, EarlyBird_MemberCost, EarlyBird_NonMemberCost, ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints, MealProvided, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost, AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, MaxParticipants, LocationType, LocationID, LocationRoomID, Presenters, Facilitator
+								Select ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, EventFeatured, Featured_StartDate, Featured_EndDate, MemberCost, NonMemberCost,  EarlyBird_RegistrationAvailable, EarlyBird_RegistrationDeadline, EarlyBird_MemberCost, EarlyBird_NonMemberCost, ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints, MealAvailable, MealIncluded, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost, AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, MaxParticipants, LocationType, LocationID, LocationRoomID, Presenters, Facilitator
 								From eEvents
 								Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
 									TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
@@ -204,7 +204,7 @@
 								<cfabort>
 							</cfcatch>
 						</cftry>
-						<cfset Temp = #SendEmailCFC.SendEventRegistrationToSingleParticipant(insertNewRegistration.GENERATED_KEY)#>
+						<cfset Temp = #SendEmailCFC.SendEventRegistrationToSingleParticipant(insertNewRegistration.generatedkey)#>
 						<cflocation url="?#HTMLEditFormat(rc.pc.getPackage())#action=admin:signin.addattendee&SuccessfullAttendeeSignin=True&EventID=#URL.EventID#" addtoken="false">
 					<cfelse>
 						<cfset AttendeeToSignIn = #ListToArray(FORM.AttendeeUserID)#>
@@ -218,7 +218,7 @@
 										UserID = <cfqueryparam value="#Variables.AttendeeToSignIn[i]#" cfsqltype="cf_sql_varchar">
 								</cfquery>
 								<cfquery name="getSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-									Select ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, EventFeatured, Featured_StartDate, Featured_EndDate, MemberCost, NonMemberCost,  EarlyBird_RegistrationAvailable, EarlyBird_RegistrationDeadline, EarlyBird_MemberCost, EarlyBird_NonMemberCost, ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints, MealProvided, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost, AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, MaxParticipants, LocationType, LocationID, LocationRoomID, Presenters, Facilitator
+									Select ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, EventFeatured, Featured_StartDate, Featured_EndDate, MemberCost, NonMemberCost,  EarlyBird_RegistrationAvailable, EarlyBird_RegistrationDeadline, EarlyBird_MemberCost, EarlyBird_NonMemberCost, ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints, MealAvailable, MealIncluded, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost, AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, MaxParticipants, LocationType, LocationID, LocationRoomID, Presenters, Facilitator
 									From eEvents
 									Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
 										TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
@@ -271,7 +271,7 @@
 									<cfabort>
 								</cfcatch>
 							</cftry>
-							<cfset Temp = #SendEmailCFC.SendEventRegistrationToSingleParticipant(insertNewRegistration.GENERATED_KEY)#>
+							<cfset Temp = #SendEmailCFC.SendEventRegistrationToSingleParticipant(insertNewRegistration.generatedkey)#>
 						</cfloop>
 						<cflocation url="?#HTMLEditFormat(rc.pc.getPackage())#action=admin:signin.addattendee&SuccessfullAttendeeSignin=True&&MultipleAttendee=True&EventID=#URL.EventID#" addtoken="false">
 					</cfif>

@@ -23,26 +23,29 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfset Session.UserRegistrationInfo.DateRegistered = #Now()#>
 				</cfif>
 			</cflock>
-			<cfquery name="Session.getSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-				Select ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime, EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost, EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost, ViewGroupPricing, GroupMemberCost, GroupNonMemberCost, GroupPriceRequirements, PGPAvailable, PGPPoints, MealProvided, MealProvidedBy, MealCost_Estimated, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost, AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, MaxParticipants, LocationID, LocationRoomID, Facilitator, Active, EventCancelled, WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost, Presenters, EventHasDailySessions, Session1BeginTime, Session1EndTime, Session2BeginTime, Session2EndTime
+			<cfquery name="getSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
+				Select ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime, EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost, EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost, ViewGroupPricing, GroupMemberCost, GroupNonMemberCost, GroupPriceRequirements, PGPAvailable, PGPPoints, MealAvailable, MealIncluded, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost, AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, MaxParticipants, LocationID, LocationRoomID, Facilitator, Active, EventCancelled, WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost, Presenters, EventHasDailySessions, Session1BeginTime, Session1EndTime, Session2BeginTime, Session2EndTime
 				From p_EventRegistration_Events
 				Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
 					TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer"> and
 					Active = <cfqueryparam value="1" cfsqltype="cf_sql_bit"> and
 					EventCancelled = <cfqueryparam value="0" cfsqltype="cf_sql_bit">
 			</cfquery>
-
+			<cflock timeout="60" scope="SESSION" type="Exclusive">
+				<cfset Session.getSelectedEvent = #StructCopy(getSelectedEvent)#>
+			</cflock>
 			<cflocation addtoken="false" url="#CGI.Script_name##CGI.path_info#?display=login">
 		<cfelseif isDefined("URL.EventID") and isNumeric(URL.EventID) and Session.Mura.IsLoggedIn EQ "true" and not isDefined("FORM.formSubmit")>
 			<cflock timeout="60" scope="SESSION" type="Exclusive">
-				<cfquery name="Session.getSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-					Select ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime, EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost, EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost, ViewGroupPricing, GroupMemberCost, GroupNonMemberCost, GroupPriceRequirements, PGPAvailable, PGPPoints, MealProvided, MealProvidedBy, MealCost_Estimated, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost, AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, MaxParticipants, LocationID, LocationRoomID, Facilitator, Active, EventCancelled, WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost, Presenters, EventHasDailySessions, Session1BeginTime, Session1EndTime, Session2BeginTime, Session2EndTime
+				<cfquery name="getSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
+					Select ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime, EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost, EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost, ViewGroupPricing, GroupMemberCost, GroupNonMemberCost, GroupPriceRequirements, PGPAvailable, PGPPoints, MealAvailable, MealIncluded, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost, AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, MaxParticipants, LocationID, LocationRoomID, Facilitator, Active, EventCancelled, WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost, Presenters, EventHasDailySessions, Session1BeginTime, Session1EndTime, Session2BeginTime, Session2EndTime
 					From p_EventRegistration_Events
 					Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
 						TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer"> and
 						Active = <cfqueryparam value="1" cfsqltype="cf_sql_bit"> and
 						EventCancelled = <cfqueryparam value="0" cfsqltype="cf_sql_bit">
 				</cfquery>
+				<cfset Session.getSelectedEvent = #StructCopy(getSelectedEvent)#>
 				<cfquery name="checkRegisteredForEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 					Select TContent_ID, RegistrationID, RegistrationDate
 					From p_EventRegistration_UserRegistrations
@@ -50,6 +53,14 @@ http://www.apache.org/licenses/LICENSE-2.0
 						User_ID = <cfqueryparam value="#Session.Mura.UserID#" cfsqltype="cf_sql_varchar"> and
 						Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar">
 				</cfquery>
+				<cfif getSelectedEvent.MealAvailable EQ 1 and getSelectedEvent.MealIncluded EQ 0>
+					<cfquery name="getEventCatererInfo" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
+						Select FacilityName, PhysicalAddress, PhysicalCity, PhysicalState, PhysicalZipCode, PrimaryVoiceNumber, BusinessWebsite, ContactName, ContactPhoneNumber
+						From p_EventRegistration_Caterers
+						Where TContent_ID = <cfqueryparam value="#getSelectedEvent.MealProvidedBy#" cfsqltype="cf_sql_integer">
+					</cfquery>
+					<cfset Session.getEventCaterer = #StructCopy(getEventCatererInfo)#>
+				</cfif>
 				<cfif isDefined("Session.UserRegistrationInfo")>
 					<cfset Session.UserRegistrationInfo.EventID = #URL.EventID#>
 					<cfset Session.UserRegistrationInfo.DateRegistered = #Now()#>
@@ -70,7 +81,6 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfset Session.UserRegistrationInfo.UserAlreadyRegistered = false>
 					</cfif>
 				</cfif>
-
 				<cfquery name="Session.getActiveMembership" datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 					Select TContent_ID, OrganizationName, OrganizationDomainName, Active
 					From p_EventRegistration_Membership
@@ -117,7 +127,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfset Session.UserRegistrationInfo.VideoConferenceOption = False>
 				</cfif>
 
-				<cfif Session.getActiveMembership.RecordCount EQ 1>
+				<cfif Session.getActiveMembership.Active EQ 1>
 					<cfset Session.UserRegistrationInfo.UserGetsMembershipPrice = True>
 					<cfset Session.UserRegistrationInfo.UserEventPrice = #Session.getSelectedEvent.MemberCost#>
 					<cfset Session.UserRegistrationInfo.GroupEventPrice = #Session.getSelectedEvent.GroupMemberCost#>
@@ -267,7 +277,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				</cfquery>
 				<cfif CheckUserAlreadyRegistered.RecordCount EQ 0>
 					<cfset RegistrationID = #CreateUUID()#>
-					<cfif Session.getSelectedEvent.MealProvided EQ 0>
+					<cfif Session.getSelectedEvent.MealAvailable EQ 0>
 						<cfset FORM.StayForMeal = 0>
 					</cfif>
 					<cftry>
@@ -309,73 +319,73 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 								Update p_EventRegistration_UserRegistrations
 								Set RegisterForEventDate2 = <cfqueryparam value="#FORM.RegisterDate1#" cfsqltype="cf_sql_bit">
-								Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+								Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 							</cfquery>
 						</cfif>
 						<cfif isDefined("FORM.RegisterDate2")>
 							<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 								Update p_EventRegistration_UserRegistrations
 								Set RegisterForEventDate3 = <cfqueryparam value="#FORM.RegisterDate2#" cfsqltype="cf_sql_bit">
-								Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+								Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 							</cfquery>
 						</cfif>
 						<cfif isDefined("FORM.RegisterDate3")>
 							<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 								Update p_EventRegistration_UserRegistrations
 								Set RegisterForEventDate4 = <cfqueryparam value="#FORM.RegisterDate3#" cfsqltype="cf_sql_bit">
-								Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+								Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 							</cfquery>
 						</cfif>
 						<cfif isDefined("FORM.RegisterDate4")>
 							<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 								Update p_EventRegistration_UserRegistrations
 								Set RegisterForEventDate5 = <cfqueryparam value="#FORM.RegisterDate4#" cfsqltype="cf_sql_bit">
-								Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+								Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 							</cfquery>
 						</cfif>
 						<cfif isDefined("FORM.RegisterDate5")>
 							<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 								Update p_EventRegistration_UserRegistrations
 								Set RegisterForEventDate6 = <cfqueryparam value="#FORM.RegisterDate5#" cfsqltype="cf_sql_bit">
-								Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+								Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 							</cfquery>
 						</cfif>
 						<cfif isDefined("FORM.AttendSession1")>
 							<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 								Update p_EventRegistration_UserRegistrations
 								Set RegisterForEventSessionAM = <cfqueryparam value="#FORM.AttendSession1#" cfsqltype="cf_sql_bit">
-								Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+								Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 							</cfquery>
 						</cfif>
 						<cfif isDefined("FORM.AttendSession2")>
 							<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 								Update p_EventRegistration_UserRegistrations
 								Set RegisterForEventSessionPM = <cfqueryparam value="#FORM.AttendSession2#" cfsqltype="cf_sql_bit">
-								Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+								Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 							</cfquery>
 						</cfif>
 						<cfif isDefined("FORM.AttendViaWebinar")>
 							<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 								Update p_EventRegistration_UserRegistrations
 								Set WebinarParticipant = <cfqueryparam value="#FORM.AttendViaWebinar#" cfsqltype="cf_sql_bit">
-								Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+								Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 							</cfquery>
 						</cfif>
 						<cfif isDefined("FORM.AttendViaIVC")>
 							<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 								Update p_EventRegistration_UserRegistrations
 								Set IVCParticipant = <cfqueryparam value="#FORM.AttendViaIVC#" cfsqltype="cf_sql_bit">
-								Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+								Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 							</cfquery>
 						</cfif>
 						<cfif Session.getSelectedEvent.MealProvided EQ 1>
 							<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 								Update p_EventRegistration_UserRegistrations
 								Set RequestsMeal = <cfqueryparam value="#FORM.StayForMeal#" cfsqltype="cf_sql_bit">
-								Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+								Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 							</cfquery>
 						</cfif>
-						<cfset Temp = #SendEmailCFC.SendEventRegistrationToSingleParticipant(rc, insertNewRegistration.GENERATED_KEY)#>
+						<cfset Temp = #SendEmailCFC.SendEventRegistrationToSingleParticipant(rc, insertNewRegistration.GENERATEDKEY)#>
 						<cfset temp = StructDelete(Session, "FormErrors")>
 						<cfset temp = StructDelete(Session, "FormInput")>
 						<cfset temp = StructDelete(Session, "UserRegistrationInfo")>
@@ -456,21 +466,21 @@ http://www.apache.org/licenses/LICENSE-2.0
 									<cfquery name="updateRegistration" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										update p_EventRegistration_UserRegistrations
 										Set RequestsMeal = <cfqueryparam value="#FORM.StayForMeal#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 								<cfif isDefined("Session.FormInput.AttendSession1")>
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionAM = <cfqueryparam value="#Session.FormInput.AttendSession1#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 								<cfif isDefined("Session.FormInput.AttendSession2")>
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionPM = <cfqueryparam value="#Session.FormInput.AttendSession2#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 							<cfelse>
@@ -483,14 +493,14 @@ http://www.apache.org/licenses/LICENSE-2.0
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionAM = <cfqueryparam value="#Session.FormInput.AttendSession1#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 								<cfif isDefined("Session.FormInput.AttendSession2")>
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionPM = <cfqueryparam value="#Session.FormInput.AttendSession2#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 							</cfif>
@@ -523,21 +533,21 @@ http://www.apache.org/licenses/LICENSE-2.0
 									<cfquery name="updateRegistration" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										update p_EventRegistration_UserRegistrations
 										Set RequestsMeal = <cfqueryparam value="#FORM.StayForMeal#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 								<cfif isDefined("Session.FormInput.AttendSession1")>
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionAM = <cfqueryparam value="#Session.FormInput.AttendSession1#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 								<cfif isDefined("Session.FormInput.AttendSession2")>
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionPM = <cfqueryparam value="#Session.FormInput.AttendSession2#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 							<cfelse>
@@ -550,14 +560,14 @@ http://www.apache.org/licenses/LICENSE-2.0
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionAM = <cfqueryparam value="#Session.FormInput.AttendSession1#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 								<cfif isDefined("Session.FormInput.AttendSession2")>
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionPM = <cfqueryparam value="#Session.FormInput.AttendSession2#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 							</cfif>
@@ -590,21 +600,21 @@ http://www.apache.org/licenses/LICENSE-2.0
 									<cfquery name="updateRegistration" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										update p_EventRegistration_UserRegistrations
 										Set RequestsMeal = <cfqueryparam value="#FORM.StayForMeal#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 								<cfif isDefined("Session.FormInput.AttendSession1")>
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionAM = <cfqueryparam value="#Session.FormInput.AttendSession1#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 								<cfif isDefined("Session.FormInput.AttendSession2")>
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionPM = <cfqueryparam value="#Session.FormInput.AttendSession2#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 							<cfelse>
@@ -617,14 +627,14 @@ http://www.apache.org/licenses/LICENSE-2.0
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionAM = <cfqueryparam value="#Session.FormInput.AttendSession1#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 								<cfif isDefined("Session.FormInput.AttendSession2")>
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionPM = <cfqueryparam value="#Session.FormInput.AttendSession2#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 							</cfif>
@@ -657,21 +667,21 @@ http://www.apache.org/licenses/LICENSE-2.0
 									<cfquery name="updateRegistration" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										update p_EventRegistration_UserRegistrations
 										Set RequestsMeal = <cfqueryparam value="#FORM.StayForMeal#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 								<cfif isDefined("Session.FormInput.AttendSession1")>
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionAM = <cfqueryparam value="#Session.FormInput.AttendSession1#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 								<cfif isDefined("Session.FormInput.AttendSession2")>
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionPM = <cfqueryparam value="#Session.FormInput.AttendSession2#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 							<cfelse>
@@ -684,14 +694,14 @@ http://www.apache.org/licenses/LICENSE-2.0
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionAM = <cfqueryparam value="#Session.FormInput.AttendSession1#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 								<cfif isDefined("Session.FormInput.AttendSession2")>
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionPM = <cfqueryparam value="#Session.FormInput.AttendSession2#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 							</cfif>
@@ -724,21 +734,21 @@ http://www.apache.org/licenses/LICENSE-2.0
 									<cfquery name="updateRegistration" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										update p_EventRegistration_UserRegistrations
 										Set RequestsMeal = <cfqueryparam value="#FORM.StayForMeal#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 								<cfif isDefined("Session.FormInput.AttendSession1")>
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionAM = <cfqueryparam value="#Session.FormInput.AttendSession1#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 								<cfif isDefined("Session.FormInput.AttendSession2")>
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionPM = <cfqueryparam value="#Session.FormInput.AttendSession2#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 							<cfelse>
@@ -751,14 +761,14 @@ http://www.apache.org/licenses/LICENSE-2.0
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionAM = <cfqueryparam value="#Session.FormInput.AttendSession1#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 								<cfif isDefined("Session.FormInput.AttendSession2")>
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionPM = <cfqueryparam value="#Session.FormInput.AttendSession2#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 							</cfif>
@@ -791,21 +801,21 @@ http://www.apache.org/licenses/LICENSE-2.0
 									<cfquery name="updateRegistration" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										update p_EventRegistration_UserRegistrations
 										Set RequestsMeal = <cfqueryparam value="#FORM.StayForMeal#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 								<cfif isDefined("Session.FormInput.AttendSession1")>
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionAM = <cfqueryparam value="#Session.FormInput.AttendSession1#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 								<cfif isDefined("Session.FormInput.AttendSession2")>
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionPM = <cfqueryparam value="#Session.FormInput.AttendSession2#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 							<cfelse>
@@ -818,14 +828,14 @@ http://www.apache.org/licenses/LICENSE-2.0
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionAM = <cfqueryparam value="#Session.FormInput.AttendSession1#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 								<cfif isDefined("Session.FormInput.AttendSession2")>
 									<cfquery name="updateRegistrationRegisterDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 										Update p_EventRegistration_UserRegistrations
 										Set RegisterForEventSessionPM = <cfqueryparam value="#Session.FormInput.AttendSession2#" cfsqltype="cf_sql_bit">
-										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATED_KEY#" cfsqltype="cf_sql_varchar">
+										Where TContent_ID = <cfqueryparam value="#insertNewRegistration.GENERATEDKEY#" cfsqltype="cf_sql_varchar">
 									</cfquery>
 								</cfif>
 							</cfif>

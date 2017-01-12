@@ -1,0 +1,13 @@
+<div ng-controller="singlePriceController">
+	
+	<form  name="eventPriceForm" novalidate>
+		<formly-form model="eventPrices[0]" fields="priceFields" form="eventPriceForm">
+			<button id="savePriceButton" type="button" ng-click="savePrice(eventPrices[0]);" class="btn btn-primary" ng-disabled="eventPriceForm.$invalid">Save Price</button>
+		</formly-form>
+	</form>
+	<!--
+		Here we need to list the existing option for this option group, and provide an add feature.	
+	-->
+		
+	</div>
+</div>

@@ -1,0 +1,84 @@
+<div ng-controller="eventEditController" ng-init="getStoredTabSelection();">
+
+	<div class="row">
+		<div class="col-sm-12">
+			<h2 class="tab-content-header">{{event.ShortTitle}}</h2>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-12">
+			<uib-tabset active="activeEventTab"
+				
+				>
+
+<uib-tab 
+				
+					
+					ng-click="setActiveTab(0);"
+					select=""
+					ui-sref=".eventinformation({eventid: event.TContent_ID})" 
+					index="0"
+					heading="Event Information"></uib-tab>
+				
+				<uib-tab
+					
+					ng-click="setActiveTab(1);"
+					select =""
+					ng-if="event.TContent_ID != -1" 
+					ui-sref=".eventoptiongroups({eventid: event.TContent_ID, subevent : -1})"
+					index="1"
+					heading="Option Groups"></uib-tab>
+				 
+				 				
+					
+				<uib-tab 
+					
+					ng-click="setActiveTab(2)"
+					select = ""
+					ng-if="event.TContent_ID != -1" 
+					ui-sref=".activities({eventid: event.TContent_ID})" 
+					index="2"
+					heading="Activities"></uib-tab>
+					
+				<uib-tab 
+					
+					ng-click="setActiveTab(3)"
+					select = ""
+					ng-if="event.TContent_ID != -1" 
+					ui-sref=".reporting({eventid: event.TContent_ID})" 
+					index="3"
+					heading="Reporting"></uib-tab>
+					
+			</uib-tabset>	 
+
+
+
+		<!--
+			<li ui-sref=".eventoptiongroups({eventid: event.TContent_ID, subevent : -1})" ui-sref-active="active">
+				<a>Option Groups</a>
+				</li>
+			<li ui-sref=".activities({eventid: event.TContent_ID})" ui-sref-active="active">
+				<a>Activities</a>
+				</li>
+			</ul>
+		-->
+		</div>
+	</div>
+		<div id="tabs-views-events" class="tabs-content-well" data-ui-view></div>
+
+		<!--
+		<div class="row">
+			<div class="col-md-12">	
+				<div class="tabcontent well-lg">	
+					<ui-view></ui-view>
+				</div>
+			</div>
+		</div>
+		-->
+
+
+
+
+
+
+</div>

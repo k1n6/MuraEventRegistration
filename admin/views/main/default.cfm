@@ -14,3 +14,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 	<p>Hello there! Welcome to the Home view of the FW/1's Main section.</p>
 	<p>This is just a FW/1 sub-application. You could create your own admin interface here, or simply provide instructions on how to use your plugin. It's entirely up to you.</p>
 </cfoutput>
+<!---
+here we just send them to the angular admin
+--->
+<cflocation url="/plugins/EventRegistration/angularadmin/##/eventlist" addtoken="false">

@@ -1,0 +1,21 @@
+<div ng-controller="priceListController" ng-show="eventid != -1">
+	<h2>Event Prices</h2>
+	<div ng-if="eventPrices.length == 0"><h2>No Prices Configured For This Event</h2></div>
+	
+	<div class="input-group col-centered custom-list-item " ng-repeat="price in eventPrices">
+		<a  class="form-control"  ui-sref="eventDetails.singleeventprice({eventid: eventid, priceid: price.price_id, subevent : price.subevent})">
+				{{price.price_name}}
+
+		</a>
+		 <span class="input-group-btn">
+			<button id="deletePricebutton" ng-click="deletePrice(price.price_id, $event);" type="button" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span> Delete</button>
+		</span>
+	</div>
+
+		
+
+	<br>
+	<button id="AddAPriceButton" class="btn btn-primary ng-scope" ui-sref="eventDetails.singleeventprice({eventid: eventid, priceid: -1, subevent : subevent})">Add A Price</button>
+
+
+</div>

@@ -1,0 +1,323 @@
+body {
+    opacity: 1 !important;
+    -webkit-transition: opacity 1s ease !important;
+    -moz-transition: opacity 1s ease !important;
+    transition: opacity 1s !important;
+}
+
+.ng-cloak {
+    opacity: 0 !important;
+}
+
+.ng-invalid {
+ 
+}
+
+section {
+    padding-top: 30px !important;
+}
+
+.page-header h1 > small > a {
+    color: #999 !important;
+}
+.page-header h1 > small > a:hover {
+    text-decoration: none !important;
+}
+
+.footer {
+    text-align: center !important;
+    padding: 30px 0 !important;
+    margin-top: 70px !important;
+    border-top: 1px solid #e5e5e5 !important;
+    background-color: #f5f5f5 !important;
+}
+
+.bs-social {
+    margin-top: 20px !important;
+    margin-bottom: 20px !important;
+    text-align: center !important;
+}
+
+@media (min-width: 768px) {
+
+    .bs-social {
+        text-align: left !important;
+    }
+
+}
+
+.nav, .pagination, .carousel, .panel-title a {
+    cursor: pointer !important;
+}
+
+.bs-social-buttons {
+    display: inline-block !important;
+    margin-bottom: 0 !important;
+    padding-left: 0 !important;
+    list-style: none !important;
+}
+.bs-social-buttons li {
+    display: inline-block !important;
+    padding: 5px 8px !important;
+    line-height: 1 !important;
+}
+
+@media (max-width: 767px) {
+
+    .visible-xs.collapse.in {
+        display: block!important;
+    }
+    .visible-xs.collapse {
+        display: none!important;
+    }
+
+}
+
+.navbar-fixed-top .collapse {
+    border-top: 1px solid #e7e7e7 !important;
+    margin-left: -15px !important;
+    margin-right: -15px !important;
+    padding-right: 15px !important;
+    padding-left: 15px !important;
+}
+
+.show-grid {
+  margin-bottom: 15px !important;
+}
+
+/*
+ * Container
+ *
+ * Tweak to width of container.
+ */
+
+/*@media (min-width: 1200px) {
+    .container{
+        max-width: 970px !important;
+    }
+}*/
+
+/*
+ * Tabs
+ *
+ * Tweaks to the Tabs.
+ */
+
+.code .nav-tabs {
+border-bottom: 1px solid #ccc !important;
+}
+
+.code pre, .code code {
+    border-top: none !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+}
+
+.code .nav-tabs>li.active>a, .code .nav-tabs>li.active>a:hover, .code .nav-tabs>li.active>a:focus {
+background-color: #f8f8f8 !important;
+border: 1px solid #ccc !important;
+border-bottom-color: transparent !important;
+}
+
+/*
+ * Button Inverse
+ *
+ * Buttons in the masthead.
+ */
+
+.btn-outline-inverse {
+color: #fff !important;
+background-color: transparent !important;
+border-color: #cdbfe3 !important;
+margin: 10px !important;
+}
+
+@media (min-width: 768px) {
+
+    .btn-outline-inverse {
+        width: auto !important;
+        margin: 20px 5px 20px 0 !important;
+        padding: 18px 24px !important;
+        font-size: 21px !important;
+    }
+
+}
+
+.btn-outline-inverse:hover, .btn-outline-inverse:focus, .btn-outline-inverse:active {
+color: #563d7c !important;
+text-shadow: none !important;
+background-color: #fff !important;
+border-color: #fff !important;
+}
+
+
+/* Page headers */
+.bs-header {
+  padding: 30px 15px 40px !important; /* side padding builds on .container 15px, so 30px */
+  font-size: 16px !important;
+  text-align: center !important;
+  text-shadow: 0 1px 0 rgba(0,0,0,.15) !important;
+  color: #cdbfe3 !important;
+  background-color: #563d7c !important;
+  background-image: url(header.png) !important;
+}
+.bs-header a {
+  color: #fff !important;
+  font-weight: normal !important;
+}
+.bs-header h1 {
+  color: #fff !important;
+}
+.bs-header p {
+  font-weight: 200 !important;
+  line-height: 1.4 !important;
+}
+.bs-header .container {
+  position: relative !important;
+}
+
+@media (min-width: 768px) {
+  .bs-header {
+    font-size: 30px !important;
+    text-align: left !important;
+  }
+  .bs-header h1 {
+    font-size: 100px !important;
+    line-height: 1 !important;
+  }
+}
+
+@media (min-width: 992px) {
+  .bs-header p {
+    margin-right: 25% !important;
+  }
+}
+
+.navbar-inner {
+    -webkit-box-shadow: 0 3px 3px rgba(0,0,0,0.175) !important;
+    box-shadow: 0 3px 3px rgba(0,0,0,0.175) !important;
+}
+
+/*
+ * Side navigation
+ *
+ * Scrollspy and affixed enhanced navigation to highlight sections and secondary
+ * sections of docs content.
+ */
+
+/* By default it's not affixed in mobile views, so undo that */
+.bs-sidebar.affix {
+  position: static !important;
+}
+
+/* First level of nav */
+.bs-sidenav {
+  margin-top: 30px !important;
+  margin-bottom: 30px !important;
+  padding-top:    10px !important;
+  padding-bottom: 10px !important;
+  text-shadow: 0 1px 0 #fff !important;
+  background-color: #f7f5fa !important;
+  border-radius: 5px !important;
+}
+
+/* All levels of nav */
+.bs-sidebar .nav > li > a {
+  display: block !important;
+  color: #716b7a !important;
+  padding: 5px 20px !important;
+}
+.bs-sidebar .nav > li > a:hover,
+.bs-sidebar .nav > li > a:focus {
+  text-decoration: none !important;
+  background-color: #e5e3e9 !important;
+  border-right: 1px solid #dbd8e0 !important;
+}
+.bs-sidebar .nav > .active > a,
+.bs-sidebar .nav > .active:hover > a,
+.bs-sidebar .nav > .active:focus > a {
+  font-weight: bold !important;
+  color: #563d7c !important;
+  background-color: transparent !important;
+  border-right: 1px solid #563d7c !important;
+}
+
+/* Nav: second level (shown on .active) */
+.bs-sidebar .nav .nav {
+  display: none !important; /* Hide by default, but at >768px, show it */
+  margin-bottom: 8px !important;
+}
+.bs-sidebar .nav .nav > li > a {
+  padding-top:    3px !important;
+  padding-bottom: 3px !important;
+  padding-left: 30px !important;
+  font-size: 90% !important;
+}
+
+/* Show and affix the side nav when space allows it */
+@media (min-width: 992px) {
+  .bs-sidebar .nav > .active > ul {
+    display: block !important;
+  }
+  /* Widen the fixed sidebar */
+  .bs-sidebar.affix,
+  .bs-sidebar.affix-bottom {
+    width: 213px !important;
+  }
+  .bs-sidebar.affix {
+    position: fixed !important; /* Undo the static from mobile first approach */
+    top: 80px !important;
+  }
+  .bs-sidebar.affix-bottom {
+    position: absolute !important; /* Undo the static from mobile first approach */
+  }
+  .bs-sidebar.affix-bottom .bs-sidenav,
+  .bs-sidebar.affix .bs-sidenav {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
+@media (min-width: 1200px) {
+  /* Widen the fixed sidebar again */
+  .bs-sidebar.affix-bottom,
+  .bs-sidebar.affix {
+    width: 263px !important;
+  }
+}
+
+
+/* Not enough room on mobile for markup tab, js tab, and plunk btn.
+  And no one cares about plunk button on a phone anyway */
+@media only screen and (max-device-width: 480px) {
+    #plunk-btn {
+        display: none !important;
+    }
+}
+
+.navbar-nav .dropdown .navbar-brand {
+    max-width: 100% !important;
+    margin-right: inherit !important;
+    margin-left: inherit !important;
+}
+
+.header-placeholder {
+    height: 50px !important;
+}
+
+@media screen and (min-width: 768px) {
+
+    .dropdown.open > .navbar-brand + .dropdown-menu {
+        left: 10px !important;
+    }
+
+    .header-placeholder {
+        height: 50px !important;
+    }
+
+    .navbar-nav .dropdown .navbar-brand {
+        max-width: 200px !important;
+        margin-right: 5px !important;
+        margin-left: 10px !important;
+    }
+
+}

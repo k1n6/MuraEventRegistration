@@ -32,6 +32,22 @@ component accessors=true output=false {
 
   property name='secret' default='';
 
+
+ private struct function get$() {
+		if ( !StructKeyExists(arguments, '$') ) {
+			var siteid = StructKeyExists(session, 'siteid') ? session.siteid : 'default';
+
+			arguments.$ = StructKeyExists(request, 'murascope')
+				? request.murascope
+				: StructKeyExists(application, 'serviceFactory')
+					? application.serviceFactory.getBean('$').init(siteid)
+					: {};
+		}
+
+		return arguments.$;
+	}
+	$ = get$();
+
   this._signupUrl='https://www.google.com/recaptcha/admin';
   this._siteVerifyUrl='https://www.google.com/recaptcha/api/siteverify?';
 
@@ -46,7 +62,7 @@ component accessors=true output=false {
     };
 
     var httpSvc = new http(method='post', charset='utf-8', url=this._siteVerifyUrl);
-    httpSvc.addParam(type='formfield', name='secret', value="6Le6hw0UAAAAAMfQXFE5H3AJ4PnGmADX9v468d93");
+    httpSvc.addParam(type='formfield', name='secret', value="#$.siteConfig('recaptchasecret')#");
     httpSvc.addParam(type='formfield', name='remoteip', value=arguments.remoteip);
     httpSvc.addParam(type='formfield', name='response', value=arguments.response);
 

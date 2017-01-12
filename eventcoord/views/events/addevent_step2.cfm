@@ -8,6 +8,13 @@ Licensed under the Apache License, Version v2.0
 http://www.apache.org/licenses/LICENSE-2.0
 
 --->
+<cfset YesNoQuery = QueryNew("ID,OptionName", "Integer,VarChar")>
+<cfset temp = QueryAddRow(YesNoQuery, 1)>
+<cfset temp = #QuerySetCell(YesNoQuery, "ID", 0)#>
+<cfset temp = #QuerySetCell(YesNoQuery, "OptionName", "No")#>
+<cfset temp = QueryAddRow(YesNoQuery, 1)>
+<cfset temp = #QuerySetCell(YesNoQuery, "ID", 1)#>
+<cfset temp = #QuerySetCell(YesNoQuery, "OptionName", "Yes")#>
 </cfsilent>
 <cfoutput>
 	<script>
@@ -50,6 +57,39 @@ http://www.apache.org/licenses/LICENSE-2.0
 				$('##NonMemberCost').blur(function() {
 					$('##NonMemberCost').formatCurrency();
 				});
+
+				$('##MealCost').blur(function() {
+					$('##MealCost').formatCurrency();
+				});
+
+				$('##EarlyBird_NonMemberCost').blur(function() {
+					$('##EarlyBird_NonMemberCost').formatCurrency();
+				});
+
+				$('##EarlyBird_Member').blur(function() {
+					$('##EarlyBird_Member').formatCurrency();
+				});
+
+				$('##GroupMemberCost').blur(function() {
+					$('##GroupMemberCost').formatCurrency();
+				});
+
+				$('##GroupNonMemberCost').blur(function() {
+					$('##GroupNonMemberCost').formatCurrency();
+				});
+
+				$('##VideoConferenceCost').blur(function() {
+					$('##VideoConferenceCost').formatCurrency();
+				});
+
+				$('##WebinarMemberCost').blur(function() {
+					$('##WebinarMemberCost').formatCurrency();
+				});
+
+				$('##WebinarNonMemberCost').blur(function() {
+					$('##WebinarNonMemberCost').formatCurrency();
+				});
+
 			});
 
 	</script>
@@ -60,9 +100,9 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfinput type="hidden" name="formSubmit" value="true">
 				<div class="panel-body">
 					<fieldset>
-						<legend><h2>Add New Event or Workshop - Step 2</h2></legend>
+						<legend><h2>Step 2 of 5 - Add New Event</h2></legend>
 					</fieldset>
-					<div class="alert alert-info">This is Step 2 of the New Workshop or Event Creation Process. Please complete this information and click the button below to move to the next screen.</div>
+					<div class="alert alert-info">Please complete any additional information and click the Proceed Button Below to continue.</div>
 					<cfif Session.UserSuppliedInfo.FirstStep.EventSpanDates EQ 1>
 						<fieldset>
 							<legend><h2>Additional Dates for Event or Workshop</h2></legend>
@@ -143,11 +183,11 @@ http://www.apache.org/licenses/LICENSE-2.0
 						</div>
 						<div class="form-group">
 							<label for="EarlyBird_Member" class="control-label col-sm-3">EarlyBird Member Pricing:&nbsp;<span style="Color: Red;" class="glyphicon glyphicon-star"></label>
-							<div class="col-sm-8"><cfinput type="text" class="form-control" id="EarlyBird_Member" name="EarlyBird_Member" required="yes"></div>
+							<div class="col-sm-8"><cfinput type="text" class="form-control" id="EarlyBird_Member" value="0.00" name="EarlyBird_Member" required="yes"></div>
 						</div>
 						<div class="form-group">
 							<label for="EarlyBird_NonMemberCost" class="control-label col-sm-3">EarlyBird NonMember Pricing:&nbsp;<span style="Color: Red;" class="glyphicon glyphicon-star"></label>
-							<div class="col-sm-8"><cfinput type="text" class="form-control" id="EarlyBird_NonMemberCost" name="EarlyBird_NonMemberCost" required="yes"></div>
+							<div class="col-sm-8"><cfinput type="text" class="form-control" id="EarlyBird_NonMemberCost" value="0.00" name="EarlyBird_NonMemberCost" required="yes"></div>
 						</div>
 					</cfif>
 					<cfif Session.UserSuppliedInfo.FirstStep.ViewGroupPricing EQ 1 and Session.UserSuppliedInfo.FirstStep.WebinarEvent EQ 0>
@@ -160,11 +200,11 @@ http://www.apache.org/licenses/LICENSE-2.0
 						</div>
 						<div class="form-group">
 							<label for="GroupMemberCost" class="control-label col-sm-3">Group Member Pricing:&nbsp;<span style="Color: Red;" class="glyphicon glyphicon-star"></label>
-							<div class="col-sm-8"><cfinput type="text" class="form-control" id="GroupMemberCost" name="GroupMemberCost" required="yes"></div>
+							<div class="col-sm-8"><cfinput type="text" class="form-control" id="GroupMemberCost" name="GroupMemberCost" value="0.00" required="yes"></div>
 						</div>
 						<div class="form-group">
 							<label for="GroupNonMemberCost" class="control-label col-sm-3">Group NonMember Pricing:&nbsp;<span style="Color: Red;" class="glyphicon glyphicon-star"></label>
-							<div class="col-sm-8"><cfinput type="text" class="form-control" id="GroupNonMemberCost" name="GroupNonMemberCost" required="yes"></div>
+							<div class="col-sm-8"><cfinput type="text" class="form-control" id="GroupNonMemberCost" name="GroupNonMemberCost" value="0.00" required="yes"></div>
 						</div>
 					</cfif>
 					<cfif Session.UserSuppliedInfo.FirstStep.PGPAvailable EQ 1>
@@ -176,10 +216,18 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<div class="col-sm-8"><cfinput type="text" class="form-control" id="PGPPoints" name="PGPPoints" required="yes"></div>
 						</div>
 					</cfif>
-					<cfif Session.UserSuppliedInfo.FirstStep.MealProvided EQ 1 and Session.UserSuppliedInfo.FirstStep.WebinarEvent EQ 0>
+					<cfif Session.UserSuppliedInfo.FirstStep.MealAvailable EQ 1 and Session.UserSuppliedInfo.FirstStep.WebinarEvent EQ 0>
 						<fieldset>
-							<legend><h2>Caterer Information</h2></legend>
+							<legend><h2>Meal Information</h2></legend>
 						</fieldset>
+						<div class="form-group">
+							<label for="MealIncluded" class="control-label col-sm-3">Meal Included in Registration:&nbsp;<span style="Color: Red;" class="glyphicon glyphicon-star"></label>
+							<div class="col-sm-8">
+								<cfselect name="MealIncluded" class="form-control" Required="Yes" Multiple="No" query="YesNoQuery" value="ID" Display="OptionName"  queryposition="below">
+									<option value="----">Is Meal Price included in Registration Fee</option>
+								</cfselect>
+							</div>
+						</div>
 						<div class="form-group">
 							<label for="MealProvidedBy" class="control-label col-sm-3">Provided By:&nbsp;<span style="Color: Red;" class="glyphicon glyphicon-star"></label>
 							<div class="col-sm-8">
@@ -187,6 +235,14 @@ http://www.apache.org/licenses/LICENSE-2.0
 									<option value="----">Select Who Provides Meal</option>
 								</cfselect>
 							</div>
+						</div>
+						<div class="form-group">
+							<label for="MealCost" class="control-label col-sm-3">Meal Cost:&nbsp;<span style="Color: Red;" class="glyphicon glyphicon-star"></label>
+							<div class="col-sm-8"><cfinput type="text" class="form-control" id="MealCost" name="MealCost" value="0.00" required="yes"></div>
+						</div>
+						<div class="form-group">
+							<label for="MealInformation" class="control-label col-sm-3">Meal Information:&nbsp;<span style="Color: Red;" class="glyphicon glyphicon-star"></label>
+							<div class="col-sm-8"><textarea name="MealInformation" id="MealInformation" class="form-control"></textarea></div>
 						</div>
 					</cfif>
 					<cfif Session.UserSuppliedInfo.FirstStep.AllowVideoConference EQ 1 and Session.UserSuppliedInfo.FirstStep.WebinarEvent EQ 0>
@@ -256,7 +312,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				</div>
 				<div class="panel-footer">
 					<cfinput type="Submit" name="AddNewEventStep" class="btn btn-primary pull-left" value="Back to Step 1">
-					<cfinput type="Submit" name="AddNewEventStep" class="btn btn-primary pull-right" value="Add Event - Step 3"><br /><br />
+					<cfinput type="Submit" name="AddNewEventStep" class="btn btn-primary pull-right" value="Proceed to Step 3"><br /><br />
 				</div>
 			</cfform>
 		</div>
@@ -274,9 +330,9 @@ http://www.apache.org/licenses/LICENSE-2.0
 				</cfif>
 				<div class="panel-body">
 					<fieldset>
-						<legend><h2>Add New Event or Workshop - Step 2</h2></legend>
+						<legend><h2>Step 2 of 5 - Add New Event</h2></legend>
 					</fieldset>
-					<div class="alert alert-info">This is Step 2 of the New Workshop or Event Creation Process. Please complete this information and click the button below to move to the next screen.</div>
+					<div class="alert alert-info">Please complete any additional information and click the Proceed Button Below to continue.</div>
 					<cfif Session.UserSuppliedInfo.FirstStep.EventSpanDates EQ 1>
 						<fieldset>
 							<legend><h2>Additional Dates for Event or Workshop</h2></legend>
@@ -426,17 +482,35 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<div class="col-sm-8"><cfinput type="text" class="form-control" id="PGPPoints" name="PGPPoints" value="#Session.UserSuppliedInfo.SecondStep.PGPPoints#" required="yes"></div>
 						</div>
 					</cfif>
-					<cfif Session.UserSuppliedInfo.FirstStep.MealProvided EQ 1 and Session.UserSuppliedInfo.FirstStep.WebinarEvent EQ 0>
+					<cfif Session.UserSuppliedInfo.FirstStep.MealAvailable EQ 1 and Session.UserSuppliedInfo.FirstStep.WebinarEvent EQ 0>
 						<fieldset>
-							<legend><h2>Caterer Information</h2></legend>
+							<legend><h2>Meal Information</h2></legend>
 						</fieldset>
+						<div class="form-group">
+							<label for="MealIncluded" class="control-label col-sm-3">Meal Included in Registration:&nbsp;<span style="Color: Red;" class="glyphicon glyphicon-star"></label>
+							<div class="col-sm-8">
+								<cfif isDefined("Session.UserSuppliedInfo.SecondStep.MealIncluded")>
+									<cfselect name="MealIncluded" class="form-control" Required="Yes" Multiple="No" query="YesNoQuery" value="ID" Display="OptionName" selected="#Session.UserSuppliedInfo.SecondStep.MealIncluded#" queryposition="below">
+										<option value="----">Is Meal Price included in Registration Fee</option>
+									</cfselect>
+								<cfelse>
+									<cfselect name="MealIncluded" class="form-control" Required="Yes" Multiple="No" query="YesNoQuery" value="ID" Display="OptionName" queryposition="below">
+										<option value="----">Is Meal Price included in Registration Fee</option>
+									</cfselect>
+								</cfif>
+							</div>
+						</div>
 						<div class="form-group">
 							<label for="MealProvidedBy" class="control-label col-sm-3">Provided By:&nbsp;<span style="Color: Red;" class="glyphicon glyphicon-star"></label>
 							<div class="col-sm-8">
-								<cfselect name="MealProvidedBy" class="form-control" Required="Yes" Multiple="No" query="Session.getCatererInformation" selected="#Session.UserSuppliedInfo.SecondStep.MealProvidedBy#" value="TContent_ID" Display="FacilityName"  queryposition="below">
+								<cfselect name="MealProvidedBy" class="form-control" Required="Yes" Multiple="No" query="Session.getCatererInformation" value="TContent_ID" Display="FacilityName" selected="#Session.UserSuppliedInfo.SecondStep.MealProvidedBy#" queryposition="below">
 									<option value="----">Select Who Provides Meal</option>
 								</cfselect>
 							</div>
+						</div>
+						<div class="form-group">
+							<label for="MealCost" class="control-label col-sm-3">Meal Cost:&nbsp;<span style="Color: Red;" class="glyphicon glyphicon-star"></label>
+							<div class="col-sm-8"><cfinput type="text" class="form-control" id="MealCost" name="MealCost" value="#Session.UserSuppliedInfo.SecondStep.MealCost#" required="yes"></div>
 						</div>
 					</cfif>
 					<cfif Session.UserSuppliedInfo.FirstStep.AllowVideoConference EQ 1 and Session.UserSuppliedInfo.FirstStep.WebinarEvent EQ 0>
@@ -491,7 +565,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				</div>
 				<div class="panel-footer">
 					<cfinput type="Submit" name="AddNewEventStep" class="btn btn-primary pull-left" value="Back to Step 1">
-					<cfinput type="Submit" name="AddNewEventStep" class="btn btn-primary pull-right" value="Add Event - Step 3"><br /><br />
+					<cfinput type="Submit" name="AddNewEventStep" class="btn btn-primary pull-right" value="Proceed to Step 3"><br /><br />
 				</div>
 			</cfform>
 		</div>

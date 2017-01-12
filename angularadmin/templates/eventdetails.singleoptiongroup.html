@@ -1,0 +1,42 @@
+<div ng-controller="singleOptionGroupController">
+	<div optionoractivityname eventid="eventid" subevent="subevent"></div>
+	<form  name="optionGroupForm" novalidate>
+		<formly-form model="eventOptionGroups[0]" fields="optionGroupFields" form="optionGroupForm">
+			<button type="button" ng-click="saveOptionGroup(eventOptionGroups[0]);" class="deleteOptionGroupButton btn btn-primary" ng-disabled="eventForm.$invalid">Save Option Group</button>
+		</formly-form>
+	</form>
+	<!--
+		Here we need to list the existing option for this option group, and provide an add feature.	
+	-->
+	<div ng-if="optiongroup != -1">
+		<h2>Options</h2>
+		<p>If you define options below the user will select one from a multi-select menu for this option group.</p>
+		
+		<div ng-if="eventOptions.length > 0" class="input-group col-centered custom-list-item " ng-repeat="option in eventOptions">
+			<a  class="form-control"  
+					ui-sref=".singleoption({eventid: option.eventid, optiongroupid: option.optiongroupid, subevent : option.subevent, optionid: option.option_id})">
+					{{option.name}}
+
+			</a>
+			 <span class="input-group-btn">
+				<button ng-click="deleteOption(option.option_id, $event);" type="button" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span> Delete</button>
+			</span>
+		</div>
+	
+					
+		<div ng-if="eventOptions.length <= 0">
+			No Options Defined For This Group.<br /><br />
+		</div>
+		<button 
+			id="AddAnOptionButton"
+			class="btn btn-primary ng-scope addAnOptionButton" 
+			ng-click="hmmm();"
+			ui-sref="eventDetails.singleoptiongroup.singleoption({eventid: eventid, optiongroup: eventOptionGroups[0].optiongroupid, subevent : subevent, optionid: -1})">Add An Option</button>
+		<ui-view  autoscroll="true"></ui-view>
+
+		
+
+		
+		
+	</div>
+</div>

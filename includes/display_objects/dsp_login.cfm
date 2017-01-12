@@ -65,6 +65,8 @@
 	<cfif not isBoolean(variables.$.event('isBlocked'))>
 		<cfset variables.$.event('isBlocked',false)>
 	</cfif>
+	ABorting  in plugin's login file.
+	<cfabort>
 	<cfoutput>
 		<div id="svLoginContainer" class="mura-login-container #this.loginWrapperClass#">
 			<div class="#this.loginWrapperInnerClass#">

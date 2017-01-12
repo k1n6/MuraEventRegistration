@@ -1,0 +1,12 @@
+<div ng-controller="singleOptionController">
+	<h2 ng-if="optionid != -1">Edit An Option</h2>
+	<h2 ng-if="optionid == -1">Add An Option</h2>
+
+	<form  name="optionForm" novalidate>
+		<formly-form model="eventOptions[0]" fields="optionFields" form="optionForm">
+			<button id="saveOptionButton" type="button" ng-click="saveOption(eventOptions[0]);" class="btn btn-primary" ng-disabled="optionForm.$invalid">Save Option</button>
+		</formly-form>
+	</form>
+
+
+</div>

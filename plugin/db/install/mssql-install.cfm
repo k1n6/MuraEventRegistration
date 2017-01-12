@@ -1,4 +1,5 @@
-<cfquery name="Create-p_EventRegistration_Caterers" datasource="#application.configBean.getDatasource()#" username="#application.configBean.getDBUsername()#" password="#application.configBean.getDBPassword()#">
+<!---
+ <cfquery name="Create-p_EventRegistration_Caterers" datasource="#application.configBean.getDatasource()#" username="#application.configBean.getDBUsername()#" password="#application.configBean.getDBPassword()#">
 	CREATE TABLE [dbo].[p_EventRegistration_Caterers](
 		[TContent_ID] [int] IDENTITY (1, 1) NOT NULL, [Site_ID] [nvarchar] (25) NOT NULL, [FacilityName] [nvarchar](50) NOT NULL, [PhysicalAddress] [nvarchar](max) NOT NULL,
 		[PhysicalCity] [nvarchar](50) NOT NULL, [PhysicalState] [nvarchar](50) NOT NULL, [PhysicalZipCode] [nvarchar](10) NOT NULL, [PhysicalZip4] [nvarchar](10) NULL,
@@ -227,6 +228,10 @@
 	From tusers
 	Where GroupName LIKE '%Event%'
 </cfquery>
+
+--->
+
+
 <cfif CheckGroups.RecordCount EQ 0>
 	<cfscript>
 		var NewGroupEventFacilitator = #application.userManager.read("")#;
@@ -276,3 +281,5 @@
 		</cfscript>
 	</cfif>
 </cfif>
+
+

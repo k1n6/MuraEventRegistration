@@ -282,7 +282,8 @@ component persistent="false" accessors="true" output="false" extends="includes.f
 		}
 
 		public boolean function isAdminRequest() {
-			return StructKeyExists(request, 'context') && ListFirst(request.context[variables.framework.action], ':') == 'admin' ? true : false;
+			return false;
+			//return StructKeyExists(request, 'context') && ListFirst(request.context[variables.framework.action], ':') == 'admin' ? true : false;
 		}
 
 		public boolean function isFrontEndRequest() {

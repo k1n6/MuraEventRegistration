@@ -8,6 +8,25 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 */
 <cfcomponent output="false" persistent="false" accessors="true">
+
+		<cfscript>
+		 private struct function get$() {
+				if ( !StructKeyExists(arguments, '$') ) {
+					var siteid = StructKeyExists(session, 'siteid') ? session.siteid : 'default';
+
+					arguments.$ = StructKeyExists(request, 'murascope')
+						? request.murascope
+						: StructKeyExists(application, 'serviceFactory')
+							? application.serviceFactory.getBean('$').init(siteid)
+							: {};
+				}
+
+				return arguments.$;
+			}
+			$ = this.get$();
+		</cfscript>
+
+
 	<cffunction name="activateaccount" returntype="any" output="false">
 		<cfargument name="rc" required="true" type="struct" default="#StructNew()#">
 
@@ -95,7 +114,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 			</cfif>
 
 			<cfif StructKeyExists(form, 'g-recaptcha-response')>
-				<cfset CheckCaptcha = #GoogleReCaptchaCFC.verifyResponse(secret='6Le6hw0UAAAAAMfQXFE5H3AJ4PnGmADX9v468d93',response=form['g-recaptcha-response'], remoteip=cgi.remote_add)#>
+				<cfset CheckCaptcha = #GoogleReCaptchaCFC.verifyResponse(secret='#$.siteConfig('recaptchasecret')#',response=form['g-recaptcha-response'], remoteip=cgi.remote_add)#>
 				<cfif CheckCaptcha.success EQ "false">
 					<cfscript>
 						InvalidPassword = {property="VerifyPassword",message="We have detected that the form was completed by a Computer Robot. We ask that this form be completed by a human being."};

@@ -12,6 +12,33 @@ http://www.apache.org/licenses/LICENSE-2.0
 		<cfargument name="rc" required="true" type="struct" default="#StructNew()#">
 	</cffunction>
 
+	<cffunction name="eventattendedsheet" returntype="any" output="false">
+		<cfargument name="rc" required="true" type="struct" default="#StructNew()#">
+		<cfquery name="Session.getSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
+			Select ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4,
+				MemberCost, NonMemberCost, EarlyBird_RegistrationAvailable, EarlyBird_RegistrationDeadline, EarlyBird_MemberCost, EarlyBird_NonMemberCost, ViewSpecialPricing, eEvents.SpecialPriceRequirements, SpecialMemberCost, SpecialNonMemberCost, VideoConferenceCost, WebinarMemberCost, WebinarNonMemberCost
+			From eEvents
+			Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
+				TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
+		</cfquery>
+
+		<cfquery name="Session.getAttendedParticipants" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
+			SELECT eRegistrations.TContent_ID, eRegistrations.RequestsMeal, eRegistrations.IVCParticipant, eRegistrations.RegistrationDate, eRegistrations.AttendeePrice, eRegistrations.AttendedEvent, eRegistrations.AttendeePriceVerified, eRegistrations.AttendeePrice as CostToAttend, tusers.Fname, tusers.Lname, tusers.Company, tusers.Email, SUBSTRING_INDEX(tusers.Email,"@",-1) AS Domain, eEvents.ShortTitle, Date_FORMAT(eEvents.EventDate, "%a, %M %d, %Y") as EventDateFormat
+			FROM eRegistrations INNER JOIN tusers ON tusers.UserID = eRegistrations.User_ID INNER JOIN eEvents ON eEvents.TContent_ID = eRegistrations.EventID
+			WHERE eRegistrations.EventID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer"> and
+				eRegistrations.Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
+				eRegistrations.AttendedEvent = <cfqueryparam value="1" cfsqltype="cf_sql_bit">
+			ORDER BY Domain ASC, tusers.Lname ASC, tusers.Fname ASC
+		</cfquery>
+
+		<cfquery name="Session.getEventIncomeFromOtherParty" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
+			Select Event_TotalIncomeFromOtherParty
+			From eEventsMatrix
+			Where Event_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
+		</cfquery>
+
+	</cffunction>
+
 	<cffunction name="addevent" returntype="any" output="true">
 		<cfargument name="rc" required="true" type="struct" default="#StructNew()#">
 
@@ -40,7 +67,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfif isDefined("FORM.EarlyBird_RegistrationAvailable")><cfset Session.UserSuppliedInfo.EarlyBird_RegistrationAvailable = #FORM.EarlyBird_RegistrationAvailable#></cfif>
 				<cfif isDefined("FORM.ViewSpecialPricing")><cfset Session.UserSuppliedInfo.ViewSpecialPricing = #FORM.ViewSpecialPricing#></cfif>
 				<cfif isDefined("FORM.PGPAvailable")><cfset Session.UserSuppliedInfo.PGPAvailable = #FORM.PGPAvailable#></cfif>
-				<cfif isDefined("FORM.MealProvided")><cfset Session.UserSuppliedInfo.MealProvided = #FORM.MealProvided#></cfif>
+				<cfif isDefined("FORM.MealAvailable")><cfset Session.UserSuppliedInfo.MealAvailable = #FORM.MealAvailable#></cfif>
 				<cfif isDefined("FORM.AllowVideoConference")><cfset Session.UserSuppliedInfo.AllowVideoConference = #FORM.AllowVideoConference#></cfif>
 				<cfif isDefined("FORM.WebinarEvent")><cfset Session.UserSuppliedInfo.WebinarEvent = #FORM.WebinarEvent#></cfif>
 				<cfif isDefined("FORM.PostEventToFB")><cfset Session.UserSuppliedInfo.PostEventToFB = #FORM.PostEventToFB#></cfif>
@@ -113,7 +140,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 			<cflock timeout="60" scope="Session" type="Exclusive">
 				<cfif Session.UserSuppliedInfo.WebinarEvent EQ 0>
-					<cfif Session.UserSuppliedInfo.MealProvided EQ 1>
+					<cfif Session.UserSuppliedInfo.MealAvailable EQ 1>
 						<cfif Session.UserSuppliedInfo.MealProvidedBy EQ 0>
 							<cfscript>
 								errormsg = {property="MealProvidedBy",message="Please Select a Caterer for this meal's event"};
@@ -259,8 +286,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 			<cftry>
 				<cfquery name="insertNewEvent" result="insertNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-					Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealProvided, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active)
-					Values ("#rc.$.siteConfig('siteID')#", "#Session.UserSuppliedInfo.ShortTitle#", #CreateDate(ListLast(Session.UserSuppliedInfo.EventDate, "/"), ListFirst(Session.UserSuppliedInfo.EventDate, "/"), ListGetAt(Session.UserSuppliedInfo.EventDate, 2, "/"))#, "#Session.UserSuppliedInfo.LongDescription#", #Variables.EventStartTimeObject#, #Variables.EventEndTimeObject#, #CreateDate(ListLast(Session.UserSuppliedInfo.Registration_Deadline, "/"), ListFirst(Session.UserSuppliedInfo.Registration_Deadline, "/"), ListGetAt(Session.UserSuppliedInfo.Registration_Deadline, 2, "/"))#, #Variables.EventRegistrationEndTimeObject#, #Session.UserSuppliedInfo.EventFeatured#, #Session.UserSuppliedInfo.EarlyBird_RegistrationAvailable#, #Session.UserSuppliedInfo.ViewSpecialPricing#, #Session.UserSuppliedInfo.PGPAvailable#, #Session.UserSuppliedInfo.MealProvided#, #Session.UserSuppliedInfo.AllowVideoConference#, #Session.UserSuppliedInfo.AcceptRegistrations#, "#Session.UserSuppliedInfo.Facilitator#", #Now()#, #Session.UserSuppliedInfo.RoomMaxParticipants#, #FORM.Active# )
+					Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active)
+					Values ("#rc.$.siteConfig('siteID')#", "#Session.UserSuppliedInfo.ShortTitle#", #CreateDate(ListLast(Session.UserSuppliedInfo.EventDate, "/"), ListFirst(Session.UserSuppliedInfo.EventDate, "/"), ListGetAt(Session.UserSuppliedInfo.EventDate, 2, "/"))#, "#Session.UserSuppliedInfo.LongDescription#", #Variables.EventStartTimeObject#, #Variables.EventEndTimeObject#, #CreateDate(ListLast(Session.UserSuppliedInfo.Registration_Deadline, "/"), ListFirst(Session.UserSuppliedInfo.Registration_Deadline, "/"), ListGetAt(Session.UserSuppliedInfo.Registration_Deadline, 2, "/"))#, #Variables.EventRegistrationEndTimeObject#, #Session.UserSuppliedInfo.EventFeatured#, #Session.UserSuppliedInfo.EarlyBird_RegistrationAvailable#, #Session.UserSuppliedInfo.ViewSpecialPricing#, #Session.UserSuppliedInfo.PGPAvailable#, #Session.UserSuppliedInfo.MealAvailable#, #Session.UserSuppliedInfo.AllowVideoConference#, #Session.UserSuppliedInfo.AcceptRegistrations#, "#Session.UserSuppliedInfo.Facilitator#", #Now()#, #Session.UserSuppliedInfo.RoomMaxParticipants#, #FORM.Active# )
 				</cfquery>
 
 				<cfquery name="updateEventLocationInfo" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
@@ -270,7 +297,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						LocationRoomID = #Session.UserSuppliedInfo.LocationRoomID#,
 						MemberCost = "#NumberFormat(Session.UserSuppliedInfo.MemberCost, '9999.99')#",
 						NonMemberCost = "#NumberFormat(Session.UserSuppliedInfo.NonMemberCost, '9999.99')#"
-					Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+					Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 				</cfquery>
 
 				<cfif isDefined("Session.UserSuppliedInfo.EventDate1")>
@@ -278,7 +305,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfquery name="updateEventDate1" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 							Update eEvents
 							Set EventDate1 = #CreateDate(ListLast(Session.UserSuppliedInfo.EventDate1, "/"), ListFirst(Session.UserSuppliedInfo.EventDate1, "/"), ListGetAt(Session.UserSuppliedInfo.EventDate1, 2, "/"))#
-							Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+							Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
 					</cfif>
 				</cfif>
@@ -288,7 +315,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfquery name="updateEventDate2" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 							Update eEvents
 							Set EventDate2 = #CreateDate(ListLast(Session.UserSuppliedInfo.EventDate2, "/"), ListFirst(Session.UserSuppliedInfo.EventDate2, "/"), ListGetAt(Session.UserSuppliedInfo.EventDate2, 2, "/"))#
-							Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+							Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
 					</cfif>
 				</cfif>
@@ -298,7 +325,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfquery name="updateEventDate3" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 							Update eEvents
 							Set EventDate3 = #CreateDate(ListLast(Session.UserSuppliedInfo.EventDate3, "/"), ListFirst(Session.UserSuppliedInfo.EventDate3, "/"), ListGetAt(Session.UserSuppliedInfo.EventDate3, 2, "/"))#
-							Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+							Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
 					</cfif>
 				</cfif>
@@ -308,7 +335,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfquery name="updateEventDate4" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 							Update eEvents
 							Set EventDate4 = #CreateDate(ListLast(Session.UserSuppliedInfo.EventDate4, "/"), ListFirst(Session.UserSuppliedInfo.EventDate4, "/"), ListGetAt(Session.UserSuppliedInfo.EventDate4, 2, "/"))#
-							Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+							Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
 					</cfif>
 				</cfif>
@@ -318,7 +345,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfquery name="updateEventDate5" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 							Update eEvents
 							Set EventDate5 = #CreateDate(ListLast(Session.UserSuppliedInfo.EventDate5, "/"), ListFirst(Session.UserSuppliedInfo.EventDate5, "/"), ListGetAt(Session.UserSuppliedInfo.EventDate5, 2, "/"))#
-							Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+							Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
 					</cfif>
 				</cfif>
@@ -328,7 +355,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfquery name="updateEventAgenda" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 							Update eEvents
 							Set EventAgenda = <cfqueryparam value="#Session.UserSuppliedInfo.EventAgenda#" cfsqltype="cf_sql_varchar">
-							Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+							Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
 					</cfif>
 				</cfif>
@@ -338,7 +365,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfquery name="updateEventAgenda" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 							Update eEvents
 							Set EventTargetAudience = <cfqueryparam value="#Session.UserSuppliedInfo.EventTargetAudience#" cfsqltype="cf_sql_varchar">
-							Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+							Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
 					</cfif>
 				</cfif>
@@ -348,7 +375,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfquery name="updateEventAgenda" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 							Update eEvents
 							Set EventStrategies = <cfqueryparam value="#Session.UserSuppliedInfo.EventStrategies#" cfsqltype="cf_sql_varchar">
-							Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+							Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
 					</cfif>
 				</cfif>
@@ -358,7 +385,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfquery name="updateEventAgenda" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 							Update eEvents
 							Set EventSpecialInstructions = <cfqueryparam value="#Session.UserSuppliedInfo.EventSpecialInstructions#" cfsqltype="cf_sql_varchar">
-							Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+							Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
 					</cfif>
 				</cfif>
@@ -369,7 +396,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						Set Featured_StartDate = #CreateDate(ListLast(Session.UserSuppliedInfo.Featured_StartDate, "/"), ListFirst(Session.UserSuppliedInfo.Featured_StartDate, "/"), ListGetAt(Session.UserSuppliedInfo.Featured_StartDate, 2, "/"))#,
 							Featured_EndDate = #CreateDate(ListLast(Session.UserSuppliedInfo.Featured_EndDate, "/"), ListFirst(Session.UserSuppliedInfo.Featured_EndDate, "/"), ListGetAt(Session.UserSuppliedInfo.Featured_EndDate, 2, "/"))#,
 							Featured_SortOrder = <cfqueryparam value="#Session.UserSuppliedInfo.Featured_SortOrder#" cfsqltype="cf_sql_integer">
-						Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+						Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 					</cfquery>
 				</cfif>
 
@@ -380,7 +407,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							EarlyBird_RegistrationDeadline = #CreateDate(ListLast(Session.UserSuppliedInfo.EarlyBird_RegistrationDeadline, "/"), ListFirst(Session.UserSuppliedInfo.EarlyBird_RegistrationDeadline, "/"), ListGetAt(Session.UserSuppliedInfo.EarlyBird_RegistrationDeadline, 2, "/"))#,
 							EarlyBird_MemberCost = "#Session.UserSuppliedInfo.EarlyBird_MemberCost#",
 							EarlyBird_NonMemberCost = "#Session.UserSuppliedInfo.EarlyBird_NonMemberCost#"
-						Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+						Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 					</cfquery>
 				</cfif>
 
@@ -391,7 +418,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							SpecialMemberCost = "#Session.UserSuppliedInfo.SpecialMemberCost#",
 							SpecialNonMemberCost = "#Session.UserSuppliedInfo.SpecialNonMemberCost#",
 							SpecialPriceRequirements = "#Session.UserSuppliedInfo.SpecialPriceRequirements#"
-						Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+						Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 					</cfquery>
 				</cfif>
 
@@ -400,16 +427,16 @@ http://www.apache.org/licenses/LICENSE-2.0
 						Update eEvents
 						Set PGPAvailable = <cfqueryparam value="#Session.UserSuppliedInfo.PGPAvailable#" cfsqltype="cf_sql_bit">,
 							PGPPoints = <cfqueryparam value="#Session.UserSuppliedInfo.PGPPoints#" cfsqltype="cf_sql_DECIMAL">
-						Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+						Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 					</cfquery>
 				</cfif>
 
-				<cfif Session.UserSuppliedInfo.MealProvided EQ 1>
+				<cfif Session.UserSuppliedInfo.MealAvailable EQ 1>
 					<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 						Update eEvents
 						Set MealCost_Estimated = <cfqueryparam value="#Session.UserSuppliedInfo.MealCost_Estimated#" cfsqltype="CF_SQL_MONEY">,
 							MealProvidedBy = <cfqueryparam value="#Session.UserSuppliedInfo.MealProvidedBy#" cfsqltype="CF_SQL_INTEGER">
-						Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+						Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 					</cfquery>
 				</cfif>
 
@@ -419,7 +446,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						Set AllowVideoConference = <cfqueryparam value="#Session.UserSuppliedInfo.AllowVideoConference#" cfsqltype="cf_sql_bit">,
 							VideoConferenceInfo = <cfqueryparam value="#Session.UserSuppliedInfo.VideoConferenceInfo#" cfsqltype="CF_SQL_VARCHAR">,
 							VideoConferenceCost = <cfqueryparam value="#Session.UserSuppliedInfo.VideoConferenceCost#" cfsqltype="CF_SQL_MONEY">
-						Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+						Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 					</cfquery>
 				</cfif>
 
@@ -430,7 +457,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							WebinarConnectInfo = <cfqueryparam value="#Session.UserSuppliedInfo.WebinarConnectWebInfo#" cfsqltype="CF_SQL_VARCHAR">,
 							WebinarMemberCost = <cfqueryparam value="#Session.UserSuppliedInfo.WebinarMemberCost#" cfsqltype="CF_SQL_MONEY">,
 							WebinarNonMemberCost = <cfqueryparam value="#Session.UserSuppliedInfo.WebinarNonMemberCost#" cfsqltype="CF_SQL_MONEY">
-						Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+						Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 					</cfquery>
 				</cfif>
 
@@ -454,7 +481,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 						Update eEvents
 						Set Registration_BeginTime = #Variables.EventRegistrationBeginTimeObject#
-						Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+						Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 					</cfquery>
 				</cfif>
 
@@ -463,15 +490,15 @@ http://www.apache.org/licenses/LICENSE-2.0
 					Set AcceptRegistrations = <cfqueryparam value="#FORM.AcceptRegistrations#" cfsqltype="cf_sql_bit">,
 						lastUpdated = #Now()#,
 						lastUpdateBy = <cfqueryparam value="#Session.Mura.UserID#" cfsqltype="cf_sql_varchar">
-					Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+					Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 				</cfquery>
 
 				<cfquery name="CheckEventMultipleDates" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 					Select Site_ID, ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime, EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost, EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost,
-						EarlyBird_NonMemberCost, ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints, MealProvided, MealProvidedBy, MealCost_Estimated, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost, AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, MaxParticipants, LocationType, LocationID, LocationRoomID,
+						EarlyBird_NonMemberCost, ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints, MealAvailable, MealIncluded, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost, AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, MaxParticipants, LocationType, LocationID, LocationRoomID,
 						Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active, EventCancelled, WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost, EventDoc_FileNameOne, EventDoc_FileTypeOne, EventDoc_FileNameTwo, EventDoc_FileTypeTwo, EventDoc_FileNameThree, EventDoc_FileTypeThree, EventDoc_FileNameFour, EventDoc_FileTypeFour, EventDoc_FileNameFive, EventDoc_FileTypeFive, EventDoc_FileNameSix, EventDoc_FileTypeSix, EventDoc_FileNameSeven, EventDoc_FileTypeSeven, EventDoc_FileNameEight, EventDoc_FileTypeEight, EventDoc_FileNameNine, EventDoc_FileTypeNine, EventDoc_FileNameTen, EventDoc_FileTypeTen, PostedTo_Facebook, PostedTo_Twitter
 					From eEvents
-					Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+					Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 				</cfquery>
 				<cfif isDate(CheckEventMultipleDates.EventDate1) or isDate(CheckEventMultipleDates.EventDate2) or isDate(CheckEventMultipleDates.EventDate3) or isDate(CheckEventMultipleDates.EventDate4) or isDate(CheckEventMultipleDates.EventDate5)>
 					<cfif isDate(CheckEventMultipleDates.EventDate1)><cfset TotalNumberDays = 2></cfif>
@@ -487,7 +514,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfquery name="UpdateEventTitle" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 						Update eEvents
 						Set ShortTitle = <cfqueryparam value="#Variables.NewEventTitle#" cfsqltype="CF_SQL_VARCHAR">
-						Where TContent_ID = <cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+						Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 					</cfquery>
 				</cfif>
 
@@ -499,8 +526,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 					</cfif>
 
 					<cfquery name="InsertSecondEventDate" result="SecondNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealProvided, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active,
-							Featured_StartDate, Featured_EndDate, Featured_SortOrder, EarlyBird_RegistrationDeadline, MemberCost, NonMemberCost, EarlyBird_MemberCost, EarlyBird_NonMemberCost, SpecialMemberCost, SpecialNonMemberCost, MealCost_Estimated, WebinarMemberCost, WebinarNonMemberCost,
+						Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active,
+							Featured_StartDate, Featured_EndDate, Featured_SortOrder, EarlyBird_RegistrationDeadline, MemberCost, NonMemberCost, EarlyBird_MemberCost, EarlyBird_NonMemberCost, SpecialMemberCost, SpecialNonMemberCost, MealCost, Meal_Notes, WebinarMemberCost, WebinarNonMemberCost,
 							VideoConferenceCost, SpecialPriceRequirements, VideoConferenceInfo, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, WebinarConnectInfo, Presenters, EventDoc_FileNameOne, EventDoc_FileTypeOne, EventDoc_FileNameTwo, EventDoc_FileTypeTwo, EventDoc_FileNameThree, EventDoc_FileTypeThree, EventDoc_FileNameFour, EventDoc_FileTypeFour, EventDoc_FileNameFive, EventDoc_FileTypeFive, EventDoc_FileNameSix, EventDoc_FileTypeSix, EventDoc_FileNameSeven, EventDoc_FileTypeSeven, EventDoc_FileNameEight, EventDoc_FileTypeEight, EventDoc_FileNameNine, EventDoc_FileTypeNine, EventDoc_FileNameTen, EventDoc_FileTypeTen,
 							PGPPoints, LocationType, MealProvidedBy, LocationID, LocationRoomID, EventCancelled, WebinarAvailable, PostedTo_Facebook, PostedTo_Twitter, lastUpdated, lastUpdateBy)
 						Values(
@@ -516,7 +543,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfqueryparam value="#CheckEventMultipleDates.EarlyBird_RegistrationAvailable#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.ViewSpecialPricing#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.PGPAvailable#" cfsqltype="CF_SQL_BIT">,
-						<cfqueryparam value="#CheckEventMultipleDates.MealProvided#" cfsqltype="CF_SQL_BIT">,
+						<cfqueryparam value="#CheckEventMultipleDates.MealAvailable#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.AllowVideoConference#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.AcceptRegistrations#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.Facilitator#" cfsqltype="CF_SQL_VARCHAR">,
@@ -580,8 +607,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 					<cfquery name="InsertEventMatrix" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">>
 						Insert into eEventsMatrix(Event_ID, Event_AdditionalDayID)
-						Values(<cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">,
-							<cfqueryparam value="#SecondNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+						Values(<cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">,
+							<cfqueryparam value="#SecondNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						)
 					</cfquery>
 
@@ -595,8 +622,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 					</cfif>
 
 					<cfquery name="InsertThirdEventDate" result="ThirdNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealProvided, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active,
-							Featured_StartDate, Featured_EndDate, Featured_SortOrder, EarlyBird_RegistrationDeadline, MemberCost, NonMemberCost, EarlyBird_MemberCost, EarlyBird_NonMemberCost, SpecialMemberCost, SpecialNonMemberCost, MealCost_Estimated, WebinarMemberCost, WebinarNonMemberCost,
+						Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active,
+							Featured_StartDate, Featured_EndDate, Featured_SortOrder, EarlyBird_RegistrationDeadline, MemberCost, NonMemberCost, EarlyBird_MemberCost, EarlyBird_NonMemberCost, SpecialMemberCost, SpecialNonMemberCost, MealCost, Meal_Notes, WebinarMemberCost, WebinarNonMemberCost,
 							VideoConferenceCost, SpecialPriceRequirements, VideoConferenceInfo, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, WebinarConnectInfo, Presenters, EventDoc_FileNameOne, EventDoc_FileTypeOne, EventDoc_FileNameTwo, EventDoc_FileTypeTwo, EventDoc_FileNameThree, EventDoc_FileTypeThree, EventDoc_FileNameFour, EventDoc_FileTypeFour, EventDoc_FileNameFive, EventDoc_FileTypeFive, EventDoc_FileNameSix, EventDoc_FileTypeSix, EventDoc_FileNameSeven, EventDoc_FileTypeSeven, EventDoc_FileNameEight, EventDoc_FileTypeEight, EventDoc_FileNameNine, EventDoc_FileTypeNine, EventDoc_FileNameTen, EventDoc_FileTypeTen,
 							PGPPoints, LocationType, MealProvidedBy, LocationID, LocationRoomID, EventCancelled, WebinarAvailable, PostedTo_Facebook, PostedTo_Twitter, lastUpdated, lastUpdateBy)
 						Values(
@@ -612,7 +639,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfqueryparam value="#CheckEventMultipleDates.EarlyBird_RegistrationAvailable#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.ViewSpecialPricing#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.PGPAvailable#" cfsqltype="CF_SQL_BIT">,
-						<cfqueryparam value="#CheckEventMultipleDates.MealProvided#" cfsqltype="CF_SQL_BIT">,
+						<cfqueryparam value="#CheckEventMultipleDates.MealAvailable#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.AllowVideoConference#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.AcceptRegistrations#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.Facilitator#" cfsqltype="CF_SQL_VARCHAR">,
@@ -676,8 +703,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 					<cfquery name="InsertEventMatrix" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">>
 						Insert into eEventsMatrix(Event_ID, Event_AdditionalDayID)
-						Values(<cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">,
-							<cfqueryparam value="#ThirdNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+						Values(<cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">,
+							<cfqueryparam value="#ThirdNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						)
 					</cfquery>
 				</cfif>
@@ -690,8 +717,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 					</cfif>
 
 					<cfquery name="InsertFourthEventDate" result="FourthNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealProvided, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active,
-							Featured_StartDate, Featured_EndDate, Featured_SortOrder, EarlyBird_RegistrationDeadline, MemberCost, NonMemberCost, EarlyBird_MemberCost, EarlyBird_NonMemberCost, SpecialMemberCost, SpecialNonMemberCost, MealCost_Estimated, WebinarMemberCost, WebinarNonMemberCost,
+						Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active,
+							Featured_StartDate, Featured_EndDate, Featured_SortOrder, EarlyBird_RegistrationDeadline, MemberCost, NonMemberCost, EarlyBird_MemberCost, EarlyBird_NonMemberCost, SpecialMemberCost, SpecialNonMemberCost, MealCost, Meal_Notes, WebinarMemberCost, WebinarNonMemberCost,
 							VideoConferenceCost, SpecialPriceRequirements, VideoConferenceInfo, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, WebinarConnectInfo, Presenters, EventDoc_FileNameOne, EventDoc_FileTypeOne, EventDoc_FileNameTwo, EventDoc_FileTypeTwo, EventDoc_FileNameThree, EventDoc_FileTypeThree, EventDoc_FileNameFour, EventDoc_FileTypeFour, EventDoc_FileNameFive, EventDoc_FileTypeFive, EventDoc_FileNameSix, EventDoc_FileTypeSix, EventDoc_FileNameSeven, EventDoc_FileTypeSeven, EventDoc_FileNameEight, EventDoc_FileTypeEight, EventDoc_FileNameNine, EventDoc_FileTypeNine, EventDoc_FileNameTen, EventDoc_FileTypeTen,
 							PGPPoints, LocationType, MealProvidedBy, LocationID, LocationRoomID, EventCancelled, WebinarAvailable, PostedTo_Facebook, PostedTo_Twitter, lastUpdated, lastUpdateBy)
 						Values(
@@ -707,7 +734,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfqueryparam value="#CheckEventMultipleDates.EarlyBird_RegistrationAvailable#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.ViewSpecialPricing#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.PGPAvailable#" cfsqltype="CF_SQL_BIT">,
-						<cfqueryparam value="#CheckEventMultipleDates.MealProvided#" cfsqltype="CF_SQL_BIT">,
+						<cfqueryparam value="#CheckEventMultipleDates.MealAvailable#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.AllowVideoConference#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.AcceptRegistrations#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.Facilitator#" cfsqltype="CF_SQL_VARCHAR">,
@@ -771,8 +798,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 					<cfquery name="InsertEventMatrix" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">>
 						Insert into eEventsMatrix(Event_ID, Event_AdditionalDayID)
-						Values(<cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">,
-							<cfqueryparam value="#FourthNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+						Values(<cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">,
+							<cfqueryparam value="#FourthNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						)
 					</cfquery>
 				</cfif>
@@ -785,8 +812,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 					</cfif>
 
 					<cfquery name="InsertFifthEventDate" result="FifthNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealProvided, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active,
-							Featured_StartDate, Featured_EndDate, Featured_SortOrder, EarlyBird_RegistrationDeadline, MemberCost, NonMemberCost, EarlyBird_MemberCost, EarlyBird_NonMemberCost, SpecialMemberCost, SpecialNonMemberCost, MealCost_Estimated, WebinarMemberCost, WebinarNonMemberCost,
+						Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active,
+							Featured_StartDate, Featured_EndDate, Featured_SortOrder, EarlyBird_RegistrationDeadline, MemberCost, NonMemberCost, EarlyBird_MemberCost, EarlyBird_NonMemberCost, SpecialMemberCost, SpecialNonMemberCost, MealCost, Meal_Notes, WebinarMemberCost, WebinarNonMemberCost,
 							VideoConferenceCost, SpecialPriceRequirements, VideoConferenceInfo, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, WebinarConnectInfo, Presenters, EventDoc_FileNameOne, EventDoc_FileTypeOne, EventDoc_FileNameTwo, EventDoc_FileTypeTwo, EventDoc_FileNameThree, EventDoc_FileTypeThree, EventDoc_FileNameFour, EventDoc_FileTypeFour, EventDoc_FileNameFive, EventDoc_FileTypeFive, EventDoc_FileNameSix, EventDoc_FileTypeSix, EventDoc_FileNameSeven, EventDoc_FileTypeSeven, EventDoc_FileNameEight, EventDoc_FileTypeEight, EventDoc_FileNameNine, EventDoc_FileTypeNine, EventDoc_FileNameTen, EventDoc_FileTypeTen,
 							PGPPoints, LocationType, MealProvidedBy, LocationID, LocationRoomID, EventCancelled, WebinarAvailable, PostedTo_Facebook, PostedTo_Twitter, lastUpdated, lastUpdateBy)
 						Values(
@@ -802,7 +829,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfqueryparam value="#CheckEventMultipleDates.EarlyBird_RegistrationAvailable#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.ViewSpecialPricing#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.PGPAvailable#" cfsqltype="CF_SQL_BIT">,
-						<cfqueryparam value="#CheckEventMultipleDates.MealProvided#" cfsqltype="CF_SQL_BIT">,
+						<cfqueryparam value="#CheckEventMultipleDates.MealAvailable#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.AllowVideoConference#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.AcceptRegistrations#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.Facilitator#" cfsqltype="CF_SQL_VARCHAR">,
@@ -866,8 +893,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 					<cfquery name="InsertEventMatrix" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">>
 						Insert into eEventsMatrix(Event_ID, Event_AdditionalDayID)
-						Values(<cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">,
-							<cfqueryparam value="#FifthNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+						Values(<cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">,
+							<cfqueryparam value="#FifthNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						)
 					</cfquery>
 				</cfif>
@@ -880,8 +907,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 					</cfif>
 
 					<cfquery name="InsertSixthEventDate" result="SixthNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealProvided, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active,
-							Featured_StartDate, Featured_EndDate, Featured_SortOrder, EarlyBird_RegistrationDeadline, MemberCost, NonMemberCost, EarlyBird_MemberCost, EarlyBird_NonMemberCost, SpecialMemberCost, SpecialNonMemberCost, MealCost_Estimated, WebinarMemberCost, WebinarNonMemberCost,
+						Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active,
+							Featured_StartDate, Featured_EndDate, Featured_SortOrder, EarlyBird_RegistrationDeadline, MemberCost, NonMemberCost, EarlyBird_MemberCost, EarlyBird_NonMemberCost, SpecialMemberCost, SpecialNonMemberCost, MealCost, Meal_Notes, WebinarMemberCost, WebinarNonMemberCost,
 							VideoConferenceCost, SpecialPriceRequirements, VideoConferenceInfo, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, WebinarConnectInfo, Presenters, EventDoc_FileNameOne, EventDoc_FileTypeOne, EventDoc_FileNameTwo, EventDoc_FileTypeTwo, EventDoc_FileNameThree, EventDoc_FileTypeThree, EventDoc_FileNameFour, EventDoc_FileTypeFour, EventDoc_FileNameFive, EventDoc_FileTypeFive, EventDoc_FileNameSix, EventDoc_FileTypeSix, EventDoc_FileNameSeven, EventDoc_FileTypeSeven, EventDoc_FileNameEight, EventDoc_FileTypeEight, EventDoc_FileNameNine, EventDoc_FileTypeNine, EventDoc_FileNameTen, EventDoc_FileTypeTen,
 							PGPPoints, LocationType, MealProvidedBy, LocationID, LocationRoomID, EventCancelled, WebinarAvailable, PostedTo_Facebook, PostedTo_Twitter, lastUpdated, lastUpdateBy)
 						Values(
@@ -897,7 +924,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfqueryparam value="#CheckEventMultipleDates.EarlyBird_RegistrationAvailable#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.ViewSpecialPricing#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.PGPAvailable#" cfsqltype="CF_SQL_BIT">,
-						<cfqueryparam value="#CheckEventMultipleDates.MealProvided#" cfsqltype="CF_SQL_BIT">,
+						<cfqueryparam value="#CheckEventMultipleDates.MealAvailable#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.AllowVideoConference#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.AcceptRegistrations#" cfsqltype="CF_SQL_BIT">,
 						<cfqueryparam value="#CheckEventMultipleDates.Facilitator#" cfsqltype="CF_SQL_VARCHAR">,
@@ -961,8 +988,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 					<cfquery name="InsertEventMatrix" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">>
 						Insert into eEventsMatrix(Event_ID, Event_AdditionalDayID)
-						Values(<cfqueryparam value="#insertNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">,
-							<cfqueryparam value="#SixthNewEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+						Values(<cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">,
+							<cfqueryparam value="#SixthNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						)
 					</cfquery>
 				</cfif>
@@ -1000,7 +1027,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
 					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
 					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealProvided, MealProvidedBy, MealCost_Estimated, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
+					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
 					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
 					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy
 				From eEvents
@@ -1063,7 +1090,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfset Session.UserSuppliedInfo.SpecialPriceRequirements = #GetSelectedEvent.SpecialPriceRequirements#>
 					<cfset Session.UserSuppliedInfo.PGPAvailable = #GetSelectedEvent.PGPAvailable#>
 					<cfset Session.UserSuppliedInfo.PGPPoints = #GetSelectedEvent.PGPPoints#>
-					<cfset Session.UserSuppliedInfo.MealProvided = #GetSelectedEvent.MealProvided#>
+					<cfset Session.UserSuppliedInfo.MealAvailable = #GetSelectedEvent.MealAvailable#>
 					<cfset Session.UserSuppliedInfo.MealProvidedBy = #GetSelectedEvent.MealProvidedBy#>
 					<cfset Session.UserSuppliedInfo.MealCost_Estimated = #GetSelectedEvent.MealCost_Estimated#>
 					<cfset Session.UserSuppliedInfo.AllowVideoConference = #GetSelectedEvent.AllowVideoConference#>
@@ -1436,7 +1463,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cftry>
 					<cfquery name="updateEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 						Update eEvents
-						Set MealProvided = <cfqueryparam value="#Session.UserSuppliedInfo.MealProvided#" cfsqltype="cf_sql_bit">,
+						Set MealAvailable = <cfqueryparam value="#Session.UserSuppliedInfo.MealAvailable#" cfsqltype="cf_sql_bit">,
 							MealCost_Estimated = <cfqueryparam value="#Session.UserSuppliedInfo.MealCost_Estimated#" cfsqltype="CF_SQL_MONEY">,
 							MealProvidedBy = <cfqueryparam value="#Session.UserSuppliedInfo.MealProvidedBy#" cfsqltype="CF_SQL_INTEGER">,
 							lastUpdated = #Now()#,
@@ -1984,18 +2011,18 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfset Session.FormErrors = #ArrayNew()#>
 			</cflock>
 
-			<cfif FORM.MealProvided EQ 0>
-				<cfset Session.UserSuppliedInfo.MealProvided = #FORM.MealProvided#>
+			<cfif FORM.MealAvailable EQ 0>
+				<cfset Session.UserSuppliedInfo.MealAvailable = #FORM.MealAvailable#>
 				<cfset Session.UserSuppliedInfo.MealCost_Estimated = 0>
 				<cfset Session.UserSuppliedInfo.MealProvidedBy = "No Meal Provided">
 			</cfif>
 
-			<cfif FORM.MealProvided EQ 1 and FORM.MealProvidedBy EQ 0>
-				<cfset Session.UserSuppliedInfo.MealProvided = #FORM.MealProvided#>
+			<cfif FORM.MealAvailable EQ 1 and FORM.MealProvidedBy EQ 0>
+				<cfset Session.UserSuppliedInfo.MealAvailable = #FORM.MealAvailable#>
 				<cfset Session.UserSuppliedInfo.MealCost_Estimated = 0>
 				<cfset Session.UserSuppliedInfo.MealProvidedBy = #FORM.MealProvidedBy#>
 			<cfelse>
-				<cfset Session.UserSuppliedInfo.MealProvided = #FORM.MealProvided#>
+				<cfset Session.UserSuppliedInfo.MealAvailable = #FORM.MealAvailable#>
 				<cfset Session.UserSuppliedInfo.MealCost_Estimated = #FORM.MealCost_Estimated#>
 				<cfset Session.UserSuppliedInfo.MealProvidedBy = #FORM.MealProvidedBy#>
 			</cfif>
@@ -2133,7 +2160,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
 					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
 					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealProvided, MealProvidedBy, MealCost_Estimated, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
+					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
 					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
 					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy
 				From eEvents
@@ -2178,7 +2205,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfset Session.UserSuppliedInfo.SpecialPriceRequirements = #GetSelectedEvent.SpecialPriceRequirements#>
 					<cfset Session.UserSuppliedInfo.PGPAvailable = #GetSelectedEvent.PGPAvailable#>
 					<cfset Session.UserSuppliedInfo.PGPPoints = #GetSelectedEvent.PGPPoints#>
-					<cfset Session.UserSuppliedInfo.MealProvided = #GetSelectedEvent.MealProvided#>
+					<cfset Session.UserSuppliedInfo.MealAvailable = #GetSelectedEvent.MealAvailable#>
 					<cfset Session.UserSuppliedInfo.MealProvidedBy = #GetSelectedEvent.MealProvidedBy#>
 					<cfset Session.UserSuppliedInfo.MealCost_Estimated = #GetSelectedEvent.MealCost_Estimated#>
 					<cfset Session.UserSuppliedInfo.AllowVideoConference = #GetSelectedEvent.AllowVideoConference#>
@@ -2265,13 +2292,13 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cftry>
 					<cfif LEN(Session.UserSuppliedInfo.Registration_EndTime)>
 						<cfquery name="insertCopiedEvent" result="insertCopiedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, MemberCost, NonMemberCost, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealProvided, AllowVideoConference, AcceptRegistrations, LocationType, LocationID, LocationRoomID, MaxParticipants, Facilitator, dateCreated)
-							Values ("#rc.$.siteConfig('siteID')#", "#Session.UserSuppliedInfo.ShortTitle#", #CreateDate(ListLast(Variables.EventDate, "/"), ListFirst(Variables.EventDate, "/"), ListGetAt(Variables.EventDate, 2, "/"))#, "#Session.UserSuppliedInfo.LongDescription#", #Variables.EventStartTimeObject#, #Variables.EventEndTimeObject#, #CreateDate(ListLast(Variables.RegistrationDeadline, "/"), ListFirst(Variables.RegistrationDeadline, "/"), ListGetAt(Variables.RegistrationDeadline, 2, "/"))#, #Variables.EventRegistrationEndTimeObject#, #Session.UserSuppliedInfo.EventFeatured#, "#Session.UserSuppliedInfo.MemberCost#", "#Session.UserSuppliedInfo.NonMemberCost#", #Session.UserSuppliedInfo.EarlyBird_RegistrationAvailable#, #Session.UserSuppliedInfo.ViewSpecialPricing#, #Session.UserSuppliedInfo.PGPAvailable#, #Session.UserSuppliedInfo.MealProvided#, #Session.UserSuppliedInfo.AllowVideoConference#, #Session.UserSuppliedInfo.AcceptRegistrations#, "#Session.UserSuppliedInfo.LocationType#", #Session.UserSuppliedInfo.LocationID#, #Session.UserSuppliedInfo.LocationRoomID#, #Session.UserSuppliedInfo.RoomMaxParticipants#, "#Session.UserSuppliedInfo.Facilitator#", #Now()# )
+							Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, MemberCost, NonMemberCost, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, LocationType, LocationID, LocationRoomID, MaxParticipants, Facilitator, dateCreated)
+							Values ("#rc.$.siteConfig('siteID')#", "#Session.UserSuppliedInfo.ShortTitle#", #CreateDate(ListLast(Variables.EventDate, "/"), ListFirst(Variables.EventDate, "/"), ListGetAt(Variables.EventDate, 2, "/"))#, "#Session.UserSuppliedInfo.LongDescription#", #Variables.EventStartTimeObject#, #Variables.EventEndTimeObject#, #CreateDate(ListLast(Variables.RegistrationDeadline, "/"), ListFirst(Variables.RegistrationDeadline, "/"), ListGetAt(Variables.RegistrationDeadline, 2, "/"))#, #Variables.EventRegistrationEndTimeObject#, #Session.UserSuppliedInfo.EventFeatured#, "#Session.UserSuppliedInfo.MemberCost#", "#Session.UserSuppliedInfo.NonMemberCost#", #Session.UserSuppliedInfo.EarlyBird_RegistrationAvailable#, #Session.UserSuppliedInfo.ViewSpecialPricing#, #Session.UserSuppliedInfo.PGPAvailable#, #Session.UserSuppliedInfo.MealAvailable#, #Session.UserSuppliedInfo.AllowVideoConference#, #Session.UserSuppliedInfo.AcceptRegistrations#, "#Session.UserSuppliedInfo.LocationType#", #Session.UserSuppliedInfo.LocationID#, #Session.UserSuppliedInfo.LocationRoomID#, #Session.UserSuppliedInfo.RoomMaxParticipants#, "#Session.UserSuppliedInfo.Facilitator#", #Now()# )
 						</cfquery>
 					<cfelse>
 						<cfquery name="insertCopiedEvent" result="insertCopiedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, EventFeatured, MemberCost, NonMemberCost, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealProvided, AllowVideoConference, AcceptRegistrations, LocationType, LocationID, LocationRoomID, MaxParticipants, Facilitator, dateCreated)
-							Values ("#rc.$.siteConfig('siteID')#", "#Session.UserSuppliedInfo.ShortTitle#", #CreateDate(ListLast(Variables.EventDate, "/"), ListFirst(Variables.EventDate, "/"), ListGetAt(Variables.EventDate, 2, "/"))#, "#Session.UserSuppliedInfo.LongDescription#", #Variables.EventStartTimeObject#, #Variables.EventEndTimeObject#, #CreateDate(ListLast(Variables.RegistrationDeadline, "/"), ListFirst(Variables.RegistrationDeadline, "/"), ListGetAt(Variables.RegistrationDeadline, 2, "/"))#, #Session.UserSuppliedInfo.EventFeatured#, "#Session.UserSuppliedInfo.MemberCost#", "#Session.UserSuppliedInfo.NonMemberCost#", #Session.UserSuppliedInfo.EarlyBird_RegistrationAvailable#, #Session.UserSuppliedInfo.ViewSpecialPricing#, #Session.UserSuppliedInfo.PGPAvailable#, #Session.UserSuppliedInfo.MealProvided#, #Session.UserSuppliedInfo.AllowVideoConference#, #Session.UserSuppliedInfo.AcceptRegistrations#, "#Session.UserSuppliedInfo.LocationType#", #Session.UserSuppliedInfo.LocationID#, #Session.UserSuppliedInfo.LocationRoomID#, #Session.UserSuppliedInfo.RoomMaxParticipants#, "#Session.UserSuppliedInfo.Facilitator#", #Now()# )
+							Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, EventFeatured, MemberCost, NonMemberCost, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, LocationType, LocationID, LocationRoomID, MaxParticipants, Facilitator, dateCreated)
+							Values ("#rc.$.siteConfig('siteID')#", "#Session.UserSuppliedInfo.ShortTitle#", #CreateDate(ListLast(Variables.EventDate, "/"), ListFirst(Variables.EventDate, "/"), ListGetAt(Variables.EventDate, 2, "/"))#, "#Session.UserSuppliedInfo.LongDescription#", #Variables.EventStartTimeObject#, #Variables.EventEndTimeObject#, #CreateDate(ListLast(Variables.RegistrationDeadline, "/"), ListFirst(Variables.RegistrationDeadline, "/"), ListGetAt(Variables.RegistrationDeadline, 2, "/"))#, #Session.UserSuppliedInfo.EventFeatured#, "#Session.UserSuppliedInfo.MemberCost#", "#Session.UserSuppliedInfo.NonMemberCost#", #Session.UserSuppliedInfo.EarlyBird_RegistrationAvailable#, #Session.UserSuppliedInfo.ViewSpecialPricing#, #Session.UserSuppliedInfo.PGPAvailable#, #Session.UserSuppliedInfo.MealAvailable#, #Session.UserSuppliedInfo.AllowVideoConference#, #Session.UserSuppliedInfo.AcceptRegistrations#, "#Session.UserSuppliedInfo.LocationType#", #Session.UserSuppliedInfo.LocationID#, #Session.UserSuppliedInfo.LocationRoomID#, #Session.UserSuppliedInfo.RoomMaxParticipants#, "#Session.UserSuppliedInfo.Facilitator#", #Now()# )
 						</cfquery>
 					</cfif>
 
@@ -2281,7 +2308,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<cfquery name="updateEventDate1" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 								Update eEvents
 								Set EventDate1 = #CreateDate(ListLast(Variables.EventDate1, "/"), ListFirst(Variables.EventDate1, "/"), ListGetAt(Variables.EventDate1, 2, "/"))#
-								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 							</cfquery>
 						</cfif>
 					</cfif>
@@ -2292,7 +2319,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<cfquery name="updateEventDate2" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 								Update eEvents
 								Set EventDate2 = #CreateDate(ListLast(Variables.EventDate2, "/"), ListFirst(Variables.EventDate2, "/"), ListGetAt(Variables.EventDate2, 2, "/"))#
-								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 							</cfquery>
 						</cfif>
 					</cfif>
@@ -2303,7 +2330,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<cfquery name="updateEventDate3" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 								Update eEvents
 								Set EventDate3 = #CreateDate(ListLast(Variables.EventDate3, "/"), ListFirst(Variables.EventDate3, "/"), ListGetAt(Variables.EventDate3, 2, "/"))#
-								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 							</cfquery>
 						</cfif>
 					</cfif>
@@ -2314,7 +2341,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<cfquery name="updateEventDate4" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 								Update eEvents
 								Set EventDate4 = #CreateDate(ListLast(Variables.EventDate4, "/"), ListFirst(Variables.EventDate4, "/"), ListGetAt(Variables.EventDate4, 2, "/"))#
-								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 							</cfquery>
 						</cfif>
 					</cfif>
@@ -2324,7 +2351,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<cfquery name="updateEventAgenda" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 								Update eEvents
 								Set EventAgenda = <cfqueryparam value="#Session.UserSuppliedInfo.EventAgenda#" cfsqltype="cf_sql_varchar">
-								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 							</cfquery>
 						</cfif>
 					</cfif>
@@ -2334,7 +2361,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<cfquery name="updateEventAgenda" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 								Update eEvents
 								Set EventTargetAudience = <cfqueryparam value="#Session.UserSuppliedInfo.EventTargetAudience#" cfsqltype="cf_sql_varchar">
-								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 							</cfquery>
 						</cfif>
 					</cfif>
@@ -2344,7 +2371,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<cfquery name="updateEventAgenda" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 								Update eEvents
 								Set EventStrategies = <cfqueryparam value="#Session.UserSuppliedInfo.EventStrategies#" cfsqltype="cf_sql_varchar">
-								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 							</cfquery>
 						</cfif>
 					</cfif>
@@ -2354,7 +2381,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<cfquery name="updateEventAgenda" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 								Update eEvents
 								Set EventSpecialInstructions = <cfqueryparam value="#Session.UserSuppliedInfo.EventSpecialInstructions#" cfsqltype="cf_sql_varchar">
-								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 							</cfquery>
 						</cfif>
 					</cfif>
@@ -2367,7 +2394,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							Set Featured_StartDate = #CreateDate(ListLast(Variables.FeaturedStartDate, "/"), ListFirst(Variables.FeaturedStartDate, "/"), ListGetAt(Variables.FeaturedStartDate, 2, "/"))#,
 								Featured_EndDate = #CreateDate(ListLast(Variables.FeaturedEndDate, "/"), ListFirst(Variables.FeaturedEndDate, "/"), ListGetAt(Variables.FeaturedEndDate, 2, "/"))#,
 								Featured_SortOrder = <cfqueryparam value="#Session.UserSuppliedInfo.Featured_SortOrder#" cfsqltype="cf_sql_integer">
-							Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+							Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
 					</cfif>
 
@@ -2379,7 +2406,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 								EarlyBird_RegistrationDeadline = #CreateDate(ListLast(Variables.RegistrationDeadline, "/"), ListFirst(Variables.RegistrationDeadline, "/"), ListGetAt(Variables.RegistrationDeadline, 2, "/"))#,
 								EarlyBird_MemberCost = "#Session.UserSuppliedInfo.EarlyBird_MemberCost#",
 								EarlyBird_NonMemberCost = "#Session.UserSuppliedInfo.EarlyBird_NonMemberCost#"
-							Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+							Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
 					</cfif>
 
@@ -2390,7 +2417,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 								SpecialMemberCost = "#Session.UserSuppliedInfo.SpecialMemberCost#",
 								SpecialNonMemberCost = "#Session.UserSuppliedInfo.SpecialNonMemberCost#",
 								SpecialPriceRequirements = "#Session.UserSuppliedInfo.SpecialPriceRequirements#"
-							Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+							Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
 					</cfif>
 
@@ -2399,7 +2426,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							Update eEvents
 							Set PGPAvailable = <cfqueryparam value="#Session.UserSuppliedInfo.PGPAvailable#" cfsqltype="cf_sql_bit">,
 								PGPPoints = <cfqueryparam value="#Session.UserSuppliedInfo.PGPPoints#" cfsqltype="cf_sql_DECIMAL">
-							Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+							Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
 					</cfif>
 
@@ -2408,7 +2435,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							Update eEvents
 							Set MealCost_Estimated = <cfqueryparam value="#Session.UserSuppliedInfo.MealCost_Estimated#" cfsqltype="CF_SQL_MONEY">,
 								MealProvidedBy = <cfqueryparam value="#Session.UserSuppliedInfo.MealProvidedBy#" cfsqltype="CF_SQL_INTEGER">
-							Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+							Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
 					</cfif>
 
@@ -2418,7 +2445,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							Set AllowVideoConference = <cfqueryparam value="#Session.UserSuppliedInfo.AllowVideoConference#" cfsqltype="cf_sql_bit">,
 								VideoConferenceInfo = <cfqueryparam value="#Session.UserSuppliedInfo.VideoConferenceInfo#" cfsqltype="CF_SQL_VARCHAR">,
 								VideoConferenceCost = <cfqueryparam value="#Session.UserSuppliedInfo.VideoConferenceCost#" cfsqltype="CF_SQL_MONEY">
-							Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+							Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
 					</cfif>
 
@@ -2443,7 +2470,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 							Update eEvents
 							Set Registration_BeginTime = #Variables.EventRegistrationBeginTimeObject#
-							Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+							Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
 					</cfif>
 
@@ -2453,7 +2480,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							lastUpdated = #Now()#,
 							lastUpdateBy = <cfqueryparam value="#Session.Mura.UserID#" cfsqltype="cf_sql_varchar">,
 							Active = <cfqueryparam value="1" cfsqltype="cf_sql_bit">
-						Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.GENERATED_KEY#" cfsqltype="cf_sql_integer">
+						Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 					</cfquery>
 
 					<cfcatch type="Database">
@@ -2484,7 +2511,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
 					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
 					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealProvided, MealProvidedBy, MealCost_Estimated, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
+					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
 					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
 					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
 					WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost
@@ -2540,7 +2567,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfset Session.UserSuppliedInfo.SpecialPriceRequirements = #GetSelectedEvent.SpecialPriceRequirements#>
 					<cfset Session.UserSuppliedInfo.PGPAvailable = #GetSelectedEvent.PGPAvailable#>
 					<cfset Session.UserSuppliedInfo.PGPPoints = #GetSelectedEvent.PGPPoints#>
-					<cfset Session.UserSuppliedInfo.MealProvided = #GetSelectedEvent.MealProvided#>
+					<cfset Session.UserSuppliedInfo.MealAvailable = #GetSelectedEvent.MealAvailable#>
 					<cfset Session.UserSuppliedInfo.MealProvidedBy = #GetSelectedEvent.MealProvidedBy#>
 					<cfset Session.UserSuppliedInfo.MealCost_Estimated = #GetSelectedEvent.MealCost_Estimated#>
 					<cfset Session.UserSuppliedInfo.AllowVideoConference = #GetSelectedEvent.AllowVideoConference#>
@@ -2618,7 +2645,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 		<cfif isDefined("URL.EventID")>
 			<cfquery name="getSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-				Select ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime, EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost, EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost, ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints, MealProvided, MealProvidedBy, MealCost_Estimated, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost, AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, MaxParticipants, LocationType, LocationID, LocationRoomID, Facilitator, Active, EventCancelled, WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost, Presenters
+				Select ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime, EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost, EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost, ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints, MealAvailable, MealIncluded, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost, AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, MaxParticipants, LocationType, LocationID, LocationRoomID, Facilitator, Active, EventCancelled, WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost, Presenters
 				From eEvents
 				Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
 					TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer"> and
@@ -2671,7 +2698,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
 					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
 					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealProvided, MealProvidedBy, MealCost_Estimated, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
+					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
 					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
 					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
 					WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost,
@@ -2726,7 +2753,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfset Session.UserSuppliedInfo.SpecialPriceRequirements = #GetSelectedEvent.SpecialPriceRequirements#>
 				<cfset Session.UserSuppliedInfo.PGPAvailable = #GetSelectedEvent.PGPAvailable#>
 				<cfset Session.UserSuppliedInfo.PGPPoints = #GetSelectedEvent.PGPPoints#>
-				<cfset Session.UserSuppliedInfo.MealProvided = #GetSelectedEvent.MealProvided#>
+				<cfset Session.UserSuppliedInfo.MealAvailable = #GetSelectedEvent.MealAvailable#>
 				<cfset Session.UserSuppliedInfo.MealProvidedBy = #GetSelectedEvent.MealProvidedBy#>
 				<cfset Session.UserSuppliedInfo.MealCost_Estimated = #GetSelectedEvent.MealCost_Estimated#>
 				<cfset Session.UserSuppliedInfo.AllowVideoConference = #GetSelectedEvent.AllowVideoConference#>
@@ -2797,7 +2824,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
 					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
 					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealProvided, MealProvidedBy, MealCost_Estimated, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
+					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
 					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
 					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
 					WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost, EventDoc_FileNameOne, EventDoc_FileTypeOne, EventDoc_FileNameTwo, EventDoc_FileTypeTwo, EventDoc_FileNameThree, EventDoc_FileTypeThree,
@@ -2995,7 +3022,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
 					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
 					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealProvided, MealProvidedBy, MealCost_Estimated, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
+					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
 					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
 					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
 					WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost
@@ -3040,7 +3067,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfset Session.UserSuppliedInfo.PickedEvent.SpecialPriceRequirements = #GetSelectedEvent.SpecialPriceRequirements#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.PGPAvailable = #GetSelectedEvent.PGPAvailable#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.PGPPoints = #GetSelectedEvent.PGPPoints#>
-				<cfset Session.UserSuppliedInfo.PickedEvent.MealProvided = #GetSelectedEvent.MealProvided#>
+				<cfset Session.UserSuppliedInfo.PickedEvent.MealAvailable = #GetSelectedEvent.MealAvailable#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.MealProvidedBy = #GetSelectedEvent.MealProvidedBy#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.MealCost_Estimated = #GetSelectedEvent.MealCost_Estimated#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.AllowVideoConference = #GetSelectedEvent.AllowVideoConference#>
@@ -3132,7 +3159,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 										Insert into eRegistrations(Site_ID, RegistrationID, RegistrationDate, User_ID, EventID, RegistrationIPAddr, RegisterByUserID)
 										Values("#rc.$.siteConfig('siteID')#", "#Variables.RegistrationUUID#", #Now()#, "#i#", #Session.UserSuppliedInfo.PickedEvent.RecNo#, "#CGI.Remote_Addr#", "#Session.Mura.UserID#")
 									</cfquery>
-									<cfif Session.UserSuppliedInfo.PickedEvent.MealProvided EQ 1>
+									<cfif Session.UserSuppliedInfo.PickedEvent.MealAvailable EQ 1>
 										<cfquery name="UpdateRegistration" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 											Update eRegistrations
 											Set RequestsMeal = #Session.UserSuppliedInfo.EventRegistration.Step2.RegisterParticipantStayForMeal#
@@ -3262,7 +3289,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 										Insert into eRegistrations(Site_ID, RegistrationID, RegistrationDate, User_ID, EventID, RegistrationIPAddr, RegisterByUserID)
 										Values("#rc.$.siteConfig('siteID')#", "#Variables.RegistrationUUID#", #Now()#, "#Variables.NewUserAccountID#", #Session.UserSuppliedInfo.PickedEvent.RecNo#, "#CGI.Remote_Addr#", "#Session.Mura.UserID#")
 									</cfquery>
-									<cfif Session.UserSuppliedInfo.PickedEvent.MealProvided EQ 1>
+									<cfif Session.UserSuppliedInfo.PickedEvent.MealAvailable EQ 1>
 										<cfquery name="UpdateRegistration" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 											Update eRegistrations
 											Set RequestsMeal = #FORM.Participant1WantsMeal#
@@ -3356,7 +3383,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 										Insert into eRegistrations(Site_ID, RegistrationID, RegistrationDate, User_ID, EventID, RegistrationIPAddr, RegisterByUserID)
 										Values("#rc.$.siteConfig('siteID')#", "#Variables.RegistrationUUID#", #Now()#, "#CheckAccount.UserID#", #Session.UserSuppliedInfo.PickedEvent.RecNo#, "#CGI.Remote_Addr#", "#Session.Mura.UserID#")
 									</cfquery>
-									<cfif Session.UserSuppliedInfo.PickedEvent.MealProvided EQ 1>
+									<cfif Session.UserSuppliedInfo.PickedEvent.MealAvailable EQ 1>
 										<cfquery name="UpdateRegistration" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 											Update eRegistrations
 											Set RequestsMeal = #FORM.Participant1WantsMeal#
@@ -3471,7 +3498,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 										Insert into eRegistrations(Site_ID, RegistrationID, RegistrationDate, User_ID, EventID, RegistrationIPAddr, RegisterByUserID)
 										Values("#rc.$.siteConfig('siteID')#", "#Variables.RegistrationUUID#", #Now()#, "#Variables.NewUserAccountID#", #Session.UserSuppliedInfo.PickedEvent.RecNo#, "#CGI.Remote_Addr#", "#Session.Mura.UserID#")
 									</cfquery>
-									<cfif Session.UserSuppliedInfo.PickedEvent.MealProvided EQ 1>
+									<cfif Session.UserSuppliedInfo.PickedEvent.MealAvailable EQ 1>
 										<cfquery name="UpdateRegistration" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 											Update eRegistrations
 											Set RequestsMeal = #FORM.Participant2WantsMeal#
@@ -3565,7 +3592,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 										Insert into eRegistrations(Site_ID, RegistrationID, RegistrationDate, User_ID, EventID, RegistrationIPAddr, RegisterByUserID)
 										Values("#rc.$.siteConfig('siteID')#", "#Variables.RegistrationUUID#", #Now()#, "#CheckAccount.UserID#", #Session.UserSuppliedInfo.PickedEvent.RecNo#, "#CGI.Remote_Addr#", "#Session.Mura.UserID#")
 									</cfquery>
-									<cfif Session.UserSuppliedInfo.PickedEvent.MealProvided EQ 1>
+									<cfif Session.UserSuppliedInfo.PickedEvent.MealAvailable EQ 1>
 										<cfquery name="UpdateRegistration" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 											Update eRegistrations
 											Set RequestsMeal = #FORM.Participant2WantsMeal#
@@ -3680,7 +3707,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 										Insert into eRegistrations(Site_ID, RegistrationID, RegistrationDate, User_ID, EventID, RegistrationIPAddr, RegisterByUserID)
 										Values("#rc.$.siteConfig('siteID')#", "#Variables.RegistrationUUID#", #Now()#, "#Variables.NewUserAccountID#", #Session.UserSuppliedInfo.PickedEvent.RecNo#, "#CGI.Remote_Addr#", "#Session.Mura.UserID#")
 									</cfquery>
-									<cfif Session.UserSuppliedInfo.PickedEvent.MealProvided EQ 1>
+									<cfif Session.UserSuppliedInfo.PickedEvent.MealAvailable EQ 1>
 										<cfquery name="UpdateRegistration" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 											Update eRegistrations
 											Set RequestsMeal = #FORM.Participant3WantsMeal#
@@ -3774,7 +3801,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 										Insert into eRegistrations(Site_ID, RegistrationID, RegistrationDate, User_ID, EventID, RegistrationIPAddr, RegisterByUserID)
 										Values("#rc.$.siteConfig('siteID')#", "#Variables.RegistrationUUID#", #Now()#, "#CheckAccount.UserID#", #Session.UserSuppliedInfo.PickedEvent.RecNo#, "#CGI.Remote_Addr#", "#Session.Mura.UserID#")
 									</cfquery>
-									<cfif Session.UserSuppliedInfo.PickedEvent.MealProvided EQ 1>
+									<cfif Session.UserSuppliedInfo.PickedEvent.MealAvailable EQ 1>
 										<cfquery name="UpdateRegistration" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 											Update eRegistrations
 											Set RequestsMeal = #FORM.Participant3WantsMeal#
@@ -3889,7 +3916,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 										Insert into eRegistrations(Site_ID, RegistrationID, RegistrationDate, User_ID, EventID, RegistrationIPAddr, RegisterByUserID)
 										Values("#rc.$.siteConfig('siteID')#", "#Variables.RegistrationUUID#", #Now()#, "#Variables.NewUserAccountID#", #Session.UserSuppliedInfo.PickedEvent.RecNo#, "#CGI.Remote_Addr#", "#Session.Mura.UserID#")
 									</cfquery>
-									<cfif Session.UserSuppliedInfo.PickedEvent.MealProvided EQ 1>
+									<cfif Session.UserSuppliedInfo.PickedEvent.MealAvailable EQ 1>
 										<cfquery name="UpdateRegistration" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 											Update eRegistrations
 											Set RequestsMeal = #FORM.Participant4WantsMeal#
@@ -3983,7 +4010,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 										Insert into eRegistrations(Site_ID, RegistrationID, RegistrationDate, User_ID, EventID, RegistrationIPAddr, RegisterByUserID)
 										Values("#rc.$.siteConfig('siteID')#", "#Variables.RegistrationUUID#", #Now()#, "#CheckAccount.UserID#", #Session.UserSuppliedInfo.PickedEvent.RecNo#, "#CGI.Remote_Addr#", "#Session.Mura.UserID#")
 									</cfquery>
-									<cfif Session.UserSuppliedInfo.PickedEvent.MealProvided EQ 1>
+									<cfif Session.UserSuppliedInfo.PickedEvent.MealAvailable EQ 1>
 										<cfquery name="UpdateRegistration" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 											Update eRegistrations
 											Set RequestsMeal = #FORM.Participant4WantsMeal#
@@ -4098,7 +4125,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 										Insert into eRegistrations(Site_ID, RegistrationID, RegistrationDate, User_ID, EventID, RegistrationIPAddr, RegisterByUserID)
 										Values("#rc.$.siteConfig('siteID')#", "#Variables.RegistrationUUID#", #Now()#, "#Variables.NewUserAccountID#", #Session.UserSuppliedInfo.PickedEvent.RecNo#, "#CGI.Remote_Addr#", "#Session.Mura.UserID#")
 									</cfquery>
-									<cfif Session.UserSuppliedInfo.PickedEvent.MealProvided EQ 1>
+									<cfif Session.UserSuppliedInfo.PickedEvent.MealAvailable EQ 1>
 										<cfquery name="UpdateRegistration" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 											Update eRegistrations
 											Set RequestsMeal = #FORM.Participant5WantsMeal#
@@ -4192,7 +4219,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 										Insert into eRegistrations(Site_ID, RegistrationID, RegistrationDate, User_ID, EventID, RegistrationIPAddr, RegisterByUserID)
 										Values("#rc.$.siteConfig('siteID')#", "#Variables.RegistrationUUID#", #Now()#, "#CheckAccount.UserID#", #Session.UserSuppliedInfo.PickedEvent.RecNo#, "#CGI.Remote_Addr#", "#Session.Mura.UserID#")
 									</cfquery>
-									<cfif Session.UserSuppliedInfo.PickedEvent.MealProvided EQ 1>
+									<cfif Session.UserSuppliedInfo.PickedEvent.MealAvailable EQ 1>
 										<cfquery name="UpdateRegistration" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 											Update eRegistrations
 											Set RequestsMeal = #FORM.Participant5WantsMeal#
@@ -4307,7 +4334,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 										Insert into eRegistrations(Site_ID, RegistrationID, RegistrationDate, User_ID, EventID, RegistrationIPAddr, RegisterByUserID)
 										Values("#rc.$.siteConfig('siteID')#", "#Variables.RegistrationUUID#", #Now()#, "#Variables.NewUserAccountID#", #Session.UserSuppliedInfo.PickedEvent.RecNo#, "#CGI.Remote_Addr#", "#Session.Mura.UserID#")
 									</cfquery>
-									<cfif Session.UserSuppliedInfo.PickedEvent.MealProvided EQ 1>
+									<cfif Session.UserSuppliedInfo.PickedEvent.MealAvailable EQ 1>
 										<cfquery name="UpdateRegistration" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 											Update eRegistrations
 											Set RequestsMeal = #FORM.Participant6WantsMeal#
@@ -4401,7 +4428,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 										Insert into eRegistrations(Site_ID, RegistrationID, RegistrationDate, User_ID, EventID, RegistrationIPAddr, RegisterByUserID)
 										Values("#rc.$.siteConfig('siteID')#", "#Variables.RegistrationUUID#", #Now()#, "#CheckAccount.UserID#", #Session.UserSuppliedInfo.PickedEvent.RecNo#, "#CGI.Remote_Addr#", "#Session.Mura.UserID#")
 									</cfquery>
-									<cfif Session.UserSuppliedInfo.PickedEvent.MealProvided EQ 1>
+									<cfif Session.UserSuppliedInfo.PickedEvent.MealAvailable EQ 1>
 										<cfquery name="UpdateRegistration" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 											Update eRegistrations
 											Set RequestsMeal = #FORM.Participant6WantsMeal#
@@ -4504,7 +4531,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
 					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
 					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealProvided, MealProvidedBy, MealCost_Estimated, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
+					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
 					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
 					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
 					WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost
@@ -4549,7 +4576,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfset Session.UserSuppliedInfo.PickedEvent.SpecialPriceRequirements = #GetSelectedEvent.SpecialPriceRequirements#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.PGPAvailable = #GetSelectedEvent.PGPAvailable#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.PGPPoints = #GetSelectedEvent.PGPPoints#>
-				<cfset Session.UserSuppliedInfo.PickedEvent.MealProvided = #GetSelectedEvent.MealProvided#>
+				<cfset Session.UserSuppliedInfo.PickedEvent.MealAvailable = #GetSelectedEvent.MealAvailable#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.MealProvidedBy = #GetSelectedEvent.MealProvidedBy#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.MealCost_Estimated = #GetSelectedEvent.MealCost_Estimated#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.AllowVideoConference = #GetSelectedEvent.AllowVideoConference#>
@@ -4702,7 +4729,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
 					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
 					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealProvided, MealProvidedBy, MealCost_Estimated, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
+					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
 					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
 					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
 					WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost
@@ -4758,7 +4785,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfset Session.UserSuppliedInfo.PickedEvent.SpecialPriceRequirements = #GetSelectedEvent.SpecialPriceRequirements#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.PGPAvailable = #GetSelectedEvent.PGPAvailable#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.PGPPoints = #GetSelectedEvent.PGPPoints#>
-				<cfset Session.UserSuppliedInfo.PickedEvent.MealProvided = #GetSelectedEvent.MealProvided#>
+				<cfset Session.UserSuppliedInfo.PickedEvent.MealAvailable = #GetSelectedEvent.MealAvailable#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.MealProvidedBy = #GetSelectedEvent.MealProvidedBy#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.MealCost_Estimated = #GetSelectedEvent.MealCost_Estimated#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.AllowVideoConference = #GetSelectedEvent.AllowVideoConference#>
@@ -4849,7 +4876,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
 						EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
 						ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-						MealProvided, MealProvidedBy, MealCost_Estimated, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
+						MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
 						AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
 						LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
 						WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost
@@ -4873,7 +4900,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
 					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
 					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealProvided, MealProvidedBy, MealCost_Estimated, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
+					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
 					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
 					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
 					WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost
@@ -4930,7 +4957,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfset Session.UserSuppliedInfo.PickedEvent.SpecialPriceRequirements = #GetSelectedEvent.SpecialPriceRequirements#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.PGPAvailable = #GetSelectedEvent.PGPAvailable#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.PGPPoints = #GetSelectedEvent.PGPPoints#>
-				<cfset Session.UserSuppliedInfo.PickedEvent.MealProvided = #GetSelectedEvent.MealProvided#>
+				<cfset Session.UserSuppliedInfo.PickedEvent.MealAvailable = #GetSelectedEvent.MealAvailable#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.MealProvidedBy = #GetSelectedEvent.MealProvidedBy#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.MealCost_Estimated = #GetSelectedEvent.MealCost_Estimated#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.AllowVideoConference = #GetSelectedEvent.AllowVideoConference#>
@@ -4981,7 +5008,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
 					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
 					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealProvided, MealProvidedBy, MealCost_Estimated, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
+					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
 					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
 					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
 					WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost,
@@ -5037,7 +5064,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfset Session.UserSuppliedInfo.SpecialPriceRequirements = #GetSelectedEvent.SpecialPriceRequirements#>
 				<cfset Session.UserSuppliedInfo.PGPAvailable = #GetSelectedEvent.PGPAvailable#>
 				<cfset Session.UserSuppliedInfo.PGPPoints = #GetSelectedEvent.PGPPoints#>
-				<cfset Session.UserSuppliedInfo.MealProvided = #GetSelectedEvent.MealProvided#>
+				<cfset Session.UserSuppliedInfo.MealAvailable = #GetSelectedEvent.MealAvailable#>
 				<cfset Session.UserSuppliedInfo.MealProvidedBy = #GetSelectedEvent.MealProvidedBy#>
 				<cfset Session.UserSuppliedInfo.MealCost_Estimated = #GetSelectedEvent.MealCost_Estimated#>
 				<cfset Session.UserSuppliedInfo.AllowVideoConference = #GetSelectedEvent.AllowVideoConference#>
@@ -5109,7 +5136,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
 					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
 					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealProvided, MealProvidedBy, MealCost_Estimated, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
+					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
 					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
 					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
 					WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost, EventDoc_FileNameSix, EventDoc_FileTypeSix, EventDoc_FileNameSeven, EventDoc_FileTypeSeven, EventDoc_FileNameEight, EventDoc_FileTypeEight,
@@ -5458,7 +5485,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				Where Event_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 			</cfquery>
 			<cfquery name="Session.getRegistrations" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-				SELECT eRegistrations.TContent_ID, eRegistrations.RegistrationDate, tusers.Fname, tusers.Lname, tusers.Email, eRegistrations.AttendeePrice, eRegistrations.AttendeePriceVerified, SUBSTR(tusers.Email, INSTR(tusers.Email, '@') + 1, LENGTH(tusers.Email) - (INSTR(tusers.Email, '@') + 1) - LENGTH(SUBSTRING_INDEX(tusers.Email,'.',-1))) as DomainName
+				SELECT eRegistrations.TContent_ID, eRegistrations.RegistrationDate, tusers.Fname, tusers.Lname, tusers.Email, eRegistrations.AttendeePrice, eRegistrations.AttendeePriceVerified, SUBSTR(tusers.Email, INSTR(tusers.Email, '@') + 1, LENGTH(tusers.Email) - (INSTR(tusers.Email, '@') + 1) - LENGTH(dbo.SUBSTRING_INDEX(tusers.Email,'.',-1))) as DomainName
 				FROM eRegistrations LEFT JOIN tusers ON tusers.UserID = eRegistrations.User_ID
 				WHERE eRegistrations.EventID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 					and eRegistrations.AttendedEvent = <cfqueryparam value="1" cfsqltype="cf_sql_bit">
@@ -5508,6 +5535,45 @@ http://www.apache.org/licenses/LICENSE-2.0
 					</cfcatch>
 				</cftry>
 				<cflocation url="?#HTMLEditFormat(rc.pc.getPackage())#action=admin:events.generateprofitlossreport&EventID=#FORM.EventID#&UserAction=ParticipantCostVerified" addtoken="false">
+			</cfif>
+		</cfif>
+	</cffunction>
+
+	<cffunction name="updateparticipantcost2" returntype="any" output="true">
+		<cfargument name="rc" required="true" type="struct" default="#StructNew()#">
+
+		<cfif not isDefined("FORM.formSubmit") and isDefined("URL.EventID")>
+			<cflock timeout="60" scope="Session" type="Exclusive">
+				<cfset Session.FormData = #StructNew()#>
+				<cfset Session.FormErrors = #ArrayNew()#>
+				<cfif not isDefined("Session.UserSuppliedInfo")><cfset Session.UserSuppliedInfo = #StructNew()#></cfif>
+			</cflock>
+			<cfquery name="Session.getRegistrations" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
+				SELECT eRegistrations.TContent_ID, eRegistrations.RegistrationDate, tusers.Fname, tusers.Lname, tusers.Email, eRegistrations.AttendeePrice
+				FROM eRegistrations LEFT JOIN tusers ON tusers.UserID = eRegistrations.User_ID
+				WHERE eRegistrations.EventID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer"> and
+					eRegistrations.TContent_ID = <cfqueryparam value="#URL.RegistrationID#" cfsqltype="cf_sql_integer">
+			</cfquery>
+		<cfelseif isDefined("FORM.formSubmit") and isDefined("FORM.EventID") and isDefined("FORM.RegistrationID")>
+			<cfif not isNumeric(FORM.ParticipantCost)>
+				<cfscript>
+					errormsg = {property="ParticipantCost",message="Please Enter Cost to charge Participant for this event."};
+					arrayAppend(Session.FormErrors, errormsg);
+				</cfscript>
+				<cflocation url="?#HTMLEditFormat(rc.pc.getPackage())#action=admin:events.updateparticipantcost&EventID=#FORM.EventID#&RegistrationID=#FORM.RegistrationID#&EventStatus=ReEnterForm" addtoken="false">
+			<cfelse>
+				<cftry>
+					<cfquery name="updateParticipantCost" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
+						Update eRegistrations
+						Set AttendeePrice = <cfqueryparam value="#NumberFormat(FORM.ParticipantCost, '99999.99')#" cfsqltype="CF_SQL_DOUBLE">
+						Where EventID = <cfqueryparam value="#FORM.EventID#" cfsqltype="cf_sql_integer"> and
+							TContent_ID = <cfqueryparam value="#FORM.RegistrationID#" cfsqltype="cf_sql_integer">
+					</cfquery>
+					<cfcatch type="Database">
+						<cfdump var="#CFCATCH#"><cfabort>
+					</cfcatch>
+				</cftry>
+				<cflocation url="?#HTMLEditFormat(rc.pc.getPackage())#action=admin:events.eventattendedsheet&EventID=#FORM.EventID#&UserAction=ParticipantCostVerified" addtoken="false">
 			</cfif>
 		</cfif>
 	</cffunction>
@@ -5609,7 +5675,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
 					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
 					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealProvided, MealProvidedBy, MealCost_Estimated, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
+					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
 					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
 					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
 					WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost
@@ -5670,9 +5736,9 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfset Session.UserSuppliedInfo.PickedEvent.SpecialPriceRequirements = #GetSelectedEvent.SpecialPriceRequirements#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.PGPAvailable = #GetSelectedEvent.PGPAvailable#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.PGPPoints = #GetSelectedEvent.PGPPoints#>
-				<cfset Session.UserSuppliedInfo.PickedEvent.MealProvided = #GetSelectedEvent.MealProvided#>
+				<cfset Session.UserSuppliedInfo.PickedEvent.MealAvailable = #GetSelectedEvent.MealAvailable#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.MealProvidedBy = #GetSelectedEvent.MealProvidedBy#>
-				<cfset Session.UserSuppliedInfo.PickedEvent.MealCost_Estimated = #GetSelectedEvent.MealCost_Estimated#>
+				<cfset Session.UserSuppliedInfo.PickedEvent.MealCost = #GetSelectedEvent.MealCost#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.AllowVideoConference = #GetSelectedEvent.AllowVideoConference#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.VideoConferenceInfo = #GetSelectedEvent.VideoConferenceInfo#>
 				<cfset Session.UserSuppliedInfo.PickedEvent.VideoConferenceCost = #GetSelectedEvent.VideoConferenceCost#>

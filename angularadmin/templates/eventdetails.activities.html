@@ -1,0 +1,23 @@
+<div ng-controller="eventActivitiesController">
+	<h2>Event Activities</h2>
+	<div ng-if="subEvents.length == 0"><h2>No Activities Configured For This Event</h2></div>
+	
+	<div class="input-group col-centered custom-list-item " ng-repeat="subevent in subEvents">
+		<a  class="form-control"  ui-sref="eventDetails.subeventdetails({subevent: subevent.subeventid})">
+				{{subevent.subevent_name}}
+		</a>
+		 <span class="input-group-btn">
+			<button ng-click="deleteSubEvent(subevent.subeventid, $event);" type="button" class="deleteActivityButton btn btn-danger"><span class="glyphicon glyphicon-remove"></span> Delete</button>
+		</span>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<button id="AddActivityButton" type="button" class="btn btn-primary ng-scope" ui-sref="eventDetails.subeventdetails({subevent: -1})">Add an Activity</button>
+		</div>
+	</div>
+	
+
+
+
+
+</div>
