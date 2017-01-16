@@ -11,7 +11,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 </cfsilent>
 <cfquery name="getEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 	Select ShortTitle
-	From eEvents
+	From p_eventregistration_events
 	Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer"> and
 		Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar">
 </cfquery>

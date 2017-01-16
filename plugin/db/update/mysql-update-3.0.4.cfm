@@ -86,7 +86,7 @@
 </cfquery>
 <cfif ShowOldTableeEvents.RecordCount>
 	<cfquery name="AlterTableeEvents" datasource="#application.configBean.getDatasource()#" username="#application.configBean.getDBUsername()#" password="#application.configBean.getDBPassword()#">
-		ALTER TABLE eEvents RENAME p_EventRegistration_Events
+		ALTER TABLE p_eventregistration_events RENAME p_EventRegistration_Events
 	</cfquery>
 	<cfquery name="CheckTableFieldLocationType" datasource="#application.configBean.getDatasource()#" username="#application.configBean.getDBUsername()#" password="#application.configBean.getDBPassword()#">
 		SHOW COLUMNS FROM p_EventRegistration_Events LIKE 'LocationType'

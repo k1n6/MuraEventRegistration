@@ -1,0 +1,14 @@
+<div ng-controller="singleconfigController">
+	
+	<form  name="configForm" novalidate>
+		<formly-form model="configs[0]" fields="configFields" form="configForm">
+			<button id="saveconfigButton" type="button" ng-click="saveconfig(configs[0]);" class="btn btn-primary" ng-disabled="configForm.$invalid">Save Configuration</button>
+		</formly-form>
+	</form>
+	<!--
+		Here we need to list the existing option for this option group, and provide an add feature.	
+	-->
+		
+	</div>
+</div>
+		

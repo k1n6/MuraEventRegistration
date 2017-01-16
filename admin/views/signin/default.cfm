@@ -23,7 +23,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 		<cfcase value="EventDate">
 			<cfquery name="getEvents" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 				Select TContent_ID, ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4
-				From eEvents
+				From p_eventregistration_events
 				Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
 					EventDate = <cfqueryparam value="#DateFormat(FORM.SearchText, 'yyyy-mm-dd')#" cfsqltype="cf_sql_varchar"> or
 					
@@ -43,7 +43,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 		<cfcase value="ShortTitle">
 			<cfquery name="getEvents" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 				Select TContent_ID, ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4
-				From eEvents
+				From p_eventregistration_events
 				Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
 					ShortTitle LIKE '%#FORM.SearchText#%'
 				Order by EventDate ASC
@@ -53,7 +53,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 <cfelse>
 	<cfquery name="getEvents" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 		Select TContent_ID, ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4
-		From eEvents
+		From p_eventregistration_events
 		Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
 			EventDate = <cfqueryparam value="#DateFormat(Now(), 'yyyy-mm-dd')#" cfsqltype="cf_sql_varchar">
 		Order by EventDate ASC

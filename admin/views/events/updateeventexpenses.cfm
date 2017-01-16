@@ -62,7 +62,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 			<cfcase value="GeneratePLReport">
 				<cfquery name="getEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 					Select ShortTitle, MemberCost, NonMemberCost, EarlyBird_RegistrationAvailable, EarlyBird_RegistrationDeadline, EarlyBird_MemberCost, EarlyBird_NonMemberCost, ViewSpecialPricing, SpecialPriceRequirements, SpecialMemberCost, SpecialNonMemberCost, VideoConferenceCost, WebinarMemberCost, WebinarNonMemberCost
-					From eEvents
+					From p_eventregistration_events
 					Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer"> and Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar">
 				</cfquery>
 
@@ -89,7 +89,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 				<cfquery name="checkEventMatrix" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 					Select TContent_ID, Event_TotalIncomeFromOtherParty, Event_RebatePerParticipant
-					From eEventsMatrix
+					From p_eventregistration_eventsMatrix
 					Where Event_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 				</cfquery>
 
@@ -115,14 +115,14 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 				<cfif checkEventMatrix.RecordCount>
 					<cfquery name="updateEventmatrixInfo" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						update eEventsMatrix
+						update p_eventregistration_eventsMatrix
 						Set Event_TotalExpensesToHold = <cfqueryparam value="#Variables.EventTotalExpenses#" cfsqltype="cf_sql_double">,
 							Event_TotalIncomeFromParticipants = <cfqueryparam value="#Variables.EventTotalIncomeFromParticipants#" cfsqltype="cf_sql_double">
 						Where TContent_ID = #checkEventMatrix.TContent_ID#
 					</cfquery>
 				<cfelse>
 					<cfquery name="insertEventmatrixInfo" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						insert into eEventsMatrix(Event_ID, Event_TotalExpensesToHold, Event_TotalIncomeFromParticipants)
+						insert into p_eventregistration_eventsMatrix(Event_ID, Event_TotalExpensesToHold, Event_TotalIncomeFromParticipants)
 						Values(<cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">,
 							<cfqueryparam value="#Variables.EventTotalExpenses#" cfsqltype="cf_sql_double">,
 							<cfqueryparam value="#Variables.EventTotalIncomeFromParticipants#" cfsqltype="cf_sql_double">

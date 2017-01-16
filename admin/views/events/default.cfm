@@ -12,7 +12,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 <cfset PriorDate = #CreateDate(2015, 07, 01)#>
 <cfquery name="getAvailableEvents" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 	Select TContent_ID, ShortTitle, EventDate, LongDescription, PGPAvailable, MemberCost, NonMemberCost
-	From eEvents
+	From p_eventregistration_events
 	Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
 		EventDate >= <cfqueryparam value="#Variables.PriorDate#" cfsqltype="cf_sql_date"> and
 		EventCancelled = 0
@@ -37,7 +37,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfcase value="AttendedSent">
 						<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 							Select ShortTitle
-							From eEvents
+							From p_eventregistration_events
 							Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 						</cfquery>
 						<cfoutput>
@@ -64,7 +64,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfcase value="RemoveParticipants">
 						<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 							Select ShortTitle
-							From eEvents
+							From p_eventregistration_events
 							Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 						</cfquery>
 						<cfoutput>
@@ -76,7 +76,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfcase value="RegistrationsSent">
 						<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 							Select ShortTitle
-							From eEvents
+							From p_eventregistration_events
 							Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 						</cfquery>
 						<cfoutput>
@@ -88,7 +88,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfcase value="AttendedSent">
 						<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 							Select ShortTitle
-							From eEvents
+							From p_eventregistration_events
 							Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 						</cfquery>
 						<cfoutput>

@@ -99,6 +99,14 @@ app
     templateUrl: 'templates/coordinator-list.html'
   }
   
+    var singleConfigState = {
+		name: 'singleConfig',
+		url: '/singleConfig/:siteid', 
+		templateUrl: 'templates/single-config.html'
+  }
+
+  
+  
 
 	$stateProvider.state(eventListState);
 	$stateProvider.state(administrationState);
@@ -118,6 +126,8 @@ app
 	$stateProvider.state(coordinatorList);
 	
 	$stateProvider.state(eventDetailsReporting);
+	
+	$stateProvider.state(singleConfigState);
 })
 
 
@@ -183,13 +193,70 @@ var isOldBrowser;
 
 angular.module('eventsadmin')
 
-.controller('MainsCtrl', function($scope, $http, $document, $uibModal, orderByFilter, $rootScope) {
+.controller('MainsCtrl', function($scope, $http, $document, $uibModal, orderByFilter, $rootScope, $window, $timeout) {
   // Grab old version docs
+	//this gets our site id from index.cfm
+ 	$scope.siteid = $window.siteid;
+
 	$rootScope.$on('$stateChangeSuccess', 
 	function(event, toState, toParams, fromState, fromParams){ 
 		console.log('changing state to: ' + toState.name);
 	});
 	
+	$scope.$on('$viewContentLoaded', function(){
+		
+			$timeout(function(){
+				jQuery('textarea:visible').not('.ckeditoradded').addClass('ckeditoradded').each(function(){
+					try{
+						$(this).ckeditor(
+						
+							{ toolbar :
+									[
+										{ name: 'basicstyles', items : [ 'Bold','Italic' ] },
+										{ name: 'paragraph', items : [ 'NumberedList','BulletedList' ] },
+										{ name: 'tools', items : [ 'Maximize','-','About' ] },
+										{ name: 'links', items : [ 'Link','Unlink','Anchor' ] },
+										{ name: 'insert', items : [ 'Image','Flash','Table','HorizontalRule','Smiley','SpecialChar','PageBreak','Iframe' ] }
+									],
+							customConfig : 'config.js.cfm'}
+							,
+							function(editorInstance){
+								htmlEditorOnComplete(editorInstance);
+								
+							}
+
+						);
+					
+					
+						
+				
+						
+					}catch(e){
+						console.log('error: ');
+						console.log(e);
+					}
+				}
+				);
+				 for (var i in CKEDITOR.instances) {
+                	try{
+						CKEDITOR.instances[i].on('change', function(d) { 
+							try{
+								var useid = d.editor.name;							
+								mys = angular.element($("#" + useid)).scope();
+								mys.model[mys.options.key] = $('.cke_editor_' + useid + ' iframe').contents().find('body').html();
+							}catch(e){
+								console.log("Unable to update instance of ckeditor: " + e.message);
+							}
+							
+						});
+					}catch(e){
+						console.log("Unable to update instance of ckeditor: " + e.message);
+					}
+
+				}
+			}, 300);
+			
+	});
 	$http.get('/bootstrap/versions-mapping.json')
 	.then(function(result) {
 		$scope.oldDocs = result.data;
@@ -420,3 +487,6 @@ angular.module('eventsadmin')
 	
 	
 });
+
+
+

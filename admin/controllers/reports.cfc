@@ -44,7 +44,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 			<cfset EndYearDate = #Variables.EndDateYear# & "-" & #Variables.EndDateMonth# & "-" & #Variables.EndDateDay#>
 			<cfquery name="GetYearlyEvents" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 				Select TContent_ID, ShortTitle, EventDate, MemberCost, NonMemberCost
-				From eEvents
+				From p_eventregistration_events
 				Where EventDate BETWEEN '#Variables.BegYearDate#' and '#Variables.EndYearDate#' and EventCancelled = 0
 				Order by EventDate ASC
 			</cfquery>
@@ -74,7 +74,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfif GetRegistrations.RecordCount GTE 1>
 					<cfquery name="GetEventIncomeExpenses" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 						Select Event_TotalIncomeFromParticipants, Event_TotalExpensesToHold, Event_CostPerParticipant, Event_TotalIncomeFromOtherParty
-						From eEventsMatrix
+						From p_eventregistration_eventsMatrix
 						WHere Event_ID = #EventID#
 					</cfquery>
 					<cfset YearlyEvents[EventID] = StructNew() />
@@ -193,7 +193,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 			<cfset EndYearDate = #Variables.EndDateYear# & "-" & #Variables.EndDateMonth# & "-" & #Variables.EndDateDay#>
 			<cfquery name="Session.GetYearlyEvents" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 				Select TContent_ID, ShortTitle, EventDate, MemberCost, NonMemberCost
-				From eEvents
+				From p_eventregistration_events
 				Where EventDate BETWEEN '#Variables.BegYearDate#' and '#Variables.EndYearDate#' and EventCancelled = 0
 				Order by EventDate ASC
 			</cfquery>
@@ -223,7 +223,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfif GetRegistrations.RecordCount GTE 1>
 					<cfquery name="GetEventIncomeExpenses" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 						Select Event_TotalIncomeFromParticipants, Event_TotalExpensesToHold, Event_CostPerParticipant, Event_TotalIncomeFromOtherParty
-						From eEventsMatrix
+						From p_eventregistration_eventsMatrix
 						WHere Event_ID = #EventID#
 					</cfquery>
 					<cfset YearlyEvents[EventID] = StructNew() />

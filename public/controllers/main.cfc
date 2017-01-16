@@ -34,7 +34,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						Active = <cfqueryparam value="1" cfsqltype="cf_sql_bit">
 				</cfquery>
 				<cfquery name="getNonFeaturedEvents" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-					Select ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, TContent_ID, EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, AcceptRegistrations, Registration_Deadline, MaxParticipants, PGPAvailable, AllowVideoConference, WebinarAvailable, Presenters, EventHasDailySessions, Session1BeginTime, Session1EndTime, Session2BeginTime, Session2EndTime
+					Select *
 					From p_EventRegistration_Events
 					Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
 						DateDiff(EventDate, Now()) >= <cfqueryparam value="0" cfsqltype="cf_sql_integer"> and
@@ -63,7 +63,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					Order By EventDate
 				</cfquery>
 				<cfquery name="getFeaturedEvents" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-					Select ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, TContent_ID, EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, AcceptRegistrations, Registration_Deadline, MaxParticipants, PGPAvailable, AllowVideoConference, WebinarAvailable, Presenters, EventHasDailySessions, Session1BeginTime, Session1EndTime, Session2BeginTime, Session2EndTime
+					Select *
 					From p_EventRegistration_Events
 					Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
 						DateDiff(EventDate, Now()) >= <cfqueryparam value="0" cfsqltype="cf_sql_integer"> and
@@ -102,7 +102,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						Active = <cfqueryparam value="1" cfsqltype="cf_sql_bit">
 				</cfquery>
 				<cfquery name="getNonFeaturedEvents" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-					Select ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, TContent_ID, EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, AcceptRegistrations, Registration_Deadline, MaxParticipants, PGPAvailable, AllowVideoConference, WebinarAvailable, Presenters, EventHasDailySessions, Session1BeginTime, Session1EndTime, Session2BeginTime, Session2EndTime
+					Select *
 					From p_EventRegistration_Events
 					Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
 						DateDiff("d",GETUTCDATE(), EventDate ) >= <cfqueryparam value="0" cfsqltype="cf_sql_integer"> and
@@ -131,7 +131,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					Order By EventDate
 				</cfquery>
 				<cfquery name="getFeaturedEvents" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-					Select ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, TContent_ID, EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, AcceptRegistrations, Registration_Deadline, MaxParticipants, PGPAvailable, AllowVideoConference, WebinarAvailable, Presenters, EventHasDailySessions, Session1BeginTime, Session1EndTime, Session2BeginTime, Session2EndTime
+					Select *
 					From p_EventRegistration_Events
 					Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
 						DateDiff("d", GETUTCDATE(), EventDate) >= <cfqueryparam value="0" cfsqltype="cf_sql_integer"> and
@@ -190,6 +190,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfset FeatureEventWebinarAvailable = #getFeaturedEvents.WebinarAvailable#>
 					<cfset FeatureEventPresenter = #getFeaturedEvents.Presenters#>
 					<cfset FeaturedEventSeatsLeft = #Variables.FeatureEventMaxParticipants# - #getCurrentRegistrationsbyEvent.CurrentNumberofRegistrations#>
+					
 				<cfelse>
 					<cfset temp = #QueryAddRow(getNonFeaturedEvents, 1)#>
 					<cfset temp = #QuerySetCell(getNonFeaturedEvents, "ShortTitle", getFeaturedEvents.ShortTitle)#>
@@ -219,6 +220,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfset temp = #QuerySetCell(getNonFeaturedEvents, "AllowVideoConference", getFeaturedEvents.AllowVideoConference)#>
 					<cfset temp = #QuerySetCell(getNonFeaturedEvents, "WebinarAvailable", getFeaturedEvents.WebinarAvailable)#>
 					<cfset temp = #QuerySetCell(getNonFeaturedEvents, "Presenters", getFeaturedEvents.Presenters)#>
+					
 				</cfif>
 			</cfloop>
 		</cfif>
@@ -228,7 +230,10 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 	<cffunction name="eventinfo" returntype="any" output="false">
 		<cfargument name="rc" required="true" type="struct" default="#StructNew()#">
-
+		<cfif isdefined('rc.eventid') and val(rc.eventid) gt 0>
+			<cfobject name="fr" component="cfcs.ferrari_reg">
+			<cfset rc.event_data = fr.getFullEventData(rc.eventid)>
+		</cfif>
 		<cfif isDefined("URL.EventID")>
 			<cfquery name="getSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 				Select ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime, EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost, EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost, ViewGroupPricing, GroupMemberCost, GroupNonMemberCost, GroupPriceRequirements, PGPAvailable, PGPPoints, MealAvailable, MealIncluded, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost, AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, MaxParticipants, LocationID, LocationRoomID, Presenters, Facilitator, Active, EventCancelled, WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost, EventHasDailySessions, Session1BeginTime, Session1EndTime, Session2BeginTime, Session2EndTime

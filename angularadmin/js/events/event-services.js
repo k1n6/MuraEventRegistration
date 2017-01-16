@@ -290,7 +290,36 @@ angular.module('eventsadmin')
 				return promise;	
 
 			}
+			,
+			getconfigs : function(siteid){
+				var promise;
+				 var url = '/Taffy/index.cfm/config/' + siteid;
+					promise = $http.get(url)
+					 .then(function (response) {
+						response = setBooleans(response);
+						return response.data;
+					});
+				return promise;
 
+			},
+			saveconfig : function(siteid, config){
+				var promise;
+				var url = '/Taffy/index.cfm/config/'+siteid;
+				var wrapped_config = {};
+				wrapped_config.input_data = config;
+				wrapped_config.siteid = siteid;
+				var input_data = JSON.stringify(wrapped_config);
+				promise = $http.put(url, input_data).then(function(response){
+					response = setBooleans(response);
+					return response.data;
+				});
+				return promise;
+
+			}
+
+
+
+		
 
 
 		

@@ -31,7 +31,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfset DomainSite = #LCase(Mid(tmpGetAllUsers.Email, Find("@", tmpGetAllUsers.Email, 1) + 1, 100))#>
 						<cfset temp = #QuerySetCell(GetAllUsers, "EmailDomain", Variables.DomainSite)#>
 					</cfloop>
-					<cfquery name="GetYearlyEvents" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">Select TContent_ID, ShortTitle, EventDate, MemberCost, NonMemberCost From eEvents Where EventDate BETWEEN '#DateFormat(FORM.ReportStartDate, "yyyy-mm-dd")#' and '#DateFormat(FORM.ReportEndDate, "yyyy-mm-dd")#' Order by EventDate ASC</cfquery>
+					<cfquery name="GetYearlyEvents" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">Select TContent_ID, ShortTitle, EventDate, MemberCost, NonMemberCost From p_eventregistration_events Where EventDate BETWEEN '#DateFormat(FORM.ReportStartDate, "yyyy-mm-dd")#' and '#DateFormat(FORM.ReportEndDate, "yyyy-mm-dd")#' Order by EventDate ASC</cfquery>
 					<cfset GetYearlyEventsList = #ValueList(GetYearlyEvents.TContent_ID, ",")#>
 					<cfquery name="GetAllRegistrations" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">Select EventID, User_ID, AttendedEvent From eRegistrations Where EventID IN (#Variables.GetYearlyEventsList#)</cfquery>
 					<cfset Session.YearlyEvents = ArrayNew(2)>

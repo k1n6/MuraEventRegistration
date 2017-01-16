@@ -33,7 +33,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 	
 	<cfquery name="getEvents" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 		Select TContent_ID, ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4
-		From eEvents
+		From p_eventregistration_events
 		Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
 			TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 		Order by EventDate ASC

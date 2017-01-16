@@ -1,4 +1,4 @@
-<cfsilent>
+
 	<!---
 		This file is part of MuraFW1
 
@@ -6,7 +6,47 @@
 		Licensed under the Apache License, Version v2.0
 		http://www.apache.org/licenses/LICENSE-2.0
 	--->
+	<cfobject name="em" component="cfcs.event_members">
+	
+	
+	<cfsavecontent variable="debug">
+	<cfif isdefined("session.stmember.id") and session.stmember.id gt 0 and not Session.Mura.IsLoggedIn EQ True>
+		<!---
+			Here they are logged into as a ferrari member, so lets create the mura session
+		--->
+		Attempting mura login.
+		<cfset userLogin = em.logUserInToMura(0, session.stmember.membernumber, session.stmember.id)>
+			<cfoutput>#userLogin#</cfoutput>
+		<cfif userLogin contains "no matrix entry">
+			Attempting to create user....
+			<cfset res = em.createUserFromMember(session.stmember.membernumber, session.stmember.id)>
+			
+			<cfset userLogin = em.logUserInToMura(0, session.stmember.membernumber, session.stmember.id)>
+		</cfif>
+		<cfoutput>userLogin results: #userLogin#</cfoutput><br>
+
+		Done.
+		
+	</cfif>
+	
 	<cfif Session.Mura.IsLoggedIn EQ True>
+		<cfset currentuser = $.currentUser().getUserid()>
+		
+		<!---   
+			here we are log into the ferrari session to make sure they are synch'd
+		 ---> 
+		 <cfif isdefined('session.stmember.id') and val(session.stmember.id) gt 0>
+			 <cfset t = em.createFerrariSession(0, session.stmember.id, session.stmember.membernumber, currentuser)>
+			 <cfif t eq "true">
+
+			 <cfelse>
+				Error creating ferrari session: <cfoutput> #t#</cfoutput>.<br><br>
+
+				<cfabort>
+			</cfif>
+		 </cfif>
+			
+		
 		<cfparam name="Session.Mura.EventCoordinatorRole" default="0" type="boolean">
 		<cfparam name="Session.Mura.EventPresenterRole" default="0" type="boolean">
 		<cfparam name="Session.Mura.SuperAdminRole" default="0" type="boolean">
@@ -19,19 +59,27 @@
 		<cfif Session.Mura.EventCoordinatorRole EQ "True"><cfoutput>#Variables.this.redirect(action = "eventcoord:main.default", path = cgi.path_info)#</cfoutput></cfif>
 		<cfif Session.Mura.SuperAdminRole EQ "true"><cfoutput>#Variables.this.redirect(action = "siteadmin:main.default", path = cgi.path_info)#</cfoutput></cfif>
 
+	<!---   
 		<cfif isDefined("Session.UserRegistrationInfo")>
-			<cfif DateDiff("n", Session.UserRegistrationInfo.DateRegistered, Now()) LTE 15>
+			<cfif DateDiff("n", Session.UserRegistrationInfo.DateRegistered, Now()) LTE 5>
 				<cflocation url="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:registerevent.default&EventID=#Session.UserRegistrationInfo.EventID#" addtoken="false">
 			<cfelse>
 				<cflocation url="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.UserRegistrationInfo.EventID#" addtoken="false">
 			</cfif>
 		</cfif>
+		--->
 	<cfelse>
 		<cfparam name="Session.Mura.EventCoordinatorRole" default="0" type="boolean">
 		<cfparam name="Session.Mura.EventPresenterRole" default="0" type="boolean">
 		<cfparam name="Session.Mura.SuperAdminRole" default="0" type="boolean">
 	</cfif>
-</cfsilent>
+			</cfsavecontent>
+			
+		<cfif isdefined("url.debug") and url.debug eq "true">
+				<h2>debug output</h2>
+				<cfoutput>debug output: '#debug#'</cfoutput>
+		</cfif>
+	
 <cfoutput>
 	<cfif isDefined("URL.UserAction")>
 		<cfswitch expression="#URL.UserAction#">
@@ -638,7 +686,7 @@
 							</cfquery>
 							<cfset EventSeatsLeft = #Session.getFeaturedEvents.MaxParticipants# - #getCurrentRegistrationsbyEvent.CurrentNumberofRegistrations#>
 							<tr>
-								<td>#Session.getFeaturedEvents.ShortTitle#<cfif LEN(Session.getFeaturedEvents.Presenters)><cfquery name="getPresenter" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">Select FName, LName From tusers where UserID = <cfqueryparam value="#Session.getFeaturedEvents.Presenters#" cfsqltype="cf_sql_varchar"></cfquery><br><em>Presenter: #getPresenter.FName# #getPresenter.Lname#</em></cfif></td>
+								<td><span class="event_header">#Session.getFeaturedEvents.ShortTitle#</span><cfif LEN(Session.getFeaturedEvents.Presenters)><cfquery name="getPresenter" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">Select FName, LName From tusers where UserID = <cfqueryparam value="#Session.getFeaturedEvents.Presenters#" cfsqltype="cf_sql_varchar"></cfquery><br><em>Presenter: #getPresenter.FName# #getPresenter.Lname#</em></cfif></td>
 								<td>
 									<cfif LEN(Session.getFeaturedEvents.EventDate) and LEN(Session.getFeaturedEvents.EventDate1) or LEN(Session.getFeaturedEvents.EventDate2) or LEN(Session.getFeaturedEvents.EventDate3) or LEN(Session.getFeaturedEvents.EventDate4)>
 										<cfif DateDiff("d", Now(), Session.getFeaturedEvents.EventDate) LT 0>
@@ -681,8 +729,9 @@
 								<td>
 									<cfif Session.getFeaturedEvents.AcceptRegistrations EQ 1>
 										<a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small" alt="Event Information">More Info</a>
-										<cfif Variables.EventSeatsLeft GTE 1 and DateDiff("d", Now(), Session.getFeaturedEvents.Registration_Deadline) GTE 0>
-											| <a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:registerevent.default&EventID=#Session.getFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small" alt="Register Event">Register</a>
+										 
+										<cfif DateDiff("d", Now(), Session.getFeaturedEvents.Registration_Deadline) GTE 0>
+											| <a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:ferrarireg.default&EventID=#Session.getFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small" alt="Register Event">Register</a>
 										</cfif>
 									<CFELSE>
 										<a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small" alt="Event Information">More Info</a>
@@ -702,7 +751,7 @@
 							<th width="50%">Event Title</th>
 							<th width="15%">Event Date</th>
 							<th width="20%">Event Actions</th>
-							<th width="15%">Event Attributes</th>
+							
 						</tr>
 					</thead>
 					<tbody>
@@ -715,7 +764,10 @@
 							</cfquery>
 							<cfset EventSeatsLeft = #Session.getNonFeaturedEvents.MaxParticipants# - #getCurrentRegistrationsbyEvent.CurrentNumberofRegistrations#>
 							<tr>
-								<td>#Session.getNonFeaturedEvents.ShortTitle#<cfif LEN(Session.getNonFeaturedEvents.Presenters)><cfquery name="getPresenter" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">Select FName, LName From tusers where UserID = <cfqueryparam value="#Session.getNonFeaturedEvents.Presenters#" cfsqltype="cf_sql_varchar"></cfquery><br><em>Presenter: #getPresenter.FName# #getPresenter.Lname#</em></cfif></td>
+								<td><span class="event_header">#Session.getNonFeaturedEvents.ShortTitle#</span>
+								<cfif LEN(Session.getNonFeaturedEvents.Presenters)><cfquery name="getPresenter" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">Select FName, LName From tusers where UserID = <cfqueryparam value="#Session.getNonFeaturedEvents.Presenters#" cfsqltype="cf_sql_varchar"></cfquery><br><em>Presenter: #getPresenter.FName# #getPresenter.Lname#</em></cfif><br>
+								#Session.getNonFeaturedEvents.longDescription#
+</td>
 								<td>
 									<cfif LEN(Session.getNonFeaturedEvents.EventDate) and LEN(Session.getNonFeaturedEvents.EventDate1) or LEN(Session.getNonFeaturedEvents.EventDate2) or LEN(Session.getNonFeaturedEvents.EventDate3) or LEN(Session.getNonFeaturedEvents.EventDate4)>
 										<cfif DateDiff("d", Now(), Session.getNonFeaturedEvents.EventDate) LT 0>
@@ -758,28 +810,21 @@
 								<td>
 									<cfif Session.getNonFeaturedEvents.AcceptRegistrations EQ 1>
 										<a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getNonFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small" alt="Event Information">More Info</a>
-										<cfif Variables.EventSeatsLeft GTE 1 and DateDiff("d", Now(), Session.getNonFeaturedEvents.Registration_Deadline) GTE 0>
-											| <a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:registerevent.default&EventID=#Session.getNonFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small" alt="Register Event">Register</a>
+										<cfif  DateDiff("d", Now(), Session.getNonFeaturedEvents.Registration_Deadline) GTE 0>
+											| <a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:ferrarireg.default&EventID=#Session.getNonFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small" alt="Register Event">Register</a>
 										</cfif>
 									<CFELSE>
 										<a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getNonFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small" alt="Event Information">More Info</a>
 									</cfif>
 								</td>
-								<td><cfif Session.getNonFeaturedEvents.PGPAvailable EQ 1><a href="##eventPGPCertificate" data-toggle="modal"><img src="/plugins/#HTMLEditFormat(rc.pc.getPackage())#/includes/assets/images/award.png" alt="PGP Certificate" border="0"></cfif><cfif Session.getNonFeaturedEvents.AllowVideoConference EQ 1 or Session.getNonFeaturedEvents.WebinarAvailable EQ 1><img src="/plugins/#HTMLEditFormat(rc.pc.getPackage())#/includes/assets/images/wifi.png" "Online Learning" border="0"></a></cfif></td>
+								
 							</tr>
 						</cfloop>
 					</tbody>
 				</table>
 			</cfif>
 		</div>
-		<div class="panel-footer">
-			<table class="table">
-				<tr>
-					<td style="vertical-align:top; font-family: Arial; font-size:24px; font-weight:bold;">Legend:</td>
-					<td>Greyed out Event Dates have already passed. If event does not display a Register button, the online registration deadline has passed.<br><br>Please contact #rc.$.siteConfig('site')# at #rc.$.siteConfig('ContactEmail')# or #rc.$.siteConfig('ContactPhone')# to check availablity for the event.<hr><a href="##eventPGPCertificate" data-toggle="modal"><img src="/plugins/#HTMLEditFormat(rc.pc.getPackage())#/includes/assets/images/award.png" alt="PGP Certificate" border="0"></a> = PGP Certificate Available</td>
-				</tr>
-			</table>
-		</div>
+		
 	</div>
 
 	<div id="eventPGPCertificate" class="modal fade">

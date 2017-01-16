@@ -33,7 +33,26 @@
 
 <div ng-controller="MainsCtrl" ng-init="getStoredActive();" id="top" ng-app="eventsadmin">
 
+	<cfscript>
+		 private struct function get$() {
+				if ( !StructKeyExists(arguments, '$') ) {
+					var siteid = StructKeyExists(session, 'siteid') ? session.siteid : 'default';
 
+					arguments.$ = StructKeyExists(request, 'murascope')
+						? request.murascope
+						: StructKeyExists(application, 'serviceFactory')
+							? application.serviceFactory.getBean('$').init(siteid)
+							: {};
+				}
+
+				return arguments.$;
+			}
+			$ = get$();
+		
+		</cfscript>
+		<script>
+			window.siteid = "<cfoutput>#$.siteConfig('siteid')#</cfoutput>";
+		</script>
 <div role="main">
     <header class="bs-header text-center" id="overview">
         <div class="container">
@@ -62,7 +81,7 @@
 						
 						heading="Event List"></uib-tab>
 				<uib-tab 
-						ui-sref="administration"
+						 ui-sref="singleConfig({siteid : siteid })"
 						ng-click="setActiveTab(1);"
 						select = ""
 						index="1"

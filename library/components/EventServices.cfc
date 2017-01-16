@@ -163,9 +163,9 @@
 		<cfset TodayDate = #DateFormat(Now(), "yyyy-mm-dd")#>
 
 		<cfquery name="getEvent" Datasource="NIESCEventRegistration" username="CFAppsMySQL" password="CFAppsMySQL">
-			Select eEvents.TContent_ID, eEvents.ShortTitle, eEvents.EventDate, eEvents.LongDescription
-			From eEvents
-			Where eEvents.EventDate > <cfqueryparam value="#Variables.TodayDate#" cfsqltype="cf_sql_date"> and
+			Select p_eventregistration_events.TContent_ID, p_eventregistration_events.ShortTitle, p_eventregistration_events.EventDate, p_eventregistration_events.LongDescription
+			From p_eventregistration_events
+			Where p_eventregistration_events.EventDate > <cfqueryparam value="#Variables.TodayDate#" cfsqltype="cf_sql_date"> and
 				eEvents.EventDate < <cfqueryparam value="#Variables.DateInFuture#" cfsqltype="cf_sql_date"> and
 				eEvents.Site_ID = <cfqueryparam value="#Arguments.SiteID#" cfsqltype="cf_sql_varchar"> and
 				eEvents.Active = 1

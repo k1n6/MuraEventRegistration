@@ -19,7 +19,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 	
 	<cfquery name="getEvents" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 		Select TContent_ID, ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4
-		From eEvents
+		From p_eventregistration_events
 		Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
 			TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 		Order by EventDate ASC
@@ -28,8 +28,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 	<cfquery name="getRegisteredAttendee" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 		Select 	eEvents.TContent_ID, eRegistrations.UserID, eRegistrations.RegistrationID, eRegistrations.RegistrationDate, eRegistrations.AttendedEvent,
 			eRegistrations.Comments, tusers.Fname, tusers.Lname, tusers.Email, tusers.Company
-		FROM eEvents RIGHT OUTER JOIN eRegistrations ON eRegistrations.EventID = eEvents.TContent_ID LEFT OUTER JOIN tusers ON tusers.UserID = eRegistrations.UserID
-		WHERE eEvents.TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer"> AND eRegistrations.AttendedEvent = <cfqueryparam value="0" cfsqltype="cf_sql_integer">
+		FROM p_eventregistration_events RIGHT OUTER JOIN eRegistrations ON eRegistrations.EventID = p_eventregistration_events.TContent_ID LEFT OUTER JOIN tusers ON tusers.UserID = eRegistrations.UserID
+		WHERE p_eventregistration_events.TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer"> AND eRegistrations.AttendedEvent = <cfqueryparam value="0" cfsqltype="cf_sql_integer">
 		ORDER BY tusers.Lname ASC, tusers.Fname ASC
 	</cfquery>
 		

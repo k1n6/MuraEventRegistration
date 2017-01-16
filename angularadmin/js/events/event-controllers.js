@@ -456,6 +456,70 @@ angular.module('eventsadmin')
 
 		
 
+.controller('configListController', ['$scope', 'eventServices', '$stateParams', '$state', function($scope, eventServices, $stateParams, $state){
+	$scope.configs = [];
+	$scope.eventid = $stateParams.eventid;
+	$scope.subevent = $stateParams.subevent;
+	if(typeof $scope.subevent == 'undefined' || $scope.subevent == null){
+		$scope.subevent = -1;
+		$stateParams.subevent = -1;
+	}
+	console.log($scope.subevent);
+	
+	$scope.deleteconfig = function(config_id, $event){
+		eventServices.deleteconfig(config_id).then(function(res){
+			$state.go('eventDetails.configlist', {eventid: $stateParams.eventid, subevent: $scope.subevent}, {reload: true});
+		});
+		
+		$event.stopPropagation();
+		$event.preventDefault();
+		
+	}
+	data = eventServices.getconfigs($stateParams.eventid,0, $scope.subevent);
+	data.then(function(resp){
+		$scope.configs = resp;
+	});
+}])
+
+.controller('singleconfigController', ['$scope', 'eventServices', '$stateParams', '$state', function($scope, eventServices, $stateParams, $state){
+	$scope.configs = [];
+	//we need to figure out / decide if we are viewing a main events options for an acitivities events
+	$scope.siteid = $stateParams.siteid;
+	
+
+	
+	//here we load our form variables
+	$scope.configFields = 	[];
+	eventServices.getFormData('p_eventregistration_configs').then(function(d){
+		$scope.configFields = d;
+	});
+	
+	
+	$scope.updateconfigData= function(){
+			
+			data = eventServices.getconfigs($stateParams.siteid);
+			data.then(function(resp){
+				$scope.configs = resp;
+			});
+		}
+	$scope.updateconfigData();
+	
+	$scope.saveconfig = function(config){
+		
+		config.siteid = $stateParams.siteid;
+		eventServices.saveconfig(config.siteid, config ).then(function(d){
+
+				$state.go('singleConfig', 
+					{siteid: $scope.siteid
+					 }	,
+						  {reload: true}
+						);
+		});
+	};	
+	
+}])
+
+		
 
 
 .controller('singlePriceController', ['$scope', 'eventServices', '$stateParams', '$state', function($scope, eventServices, $stateParams, $state){

@@ -16,14 +16,14 @@ http://www.apache.org/licenses/LICENSE-2.0
 		<cfargument name="rc" required="true" type="struct" default="#StructNew()#">
 		<cfquery name="Session.getSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 			Select *
-			From eEvents
+			From p_eventregistration_events
 			Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
 				TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 		</cfquery>
 
 		<cfquery name="Session.getAttendedParticipants" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-			SELECT eRegistrations.TContent_ID, eRegistrations.RequestsMeal, eRegistrations.IVCParticipant, eRegistrations.RegistrationDate, eRegistrations.AttendeePrice, eRegistrations.AttendedEvent, eRegistrations.AttendeePriceVerified, eRegistrations.AttendeePrice as CostToAttend, tusers.Fname, tusers.Lname, tusers.Company, tusers.Email, SUBSTRING_INDEX(tusers.Email,"@",-1) AS Domain, eEvents.ShortTitle, Date_FORMAT(eEvents.EventDate, "%a, %M %d, %Y") as EventDateFormat
-			FROM eRegistrations INNER JOIN tusers ON tusers.UserID = eRegistrations.User_ID INNER JOIN eEvents ON eEvents.TContent_ID = eRegistrations.EventID
+			SELECT eRegistrations.TContent_ID, eRegistrations.RequestsMeal, eRegistrations.IVCParticipant, eRegistrations.RegistrationDate, eRegistrations.AttendeePrice, eRegistrations.AttendedEvent, eRegistrations.AttendeePriceVerified, eRegistrations.AttendeePrice as CostToAttend, tusers.Fname, tusers.Lname, tusers.Company, tusers.Email, dbo.SUBSTRING_INDEX(tusers.Email,'@',-1) AS Domain, p_eventregistration_events.ShortTitle, Date_FORMAT(eEvents.EventDate, "%a, %M %d, %Y") as EventDateFormat
+			FROM eRegistrations INNER JOIN tusers ON tusers.UserID = eRegistrations.User_ID INNER JOIN p_eventregistration_events ON p_eventregistration_events.TContent_ID = eRegistrations.EventID
 			WHERE eRegistrations.EventID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer"> and
 				eRegistrations.Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
 				eRegistrations.AttendedEvent = <cfqueryparam value="1" cfsqltype="cf_sql_bit">
@@ -32,7 +32,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 		<cfquery name="Session.getEventIncomeFromOtherParty" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 			Select Event_TotalIncomeFromOtherParty
-			From eEventsMatrix
+			From p_eventregistration_eventsMatrix
 			Where Event_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 		</cfquery>
 
@@ -285,12 +285,12 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 			<cftry>
 				<cfquery name="insertNewEvent" result="insertNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-					Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active)
+					Insert into p_eventregistration_events(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active)
 					Values ("#rc.$.siteConfig('siteID')#", "#Session.UserSuppliedInfo.ShortTitle#", #CreateDate(ListLast(Session.UserSuppliedInfo.EventDate, "/"), ListFirst(Session.UserSuppliedInfo.EventDate, "/"), ListGetAt(Session.UserSuppliedInfo.EventDate, 2, "/"))#, "#Session.UserSuppliedInfo.LongDescription#", #Variables.EventStartTimeObject#, #Variables.EventEndTimeObject#, #CreateDate(ListLast(Session.UserSuppliedInfo.Registration_Deadline, "/"), ListFirst(Session.UserSuppliedInfo.Registration_Deadline, "/"), ListGetAt(Session.UserSuppliedInfo.Registration_Deadline, 2, "/"))#, #Variables.EventRegistrationEndTimeObject#, #Session.UserSuppliedInfo.EventFeatured#, #Session.UserSuppliedInfo.EarlyBird_RegistrationAvailable#, #Session.UserSuppliedInfo.ViewSpecialPricing#, #Session.UserSuppliedInfo.PGPAvailable#, #Session.UserSuppliedInfo.MealAvailable#, #Session.UserSuppliedInfo.AllowVideoConference#, #Session.UserSuppliedInfo.AcceptRegistrations#, "#Session.UserSuppliedInfo.Facilitator#", #Now()#, #Session.UserSuppliedInfo.RoomMaxParticipants#, #FORM.Active# )
 				</cfquery>
 
 				<cfquery name="updateEventLocationInfo" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-					Update eEvents
+					Update p_eventregistration_events
 					Set LocationType = '#Session.UserSuppliedInfo.LocationType#',
 						LocationID = #Session.UserSuppliedInfo.LocationID#,
 						LocationRoomID = #Session.UserSuppliedInfo.LocationRoomID#,
@@ -302,7 +302,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfif isDefined("Session.UserSuppliedInfo.EventDate1")>
 					<cfif #isDate(Session.UserSuppliedInfo.EventDate1)# EQ 1>
 						<cfquery name="updateEventDate1" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EventDate1 = #CreateDate(ListLast(Session.UserSuppliedInfo.EventDate1, "/"), ListFirst(Session.UserSuppliedInfo.EventDate1, "/"), ListGetAt(Session.UserSuppliedInfo.EventDate1, 2, "/"))#
 							Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
@@ -312,7 +312,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfif isDefined("Session.UserSuppliedInfo.EventDate2")>
 					<cfif #isDate(Session.UserSuppliedInfo.EventDate2)# EQ 1>
 						<cfquery name="updateEventDate2" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EventDate2 = #CreateDate(ListLast(Session.UserSuppliedInfo.EventDate2, "/"), ListFirst(Session.UserSuppliedInfo.EventDate2, "/"), ListGetAt(Session.UserSuppliedInfo.EventDate2, 2, "/"))#
 							Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
@@ -322,7 +322,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfif isDefined("Session.UserSuppliedInfo.EventDate3")>
 					<cfif #isDate(Session.UserSuppliedInfo.EventDate3)# EQ 1>
 						<cfquery name="updateEventDate3" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EventDate3 = #CreateDate(ListLast(Session.UserSuppliedInfo.EventDate3, "/"), ListFirst(Session.UserSuppliedInfo.EventDate3, "/"), ListGetAt(Session.UserSuppliedInfo.EventDate3, 2, "/"))#
 							Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
@@ -332,7 +332,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfif isDefined("Session.UserSuppliedInfo.EventDate4")>
 					<cfif #isDate(Session.UserSuppliedInfo.EventDate4)# EQ 1>
 						<cfquery name="updateEventDate4" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EventDate4 = #CreateDate(ListLast(Session.UserSuppliedInfo.EventDate4, "/"), ListFirst(Session.UserSuppliedInfo.EventDate4, "/"), ListGetAt(Session.UserSuppliedInfo.EventDate4, 2, "/"))#
 							Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
@@ -342,7 +342,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfif isDefined("Session.UserSuppliedInfo.EventDate5")>
 					<cfif #isDate(Session.UserSuppliedInfo.EventDate5)# EQ 1>
 						<cfquery name="updateEventDate5" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EventDate5 = #CreateDate(ListLast(Session.UserSuppliedInfo.EventDate5, "/"), ListFirst(Session.UserSuppliedInfo.EventDate5, "/"), ListGetAt(Session.UserSuppliedInfo.EventDate5, 2, "/"))#
 							Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
@@ -352,7 +352,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfif isDefined("Session.UserSuppliedInfo.EventAgenda")>
 					<cfif LEN(Session.UserSuppliedInfo.EventAgenda)>
 						<cfquery name="updateEventAgenda" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EventAgenda = <cfqueryparam value="#Session.UserSuppliedInfo.EventAgenda#" cfsqltype="cf_sql_varchar">
 							Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
@@ -362,7 +362,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfif isDefined("Session.UserSuppliedInfo.EventTargetAudience")>
 					<cfif LEN(Session.UserSuppliedInfo.EventTargetAudience)>
 						<cfquery name="updateEventAgenda" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EventTargetAudience = <cfqueryparam value="#Session.UserSuppliedInfo.EventTargetAudience#" cfsqltype="cf_sql_varchar">
 							Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
@@ -372,7 +372,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfif isDefined("Session.UserSuppliedInfo.EventStrategies")>
 					<cfif LEN(Session.UserSuppliedInfo.EventStrategies)>
 						<cfquery name="updateEventAgenda" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EventStrategies = <cfqueryparam value="#Session.UserSuppliedInfo.EventStrategies#" cfsqltype="cf_sql_varchar">
 							Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
@@ -382,7 +382,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfif isDefined("Session.UserSuppliedInfo.EventSpecialInstructions")>
 					<cfif LEN(Session.UserSuppliedInfo.EventSpecialInstructions)>
 						<cfquery name="updateEventAgenda" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EventSpecialInstructions = <cfqueryparam value="#Session.UserSuppliedInfo.EventSpecialInstructions#" cfsqltype="cf_sql_varchar">
 							Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
@@ -391,7 +391,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 				<cfif Session.UserSuppliedInfo.EventFeatured EQ 1>
 					<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set Featured_StartDate = #CreateDate(ListLast(Session.UserSuppliedInfo.Featured_StartDate, "/"), ListFirst(Session.UserSuppliedInfo.Featured_StartDate, "/"), ListGetAt(Session.UserSuppliedInfo.Featured_StartDate, 2, "/"))#,
 							Featured_EndDate = #CreateDate(ListLast(Session.UserSuppliedInfo.Featured_EndDate, "/"), ListFirst(Session.UserSuppliedInfo.Featured_EndDate, "/"), ListGetAt(Session.UserSuppliedInfo.Featured_EndDate, 2, "/"))#,
 							Featured_SortOrder = <cfqueryparam value="#Session.UserSuppliedInfo.Featured_SortOrder#" cfsqltype="cf_sql_integer">
@@ -401,7 +401,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 				<cfif Session.UserSuppliedInfo.EarlyBird_RegistrationAvailable EQ 1>
 					<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set EarlyBird_RegistrationAvailable = <cfqueryparam value="#Session.UserSuppliedInfo.EarlyBird_RegistrationAvailable#" cfsqltype="cf_sql_bit">,
 							EarlyBird_RegistrationDeadline = #CreateDate(ListLast(Session.UserSuppliedInfo.EarlyBird_RegistrationDeadline, "/"), ListFirst(Session.UserSuppliedInfo.EarlyBird_RegistrationDeadline, "/"), ListGetAt(Session.UserSuppliedInfo.EarlyBird_RegistrationDeadline, 2, "/"))#,
 							EarlyBird_MemberCost = "#Session.UserSuppliedInfo.EarlyBird_MemberCost#",
@@ -412,7 +412,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 				<cfif Session.UserSuppliedInfo.ViewSpecialPricing EQ 1>
 					<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set ViewSpecialPricing = <cfqueryparam value="#Session.UserSuppliedInfo.ViewSpecialPricing#" cfsqltype="cf_sql_bit">,
 							SpecialMemberCost = "#Session.UserSuppliedInfo.SpecialMemberCost#",
 							SpecialNonMemberCost = "#Session.UserSuppliedInfo.SpecialNonMemberCost#",
@@ -423,7 +423,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 				<cfif Session.UserSuppliedInfo.PGPAvailable EQ 1>
 					<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set PGPAvailable = <cfqueryparam value="#Session.UserSuppliedInfo.PGPAvailable#" cfsqltype="cf_sql_bit">,
 							PGPPoints = <cfqueryparam value="#Session.UserSuppliedInfo.PGPPoints#" cfsqltype="cf_sql_DECIMAL">
 						Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
@@ -432,7 +432,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 				<cfif Session.UserSuppliedInfo.MealAvailable EQ 1>
 					<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set MealCost_Estimated = <cfqueryparam value="#Session.UserSuppliedInfo.MealCost_Estimated#" cfsqltype="CF_SQL_MONEY">,
 							MealProvidedBy = <cfqueryparam value="#Session.UserSuppliedInfo.MealProvidedBy#" cfsqltype="CF_SQL_INTEGER">
 						Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
@@ -441,7 +441,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 				<cfif Session.UserSuppliedInfo.AllowVideoConference EQ 1>
 					<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set AllowVideoConference = <cfqueryparam value="#Session.UserSuppliedInfo.AllowVideoConference#" cfsqltype="cf_sql_bit">,
 							VideoConferenceInfo = <cfqueryparam value="#Session.UserSuppliedInfo.VideoConferenceInfo#" cfsqltype="CF_SQL_VARCHAR">,
 							VideoConferenceCost = <cfqueryparam value="#Session.UserSuppliedInfo.VideoConferenceCost#" cfsqltype="CF_SQL_MONEY">
@@ -451,7 +451,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 				<cfif Session.UserSuppliedInfo.WebinarEvent EQ 1>
 					<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set WebinarAvailable = <cfqueryparam value="#Session.UserSuppliedInfo.WebinarEvent#" cfsqltype="cf_sql_bit">,
 							WebinarConnectInfo = <cfqueryparam value="#Session.UserSuppliedInfo.WebinarConnectWebInfo#" cfsqltype="CF_SQL_VARCHAR">,
 							WebinarMemberCost = <cfqueryparam value="#Session.UserSuppliedInfo.WebinarMemberCost#" cfsqltype="CF_SQL_MONEY">,
@@ -478,14 +478,14 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfset EventRegistrationBeginTimeObject = #CreateTime(Variables.EventRegistrationBeginTimeHours, Variables.EventRegistrationBeginTimeMinutes, 0)#>
 
 					<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set Registration_BeginTime = #Variables.EventRegistrationBeginTimeObject#
 						Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 					</cfquery>
 				</cfif>
 
 				<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-					Update eEvents
+					Update p_eventregistration_events
 					Set AcceptRegistrations = <cfqueryparam value="#FORM.AcceptRegistrations#" cfsqltype="cf_sql_bit">,
 						lastUpdated = #Now()#,
 						lastUpdateBy = <cfqueryparam value="#Session.Mura.UserID#" cfsqltype="cf_sql_varchar">
@@ -496,7 +496,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					Select Site_ID, ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime, EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost, EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost,
 						EarlyBird_NonMemberCost, ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints, MealAvailable, MealIncluded, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost, AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, MaxParticipants, LocationType, LocationID, LocationRoomID,
 						Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active, EventCancelled, WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost, EventDoc_FileNameOne, EventDoc_FileTypeOne, EventDoc_FileNameTwo, EventDoc_FileTypeTwo, EventDoc_FileNameThree, EventDoc_FileTypeThree, EventDoc_FileNameFour, EventDoc_FileTypeFour, EventDoc_FileNameFive, EventDoc_FileTypeFive, EventDoc_FileNameSix, EventDoc_FileTypeSix, EventDoc_FileNameSeven, EventDoc_FileTypeSeven, EventDoc_FileNameEight, EventDoc_FileTypeEight, EventDoc_FileNameNine, EventDoc_FileTypeNine, EventDoc_FileNameTen, EventDoc_FileTypeTen, PostedTo_Facebook, PostedTo_Twitter
-					From eEvents
+					From p_eventregistration_events
 					Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 				</cfquery>
 				<cfif isDate(CheckEventMultipleDates.EventDate1) or isDate(CheckEventMultipleDates.EventDate2) or isDate(CheckEventMultipleDates.EventDate3) or isDate(CheckEventMultipleDates.EventDate4) or isDate(CheckEventMultipleDates.EventDate5)>
@@ -511,7 +511,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfset NewEventTitle = #Left(CheckEventMultipleDates.ShortTitle, 62)# & " - Day 1 of " & #Variables.TotalNumberDays#>
 					</cfif>
 					<cfquery name="UpdateEventTitle" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set ShortTitle = <cfqueryparam value="#Variables.NewEventTitle#" cfsqltype="CF_SQL_VARCHAR">
 						Where TContent_ID = <cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 					</cfquery>
@@ -525,7 +525,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					</cfif>
 
 					<cfquery name="InsertSecondEventDate" result="SecondNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active,
+						Insert into p_eventregistration_events(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active,
 							Featured_StartDate, Featured_EndDate, Featured_SortOrder, EarlyBird_RegistrationDeadline, MemberCost, NonMemberCost, EarlyBird_MemberCost, EarlyBird_NonMemberCost, SpecialMemberCost, SpecialNonMemberCost, MealCost, Meal_Notes, WebinarMemberCost, WebinarNonMemberCost,
 							VideoConferenceCost, SpecialPriceRequirements, VideoConferenceInfo, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, WebinarConnectInfo, Presenters, EventDoc_FileNameOne, EventDoc_FileTypeOne, EventDoc_FileNameTwo, EventDoc_FileTypeTwo, EventDoc_FileNameThree, EventDoc_FileTypeThree, EventDoc_FileNameFour, EventDoc_FileTypeFour, EventDoc_FileNameFive, EventDoc_FileTypeFive, EventDoc_FileNameSix, EventDoc_FileTypeSix, EventDoc_FileNameSeven, EventDoc_FileTypeSeven, EventDoc_FileNameEight, EventDoc_FileTypeEight, EventDoc_FileNameNine, EventDoc_FileTypeNine, EventDoc_FileNameTen, EventDoc_FileTypeTen,
 							PGPPoints, LocationType, MealProvidedBy, LocationID, LocationRoomID, EventCancelled, WebinarAvailable, PostedTo_Facebook, PostedTo_Twitter, lastUpdated, lastUpdateBy)
@@ -605,7 +605,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					</cfquery>
 
 					<cfquery name="InsertEventMatrix" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">>
-						Insert into eEventsMatrix(Event_ID, Event_AdditionalDayID)
+						Insert into p_eventregistration_eventsMatrix(Event_ID, Event_AdditionalDayID)
 						Values(<cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">,
 							<cfqueryparam value="#SecondNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						)
@@ -621,7 +621,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					</cfif>
 
 					<cfquery name="InsertThirdEventDate" result="ThirdNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active,
+						Insert into p_eventregistration_events(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active,
 							Featured_StartDate, Featured_EndDate, Featured_SortOrder, EarlyBird_RegistrationDeadline, MemberCost, NonMemberCost, EarlyBird_MemberCost, EarlyBird_NonMemberCost, SpecialMemberCost, SpecialNonMemberCost, MealCost, Meal_Notes, WebinarMemberCost, WebinarNonMemberCost,
 							VideoConferenceCost, SpecialPriceRequirements, VideoConferenceInfo, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, WebinarConnectInfo, Presenters, EventDoc_FileNameOne, EventDoc_FileTypeOne, EventDoc_FileNameTwo, EventDoc_FileTypeTwo, EventDoc_FileNameThree, EventDoc_FileTypeThree, EventDoc_FileNameFour, EventDoc_FileTypeFour, EventDoc_FileNameFive, EventDoc_FileTypeFive, EventDoc_FileNameSix, EventDoc_FileTypeSix, EventDoc_FileNameSeven, EventDoc_FileTypeSeven, EventDoc_FileNameEight, EventDoc_FileTypeEight, EventDoc_FileNameNine, EventDoc_FileTypeNine, EventDoc_FileNameTen, EventDoc_FileTypeTen,
 							PGPPoints, LocationType, MealProvidedBy, LocationID, LocationRoomID, EventCancelled, WebinarAvailable, PostedTo_Facebook, PostedTo_Twitter, lastUpdated, lastUpdateBy)
@@ -701,7 +701,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					</cfquery>
 
 					<cfquery name="InsertEventMatrix" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">>
-						Insert into eEventsMatrix(Event_ID, Event_AdditionalDayID)
+						Insert into p_eventregistration_eventsMatrix(Event_ID, Event_AdditionalDayID)
 						Values(<cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">,
 							<cfqueryparam value="#ThirdNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						)
@@ -716,7 +716,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					</cfif>
 
 					<cfquery name="InsertFourthEventDate" result="FourthNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active,
+						Insert into p_eventregistration_events(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active,
 							Featured_StartDate, Featured_EndDate, Featured_SortOrder, EarlyBird_RegistrationDeadline, MemberCost, NonMemberCost, EarlyBird_MemberCost, EarlyBird_NonMemberCost, SpecialMemberCost, SpecialNonMemberCost, MealCost, Meal_Notes, WebinarMemberCost, WebinarNonMemberCost,
 							VideoConferenceCost, SpecialPriceRequirements, VideoConferenceInfo, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, WebinarConnectInfo, Presenters, EventDoc_FileNameOne, EventDoc_FileTypeOne, EventDoc_FileNameTwo, EventDoc_FileTypeTwo, EventDoc_FileNameThree, EventDoc_FileTypeThree, EventDoc_FileNameFour, EventDoc_FileTypeFour, EventDoc_FileNameFive, EventDoc_FileTypeFive, EventDoc_FileNameSix, EventDoc_FileTypeSix, EventDoc_FileNameSeven, EventDoc_FileTypeSeven, EventDoc_FileNameEight, EventDoc_FileTypeEight, EventDoc_FileNameNine, EventDoc_FileTypeNine, EventDoc_FileNameTen, EventDoc_FileTypeTen,
 							PGPPoints, LocationType, MealProvidedBy, LocationID, LocationRoomID, EventCancelled, WebinarAvailable, PostedTo_Facebook, PostedTo_Twitter, lastUpdated, lastUpdateBy)
@@ -796,7 +796,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					</cfquery>
 
 					<cfquery name="InsertEventMatrix" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">>
-						Insert into eEventsMatrix(Event_ID, Event_AdditionalDayID)
+						Insert into p_eventregistration_eventsMatrix(Event_ID, Event_AdditionalDayID)
 						Values(<cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">,
 							<cfqueryparam value="#FourthNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						)
@@ -811,7 +811,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					</cfif>
 
 					<cfquery name="InsertFifthEventDate" result="FifthNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active,
+						Insert into p_eventregistration_events(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active,
 							Featured_StartDate, Featured_EndDate, Featured_SortOrder, EarlyBird_RegistrationDeadline, MemberCost, NonMemberCost, EarlyBird_MemberCost, EarlyBird_NonMemberCost, SpecialMemberCost, SpecialNonMemberCost, MealCost, Meal_Notes, WebinarMemberCost, WebinarNonMemberCost,
 							VideoConferenceCost, SpecialPriceRequirements, VideoConferenceInfo, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, WebinarConnectInfo, Presenters, EventDoc_FileNameOne, EventDoc_FileTypeOne, EventDoc_FileNameTwo, EventDoc_FileTypeTwo, EventDoc_FileNameThree, EventDoc_FileTypeThree, EventDoc_FileNameFour, EventDoc_FileTypeFour, EventDoc_FileNameFive, EventDoc_FileTypeFive, EventDoc_FileNameSix, EventDoc_FileTypeSix, EventDoc_FileNameSeven, EventDoc_FileTypeSeven, EventDoc_FileNameEight, EventDoc_FileTypeEight, EventDoc_FileNameNine, EventDoc_FileTypeNine, EventDoc_FileNameTen, EventDoc_FileTypeTen,
 							PGPPoints, LocationType, MealProvidedBy, LocationID, LocationRoomID, EventCancelled, WebinarAvailable, PostedTo_Facebook, PostedTo_Twitter, lastUpdated, lastUpdateBy)
@@ -891,7 +891,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					</cfquery>
 
 					<cfquery name="InsertEventMatrix" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">>
-						Insert into eEventsMatrix(Event_ID, Event_AdditionalDayID)
+						Insert into p_eventregistration_eventsMatrix(Event_ID, Event_AdditionalDayID)
 						Values(<cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">,
 							<cfqueryparam value="#FifthNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						)
@@ -906,7 +906,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					</cfif>
 
 					<cfquery name="InsertSixthEventDate" result="SixthNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active,
+						Insert into p_eventregistration_events(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, Facilitator, dateCreated, MaxParticipants, Active,
 							Featured_StartDate, Featured_EndDate, Featured_SortOrder, EarlyBird_RegistrationDeadline, MemberCost, NonMemberCost, EarlyBird_MemberCost, EarlyBird_NonMemberCost, SpecialMemberCost, SpecialNonMemberCost, MealCost, Meal_Notes, WebinarMemberCost, WebinarNonMemberCost,
 							VideoConferenceCost, SpecialPriceRequirements, VideoConferenceInfo, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, WebinarConnectInfo, Presenters, EventDoc_FileNameOne, EventDoc_FileTypeOne, EventDoc_FileNameTwo, EventDoc_FileTypeTwo, EventDoc_FileNameThree, EventDoc_FileTypeThree, EventDoc_FileNameFour, EventDoc_FileTypeFour, EventDoc_FileNameFive, EventDoc_FileTypeFive, EventDoc_FileNameSix, EventDoc_FileTypeSix, EventDoc_FileNameSeven, EventDoc_FileTypeSeven, EventDoc_FileNameEight, EventDoc_FileTypeEight, EventDoc_FileNameNine, EventDoc_FileTypeNine, EventDoc_FileNameTen, EventDoc_FileTypeTen,
 							PGPPoints, LocationType, MealProvidedBy, LocationID, LocationRoomID, EventCancelled, WebinarAvailable, PostedTo_Facebook, PostedTo_Twitter, lastUpdated, lastUpdateBy)
@@ -986,7 +986,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					</cfquery>
 
 					<cfquery name="InsertEventMatrix" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">>
-						Insert into eEventsMatrix(Event_ID, Event_AdditionalDayID)
+						Insert into p_eventregistration_eventsMatrix(Event_ID, Event_AdditionalDayID)
 						Values(<cfqueryparam value="#insertNewEvent.generatedkey#" cfsqltype="cf_sql_integer">,
 							<cfqueryparam value="#SixthNewEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						)
@@ -1021,15 +1021,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 		<cfif isDefined("URL.EventID") and not isDefined("FORM.formSubmit") and not isDefined("URL.EventStatus")>
 			<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-				Select TContent_ID, ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, LongDescription,
-					Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime,
-					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
-					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
-					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
-					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
-					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy
-				From eEvents
+				Select *
+				From p_eventregistration_events
 				Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 			</cfquery>
 			<cfif GetSelectedEvent.RecordCount EQ 0>
@@ -1177,7 +1170,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cftry>
 					<cfif LEN(Session.UserSuppliedInfo.Registration_EndTime)>
 						<cfquery name="updateEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EventDate = <cfqueryparam value="#CreateDate(ListLast(Variables.EventDate, '/'), ListFirst(Variables.EventDate, '/'), ListGetAt(Variables.EventDate, 2, '/'))#" cfsqltype="cf_sql_date">,
 								Registration_Deadline = <cfqueryparam value="#CreateDate(ListLast(Variables.RegistrationDeadline, '/'), ListFirst(Variables.RegistrationDeadline, '/'), ListGetAt(Variables.RegistrationDeadline, 2, '/'))#" cfsqltype="cf_sql_date">,
 								Event_StartTime = <cfqueryparam value="#Session.UserSuppliedInfo.Event_StartTime#" cfsqltype="cf_sql_time">,
@@ -1189,7 +1182,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						</cfquery>
 					<cfelse>
 						<cfquery name="updateEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EventDate = <cfqueryparam value="#CreateDate(ListLast(Variables.EventDate, '/'), ListFirst(Variables.EventDate, '/'), ListGetAt(Variables.EventDate, 2, '/'))#" cfsqltype="cf_sql_date">,
 								Registration_Deadline = <cfqueryparam value="#CreateDate(ListLast(Variables.RegistrationDeadline, '/'), ListFirst(Variables.RegistrationDeadline, '/'), ListGetAt(Variables.RegistrationDeadline, 2, '/'))#" cfsqltype="cf_sql_date">,
 								Event_StartTime = <cfqueryparam value="#Session.UserSuppliedInfo.Event_StartTime#" cfsqltype="cf_sql_time">,
@@ -1219,7 +1212,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfset EventRegistrationBeginTimeObject = #CreateTime(Variables.EventRegistrationBeginTimeHours, Variables.EventRegistrationBeginTimeMinutes, 0)#>
 
 						<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set Registration_BeginTime = #Variables.EventRegistrationBeginTimeObject#
 							Where TContent_ID = <cfqueryparam value="#Session.UserSuppliedInfo.RecNo#" cfsqltype="cf_sql_integer">
 						</cfquery>
@@ -1227,7 +1220,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 					<cfif Session.UserSuppliedInfo.EventSpanDates EQ 0>
 						<cfquery name="updateEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EventDate1 = null,
 								EventDate2 = null,
 								EventDate3 = null,
@@ -1241,7 +1234,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<cfif #isDate(Session.UserSuppliedInfo.EventDate1)# EQ 1>
 								<cfset EventDate1 = #DateFormat(Session.UserSuppliedInfo.EventDate1, "mm/dd/yyyy")#>
 								<cfquery name="updateEventDate1" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-									Update eEvents
+									Update p_eventregistration_events
 									Set EventDate1 = #CreateDate(ListLast(Variables.EventDate1, "/"), ListFirst(Variables.EventDate1, "/"), ListGetAt(Variables.EventDate1, 2, "/"))#
 									Where TContent_ID = <cfqueryparam value="#Session.UserSuppliedInfo.RecNo#" cfsqltype="cf_sql_integer">
 								</cfquery>
@@ -1252,7 +1245,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<cfif #isDate(Session.UserSuppliedInfo.EventDate2)# EQ 1>
 								<cfset EventDate2 = #DateFormat(Session.UserSuppliedInfo.EventDate2, "mm/dd/yyyy")#>
 								<cfquery name="updateEventDate2" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-									Update eEvents
+									Update p_eventregistration_events
 									Set EventDate2 = #CreateDate(ListLast(Variables.EventDate2, "/"), ListFirst(Variables.EventDate2, "/"), ListGetAt(Variables.EventDate2, 2, "/"))#
 									Where TContent_ID = <cfqueryparam value="#Session.UserSuppliedInfo.RecNo#" cfsqltype="cf_sql_integer">
 								</cfquery>
@@ -1263,7 +1256,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<cfif #isDate(Session.UserSuppliedInfo.EventDate3)# EQ 1>
 								<cfset EventDate3 = #DateFormat(Session.UserSuppliedInfo.EventDate3, "mm/dd/yyyy")#>
 								<cfquery name="updateEventDate3" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-									Update eEvents
+									Update p_eventregistration_events
 									Set EventDate3 = #CreateDate(ListLast(Variables.EventDate3, "/"), ListFirst(Variables.EventDate3, "/"), ListGetAt(Variables.EventDate3, 2, "/"))#
 									Where TContent_ID = <cfqueryparam value="#Session.UserSuppliedInfo.RecNo#" cfsqltype="cf_sql_integer">
 								</cfquery>
@@ -1274,7 +1267,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							<cfif #isDate(Session.UserSuppliedInfo.EventDate4)# EQ 1>
 								<cfset EventDate4 = #DateFormat(Session.UserSuppliedInfo.EventDate4, "mm/dd/yyyy")#>
 								<cfquery name="updateEventDate4" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-									Update eEvents
+									Update p_eventregistration_events
 									Set EventDate4 = #CreateDate(ListLast(Variables.EventDate4, "/"), ListFirst(Variables.EventDate4, "/"), ListGetAt(Variables.EventDate4, 2, "/"))#
 									Where TContent_ID = <cfqueryparam value="#Session.UserSuppliedInfo.RecNo#" cfsqltype="cf_sql_integer">
 								</cfquery>
@@ -1291,7 +1284,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 			<cfif Session.UserSuppliedInfo.GroupAreas.Description EQ true>
 				<cftry>
 					<cfquery name="updateEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set ShortTitle = <cfqueryparam value="#Session.UserSuppliedInfo.ShortTitle#" cfsqltype="cf_sql_varchar">,
 							LongDescription = <cfqueryparam value="#Session.UserSuppliedInfo.LongDescription#" cfsqltype="cf_sql_varchar">,
 							lastUpdated = #Now()#,
@@ -1308,7 +1301,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 			<cfif Session.UserSuppliedInfo.GroupAreas.Details EQ true>
 				<cftry>
 					<cfquery name="updateEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set lastUpdated = #Now()#,
 							lastUpdateBy = <cfqueryparam value="#Session.Mura.UserID#" cfsqltype="cf_sql_varchar">
 						Where TContent_ID = <cfqueryparam value="#Session.UserSuppliedInfo.RecNo#" cfsqltype="cf_sql_integer">
@@ -1317,7 +1310,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfif isDefined("Session.UserSuppliedInfo.EventAgenda")>
 						<cfif LEN(Session.UserSuppliedInfo.EventAgenda)>
 							<cfquery name="updateEventAgenda" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-								Update eEvents
+								Update p_eventregistration_events
 								Set EventAgenda = <cfqueryparam value="#Session.UserSuppliedInfo.EventAgenda#" cfsqltype="cf_sql_varchar">
 								Where TContent_ID = <cfqueryparam value="#Session.UserSuppliedInfo.RecNo#" cfsqltype="cf_sql_integer">
 							</cfquery>
@@ -1327,7 +1320,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfif isDefined("Session.UserSuppliedInfo.EventTargetAudience")>
 						<cfif LEN(Session.UserSuppliedInfo.EventTargetAudience)>
 							<cfquery name="updateEventAgenda" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-								Update eEvents
+								Update p_eventregistration_events
 								Set EventTargetAudience = <cfqueryparam value="#Session.UserSuppliedInfo.EventTargetAudience#" cfsqltype="cf_sql_varchar">
 								Where TContent_ID = <cfqueryparam value="#Session.UserSuppliedInfo.RecNo#" cfsqltype="cf_sql_integer">
 							</cfquery>
@@ -1337,7 +1330,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfif isDefined("Session.UserSuppliedInfo.EventStrategies")>
 						<cfif LEN(Session.UserSuppliedInfo.EventStrategies)>
 							<cfquery name="updateEventAgenda" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-								Update eEvents
+								Update p_eventregistration_events
 								Set EventStrategies = <cfqueryparam value="#Session.UserSuppliedInfo.EventStrategies#" cfsqltype="cf_sql_varchar">
 								Where TContent_ID = <cfqueryparam value="#Session.UserSuppliedInfo.RecNo#" cfsqltype="cf_sql_integer">
 							</cfquery>
@@ -1347,7 +1340,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfif isDefined("Session.UserSuppliedInfo.EventSpecialInstructions")>
 						<cfif LEN(Session.UserSuppliedInfo.EventSpecialInstructions)>
 							<cfquery name="updateEventAgenda" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-								Update eEvents
+								Update p_eventregistration_events
 								Set EventSpecialInstructions = <cfqueryparam value="#Session.UserSuppliedInfo.EventSpecialInstructions#" cfsqltype="cf_sql_varchar">
 								Where TContent_ID = <cfqueryparam value="#Session.UserSuppliedInfo.RecNo#" cfsqltype="cf_sql_integer">
 							</cfquery>
@@ -1367,7 +1360,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 			<cfif Session.UserSuppliedInfo.GroupAreas.Pricing EQ true>
 				<cftry>
 					<cfquery name="updateEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set MemberCost = <cfqueryparam value="#Session.UserSuppliedInfo.MemberCost#" cfsqltype="cf_sql_money">,
 							NonMemberCost = <cfqueryparam value="#Session.UserSuppliedInfo.NonMemberCost#" cfsqltype="cf_sql_money">,
 							lastUpdated = #Now()#,
@@ -1384,7 +1377,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 			<cfif Session.UserSuppliedInfo.GroupAreas.SpecialPricing EQ true>
 				<cftry>
 					<cfquery name="updateEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set ViewSpecialPricing = <cfqueryparam value="#Session.UserSuppliedInfo.ViewSpecialPricing#" cfsqltype="cf_sql_bit">,
 							SpecialMemberCost = "#Session.UserSuppliedInfo.SpecialMemberCost#",
 							SpecialNonMemberCost = "#Session.UserSuppliedInfo.SpecialNonMemberCost#",
@@ -1405,7 +1398,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfset FeaturedEndDate = #DateFormat(Session.UserSuppliedInfo.Featured_EndDate, "mm/dd/yyyy")#>
 				<cftry>
 					<cfquery name="updateEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set EventFeatured = <cfqueryparam value="#Session.UserSuppliedInfo.EventFeatured#" cfsqltype="cf_sql_bit">,
 							Featured_StartDate = #CreateDate(ListLast(Variables.FeaturedStartDate, "/"), ListFirst(Variables.FeaturedStartDate, "/"), ListGetAt(Variables.FeaturedStartDate, 2, "/"))#,
 							Featured_EndDate = #CreateDate(ListLast(Variables.FeaturedEndDate, "/"), ListFirst(Variables.FeaturedEndDate, "/"), ListGetAt(Variables.FeaturedEndDate, 2, "/"))#,
@@ -1425,7 +1418,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cfset RegistrationDeadline = #DateFormat(Session.UserSuppliedInfo.EarlyBird_RegistrationDeadline, "mm/dd/yyyy")#>
 				<cftry>
 					<cfquery name="updateEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set EarlyBird_RegistrationAvailable = <cfqueryparam value="#Session.UserSuppliedInfo.EarlyBird_RegistrationAvailable#" cfsqltype="cf_sql_bit">,
 							EarlyBird_RegistrationDeadline = #CreateDate(ListLast(Variables.RegistrationDeadline, "/"), ListFirst(Variables.RegistrationDeadline, "/"), ListGetAt(Variables.RegistrationDeadline, 2, "/"))#,
 							EarlyBird_MemberCost = "#Session.UserSuppliedInfo.EarlyBird_MemberCost#",
@@ -1444,7 +1437,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 			<cfif Session.UserSuppliedInfo.GroupAreas.PGP EQ true>
 				<cftry>
 					<cfquery name="updateEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set PGPAvailable = <cfqueryparam value="#Session.UserSuppliedInfo.PGPAvailable#" cfsqltype="cf_sql_bit">,
 							PGPPoints = <cfqueryparam value="#Session.UserSuppliedInfo.PGPPoints#" cfsqltype="cf_sql_DECIMAL">,
 							lastUpdated = #Now()#,
@@ -1461,7 +1454,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 			<cfif Session.UserSuppliedInfo.GroupAreas.Meals EQ true>
 				<cftry>
 					<cfquery name="updateEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set MealAvailable = <cfqueryparam value="#Session.UserSuppliedInfo.MealAvailable#" cfsqltype="cf_sql_bit">,
 							MealCost_Estimated = <cfqueryparam value="#Session.UserSuppliedInfo.MealCost_Estimated#" cfsqltype="CF_SQL_MONEY">,
 							MealProvidedBy = <cfqueryparam value="#Session.UserSuppliedInfo.MealProvidedBy#" cfsqltype="CF_SQL_INTEGER">,
@@ -1479,7 +1472,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 			<cfif Session.UserSuppliedInfo.GroupAreas.IVC EQ true>
 				<cftry>
 					<cfquery name="updateEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set AllowVideoConference = <cfqueryparam value="#Session.UserSuppliedInfo.AllowVideoConference#" cfsqltype="cf_sql_bit">,
 							VideoConferenceInfo = <cfqueryparam value="#Session.UserSuppliedInfo.VideoConferenceInfo#" cfsqltype="CF_SQL_VARCHAR">,
 							VideoConferenceCost = <cfqueryparam value="#Session.UserSuppliedInfo.VideoConferenceCost#" cfsqltype="CF_SQL_MONEY">,
@@ -1497,7 +1490,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 			<cfif Session.UserSuppliedInfo.GroupAreas.MeetingRooms EQ true>
 				<cftry>
 					<cfquery name="updateEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set LocationType = <cfqueryparam value="#Session.UserSuppliedInfo.LocationType#" cfsqltype="cf_sql_varchar">,
 							LocationID = <cfqueryparam value="#Session.UserSuppliedInfo.LocationID#" cfsqltype="cf_sql_integer">,
 							LocationRoomID = <cfqueryparam value="#Session.UserSuppliedInfo.LocationRoomID#" cfsqltype="cf_sql_integer">,
@@ -1520,7 +1513,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 			<cfif Session.UserSuppliedInfo.GroupAreas.Registrations EQ true>
 				<cftry>
 					<cfquery name="updateEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set AcceptRegistrations = <cfqueryparam value="#FORM.AcceptRegistrations#" cfsqltype="cf_sql_bit">,
 							lastUpdated = #Now()#,
 							lastUpdateBy = <cfqueryparam value="#Session.Mura.UserID#" cfsqltype="cf_sql_varchar">
@@ -2154,15 +2147,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 		<cfif isDefined("URL.EventID") and not isDefined("URL.EventStatus")>
 			<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-				Select TContent_ID, ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, LongDescription,
-					Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime,
-					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
-					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
-					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
-					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
-					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy
-				From eEvents
+				Select *
+				From p_eventregistration_events
 				Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 			</cfquery>
 			<cfif GetSelectedEvent.RecordCount EQ 0>
@@ -2291,12 +2277,12 @@ http://www.apache.org/licenses/LICENSE-2.0
 				<cftry>
 					<cfif LEN(Session.UserSuppliedInfo.Registration_EndTime)>
 						<cfquery name="insertCopiedEvent" result="insertCopiedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, MemberCost, NonMemberCost, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, LocationType, LocationID, LocationRoomID, MaxParticipants, Facilitator, dateCreated)
+							Insert into p_eventregistration_events(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, Registration_EndTime, EventFeatured, MemberCost, NonMemberCost, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, LocationType, LocationID, LocationRoomID, MaxParticipants, Facilitator, dateCreated)
 							Values ("#rc.$.siteConfig('siteID')#", "#Session.UserSuppliedInfo.ShortTitle#", #CreateDate(ListLast(Variables.EventDate, "/"), ListFirst(Variables.EventDate, "/"), ListGetAt(Variables.EventDate, 2, "/"))#, "#Session.UserSuppliedInfo.LongDescription#", #Variables.EventStartTimeObject#, #Variables.EventEndTimeObject#, #CreateDate(ListLast(Variables.RegistrationDeadline, "/"), ListFirst(Variables.RegistrationDeadline, "/"), ListGetAt(Variables.RegistrationDeadline, 2, "/"))#, #Variables.EventRegistrationEndTimeObject#, #Session.UserSuppliedInfo.EventFeatured#, "#Session.UserSuppliedInfo.MemberCost#", "#Session.UserSuppliedInfo.NonMemberCost#", #Session.UserSuppliedInfo.EarlyBird_RegistrationAvailable#, #Session.UserSuppliedInfo.ViewSpecialPricing#, #Session.UserSuppliedInfo.PGPAvailable#, #Session.UserSuppliedInfo.MealAvailable#, #Session.UserSuppliedInfo.AllowVideoConference#, #Session.UserSuppliedInfo.AcceptRegistrations#, "#Session.UserSuppliedInfo.LocationType#", #Session.UserSuppliedInfo.LocationID#, #Session.UserSuppliedInfo.LocationRoomID#, #Session.UserSuppliedInfo.RoomMaxParticipants#, "#Session.UserSuppliedInfo.Facilitator#", #Now()# )
 						</cfquery>
 					<cfelse>
 						<cfquery name="insertCopiedEvent" result="insertCopiedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Insert into eEvents(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, EventFeatured, MemberCost, NonMemberCost, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, LocationType, LocationID, LocationRoomID, MaxParticipants, Facilitator, dateCreated)
+							Insert into p_eventregistration_events(Site_ID, ShortTitle, EventDate, LongDescription, Event_StartTime, Event_EndTime, Registration_Deadline, EventFeatured, MemberCost, NonMemberCost, EarlyBird_RegistrationAvailable, ViewSpecialPricing, PGPAvailable, MealAvailable, MealIncluded, AllowVideoConference, AcceptRegistrations, LocationType, LocationID, LocationRoomID, MaxParticipants, Facilitator, dateCreated)
 							Values ("#rc.$.siteConfig('siteID')#", "#Session.UserSuppliedInfo.ShortTitle#", #CreateDate(ListLast(Variables.EventDate, "/"), ListFirst(Variables.EventDate, "/"), ListGetAt(Variables.EventDate, 2, "/"))#, "#Session.UserSuppliedInfo.LongDescription#", #Variables.EventStartTimeObject#, #Variables.EventEndTimeObject#, #CreateDate(ListLast(Variables.RegistrationDeadline, "/"), ListFirst(Variables.RegistrationDeadline, "/"), ListGetAt(Variables.RegistrationDeadline, 2, "/"))#, #Session.UserSuppliedInfo.EventFeatured#, "#Session.UserSuppliedInfo.MemberCost#", "#Session.UserSuppliedInfo.NonMemberCost#", #Session.UserSuppliedInfo.EarlyBird_RegistrationAvailable#, #Session.UserSuppliedInfo.ViewSpecialPricing#, #Session.UserSuppliedInfo.PGPAvailable#, #Session.UserSuppliedInfo.MealAvailable#, #Session.UserSuppliedInfo.AllowVideoConference#, #Session.UserSuppliedInfo.AcceptRegistrations#, "#Session.UserSuppliedInfo.LocationType#", #Session.UserSuppliedInfo.LocationID#, #Session.UserSuppliedInfo.LocationRoomID#, #Session.UserSuppliedInfo.RoomMaxParticipants#, "#Session.UserSuppliedInfo.Facilitator#", #Now()# )
 						</cfquery>
 					</cfif>
@@ -2305,7 +2291,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfif #isDate(Session.UserSuppliedInfo.EventDate1)# EQ 1>
 							<cfset EventDate1 = #DateFormat(Session.UserSuppliedInfo.EventDate1, "mm/dd/yyyy")#>
 							<cfquery name="updateEventDate1" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-								Update eEvents
+								Update p_eventregistration_events
 								Set EventDate1 = #CreateDate(ListLast(Variables.EventDate1, "/"), ListFirst(Variables.EventDate1, "/"), ListGetAt(Variables.EventDate1, 2, "/"))#
 								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 							</cfquery>
@@ -2316,7 +2302,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfif #isDate(Session.UserSuppliedInfo.EventDate2)# EQ 1>
 							<cfset EventDate2 = #DateFormat(Session.UserSuppliedInfo.EventDate2, "mm/dd/yyyy")#>
 							<cfquery name="updateEventDate2" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-								Update eEvents
+								Update p_eventregistration_events
 								Set EventDate2 = #CreateDate(ListLast(Variables.EventDate2, "/"), ListFirst(Variables.EventDate2, "/"), ListGetAt(Variables.EventDate2, 2, "/"))#
 								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 							</cfquery>
@@ -2327,7 +2313,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfif #isDate(Session.UserSuppliedInfo.EventDate3)# EQ 1>
 							<cfset EventDate3 = #DateFormat(Session.UserSuppliedInfo.EventDate3, "mm/dd/yyyy")#>
 							<cfquery name="updateEventDate3" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-								Update eEvents
+								Update p_eventregistration_events
 								Set EventDate3 = #CreateDate(ListLast(Variables.EventDate3, "/"), ListFirst(Variables.EventDate3, "/"), ListGetAt(Variables.EventDate3, 2, "/"))#
 								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 							</cfquery>
@@ -2338,7 +2324,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfif #isDate(Session.UserSuppliedInfo.EventDate4)# EQ 1>
 							<cfset EventDate4 = #DateFormat(Session.UserSuppliedInfo.EventDate4, "mm/dd/yyyy")#>
 							<cfquery name="updateEventDate4" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-								Update eEvents
+								Update p_eventregistration_events
 								Set EventDate4 = #CreateDate(ListLast(Variables.EventDate4, "/"), ListFirst(Variables.EventDate4, "/"), ListGetAt(Variables.EventDate4, 2, "/"))#
 								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 							</cfquery>
@@ -2348,7 +2334,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfif isDefined("Session.UserSuppliedInfo.EventAgenda")>
 						<cfif LEN(Session.UserSuppliedInfo.EventAgenda)>
 							<cfquery name="updateEventAgenda" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-								Update eEvents
+								Update p_eventregistration_events
 								Set EventAgenda = <cfqueryparam value="#Session.UserSuppliedInfo.EventAgenda#" cfsqltype="cf_sql_varchar">
 								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 							</cfquery>
@@ -2358,7 +2344,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfif isDefined("Session.UserSuppliedInfo.EventTargetAudience")>
 						<cfif LEN(Session.UserSuppliedInfo.EventTargetAudience)>
 							<cfquery name="updateEventAgenda" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-								Update eEvents
+								Update p_eventregistration_events
 								Set EventTargetAudience = <cfqueryparam value="#Session.UserSuppliedInfo.EventTargetAudience#" cfsqltype="cf_sql_varchar">
 								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 							</cfquery>
@@ -2368,7 +2354,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfif isDefined("Session.UserSuppliedInfo.EventStrategies")>
 						<cfif LEN(Session.UserSuppliedInfo.EventStrategies)>
 							<cfquery name="updateEventAgenda" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-								Update eEvents
+								Update p_eventregistration_events
 								Set EventStrategies = <cfqueryparam value="#Session.UserSuppliedInfo.EventStrategies#" cfsqltype="cf_sql_varchar">
 								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 							</cfquery>
@@ -2378,7 +2364,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfif isDefined("Session.UserSuppliedInfo.EventSpecialInstructions")>
 						<cfif LEN(Session.UserSuppliedInfo.EventSpecialInstructions)>
 							<cfquery name="updateEventAgenda" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-								Update eEvents
+								Update p_eventregistration_events
 								Set EventSpecialInstructions = <cfqueryparam value="#Session.UserSuppliedInfo.EventSpecialInstructions#" cfsqltype="cf_sql_varchar">
 								Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 							</cfquery>
@@ -2389,7 +2375,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfset FeaturedStartDate = #DateFormat(Session.UserSuppliedInfo.Featured_StartDate, "mm/dd/yyyy")#>
 						<cfset FeaturedEndDate = #DateFormat(Session.UserSuppliedInfo.Featured_EndDate, "mm/dd/yyyy")#>
 						<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set Featured_StartDate = #CreateDate(ListLast(Variables.FeaturedStartDate, "/"), ListFirst(Variables.FeaturedStartDate, "/"), ListGetAt(Variables.FeaturedStartDate, 2, "/"))#,
 								Featured_EndDate = #CreateDate(ListLast(Variables.FeaturedEndDate, "/"), ListFirst(Variables.FeaturedEndDate, "/"), ListGetAt(Variables.FeaturedEndDate, 2, "/"))#,
 								Featured_SortOrder = <cfqueryparam value="#Session.UserSuppliedInfo.Featured_SortOrder#" cfsqltype="cf_sql_integer">
@@ -2400,7 +2386,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 					<cfif Session.UserSuppliedInfo.EarlyBird_RegistrationAvailable EQ 1>
 						<cfset RegistrationDeadline = #DateFormat(Session.UserSuppliedInfo.EarlyBird_RegistrationDeadline, "mm/dd/yyyy")#>
 						<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EarlyBird_RegistrationAvailable = <cfqueryparam value="#Session.UserSuppliedInfo.EarlyBird_RegistrationAvailable#" cfsqltype="cf_sql_bit">,
 								EarlyBird_RegistrationDeadline = #CreateDate(ListLast(Variables.RegistrationDeadline, "/"), ListFirst(Variables.RegistrationDeadline, "/"), ListGetAt(Variables.RegistrationDeadline, 2, "/"))#,
 								EarlyBird_MemberCost = "#Session.UserSuppliedInfo.EarlyBird_MemberCost#",
@@ -2411,7 +2397,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 					<cfif Session.UserSuppliedInfo.ViewSpecialPricing EQ 1>
 						<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set ViewSpecialPricing = <cfqueryparam value="#Session.UserSuppliedInfo.ViewSpecialPricing#" cfsqltype="cf_sql_bit">,
 								SpecialMemberCost = "#Session.UserSuppliedInfo.SpecialMemberCost#",
 								SpecialNonMemberCost = "#Session.UserSuppliedInfo.SpecialNonMemberCost#",
@@ -2422,7 +2408,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 					<cfif Session.UserSuppliedInfo.PGPAvailable EQ 1>
 						<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set PGPAvailable = <cfqueryparam value="#Session.UserSuppliedInfo.PGPAvailable#" cfsqltype="cf_sql_bit">,
 								PGPPoints = <cfqueryparam value="#Session.UserSuppliedInfo.PGPPoints#" cfsqltype="cf_sql_DECIMAL">
 							Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
@@ -2431,7 +2417,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 					<cfif Session.UserSuppliedInfo.MealProvided EQ 1>
 						<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set MealCost_Estimated = <cfqueryparam value="#Session.UserSuppliedInfo.MealCost_Estimated#" cfsqltype="CF_SQL_MONEY">,
 								MealProvidedBy = <cfqueryparam value="#Session.UserSuppliedInfo.MealProvidedBy#" cfsqltype="CF_SQL_INTEGER">
 							Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
@@ -2440,7 +2426,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 					<cfif Session.UserSuppliedInfo.AllowVideoConference EQ 1>
 						<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set AllowVideoConference = <cfqueryparam value="#Session.UserSuppliedInfo.AllowVideoConference#" cfsqltype="cf_sql_bit">,
 								VideoConferenceInfo = <cfqueryparam value="#Session.UserSuppliedInfo.VideoConferenceInfo#" cfsqltype="CF_SQL_VARCHAR">,
 								VideoConferenceCost = <cfqueryparam value="#Session.UserSuppliedInfo.VideoConferenceCost#" cfsqltype="CF_SQL_MONEY">
@@ -2467,14 +2453,14 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cfset EventRegistrationBeginTimeObject = #CreateTime(Variables.EventRegistrationBeginTimeHours, Variables.EventRegistrationBeginTimeMinutes, 0)#>
 
 						<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set Registration_BeginTime = #Variables.EventRegistrationBeginTimeObject#
 							Where TContent_ID = <cfqueryparam value="#insertCopiedEvent.generatedkey#" cfsqltype="cf_sql_integer">
 						</cfquery>
 					</cfif>
 
 					<cfquery name="updateNewEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEvents
+						Update p_eventregistration_events
 						Set AcceptRegistrations = <cfqueryparam value="#Session.UserSuppliedInfo.AcceptRegistrations#" cfsqltype="cf_sql_bit">,
 							lastUpdated = #Now()#,
 							lastUpdateBy = <cfqueryparam value="#Session.Mura.UserID#" cfsqltype="cf_sql_varchar">,
@@ -2505,16 +2491,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 		<cfif isDefined("URL.EventID") and not isDefined("URL.EventStatus")>
 			<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-				Select TContent_ID, ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, LongDescription,
-					Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime,
-					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
-					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
-					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
-					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
-					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
-					WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost
-				From eEvents
+				Select *
+				From p_eventregistration_events
 				Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 			</cfquery>
 			<cfquery name="GetSelectedEventRegistrations" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
@@ -2607,7 +2585,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 						<cfif checkNumberRegistrations.RecordCount EQ 0>
 							<cfquery name="updateEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-								Update eEvents
+								Update p_eventregistration_events
 								Set Active = <cfqueryparam value="0" cfsqltype="cf_sql_bit">,
 									EventCancelled = <cfqueryparam value="1" cfsqltype="cf_sql_bit">
 								Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
@@ -2615,7 +2593,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							</cfquery>
 						<cfelse>
 							<cfquery name="updateEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-								Update eEvents
+								Update p_eventregistration_events
 								Set Active = <cfqueryparam value="0" cfsqltype="cf_sql_bit">,
 									EventCancelled = <cfqueryparam value="1" cfsqltype="cf_sql_bit">
 								Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
@@ -2645,7 +2623,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 		<cfif isDefined("URL.EventID")>
 			<cfquery name="getSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 				Select *
-				From eEvents
+				From p_eventregistration_events
 				Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
 					TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer"> and
 					Active = <cfqueryparam value="1" cfsqltype="cf_sql_bit"> and
@@ -2692,18 +2670,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 		<cfif not isDefined("FORM.formSubmit") and isDefined("URL.EventID")>
 			<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-				Select TContent_ID, ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, LongDescription,
-					Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime,
-					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
-					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
-					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
-					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
-					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
-					WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost,
-					EventDoc_FileNameOne, EventDoc_FileTypeOne, EventDoc_FileNameTwo, EventDoc_FileTypeTwo, EventDoc_FileNameThree, EventDoc_FileTypeThree,
-					EventDoc_FileNameFour, EventDoc_FileTypeFour, EventDoc_FileNameFive, EventDoc_FileTypeFive
-				From eEvents
+				Select *
+				From p_eventregistration_events
 				Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 			</cfquery>
 			<cfquery name="GetSelectedEventRegistrations" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
@@ -2818,17 +2786,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 			</cfquery>
 
 			<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-				Select TContent_ID, ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, LongDescription,
-					Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime,
-					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
-					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
-					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
-					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
-					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
-					WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost, EventDoc_FileNameOne, EventDoc_FileTypeOne, EventDoc_FileNameTwo, EventDoc_FileTypeTwo, EventDoc_FileNameThree, EventDoc_FileTypeThree,
-					EventDoc_FileNameFour, EventDoc_FileTypeFour, EventDoc_FileNameFive, EventDoc_FileTypeFive
-				From eEvents
+				Select *
+				From p_eventregistration_events
 				Where TContent_ID = <cfqueryparam value="#GetRegisteredUsersForEvent.EventID#" cfsqltype="cf_sql_integer">
 			</cfquery>
 
@@ -2858,7 +2817,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							</cfif>
 							<cffile action="move" source="#GetTempDirectory()#/#Variables.NewServerFileOne#" Destination="#rc.pc.getFullPath()#/library/EventDocs/#GetSelectedEvent.TContent_ID#/#Variables.NewServerFileOne#">
 							<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-								Update eEvents
+								Update p_eventregistration_events
 								Set EventDoc_FileNameOne = <cfqueryparam value="#Variables.NewServerFileOne#" cfsqltype="cf_sql_varchar">,
 									EventDoc_FileTypeOne = <cfqueryparam value="#Variables.EventDocumentOne.ContentType#/#Variables.EventDocumentOne.ContentSubType#" cfsqltype="cf_sql_varchar">
 								Where TContent_ID = <cfqueryparam value="#GetRegisteredUsersForEvent.EventID#" cfsqltype="cf_sql_integer">
@@ -2873,7 +2832,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cffile action="rename" source="#GetTempDirectory()#/#Variables.EventDocumentTwo.ServerFile#" Destination="#Variables.NewServerFileTwo#">
 						<cffile action="move" source="#GetTempDirectory()#/#Variables.NewServerFileTwo#" Destination="#rc.pc.getFullPath()#/library/EventDocs/#GetSelectedEvent.TContent_ID#/#Variables.NewServerFileTwo#">
 						<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EventDoc_FileNameTwo = <cfqueryparam value="#Variables.NewServerFileTwo#" cfsqltype="cf_sql_varchar">,
 								EventDoc_FileTypeTwo = <cfqueryparam value="#Variables.EventDocumentTwo.ContentType#/#Variables.EventDocumentTwo.ContentSubType#" cfsqltype="cf_sql_varchar">
 							Where TContent_ID = <cfqueryparam value="#GetRegisteredUsersForEvent.EventID#" cfsqltype="cf_sql_integer">
@@ -2888,7 +2847,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cffile action="rename" source="#GetTempDirectory()#/#Variables.EventDocumentThree.ServerFile#" Destination="#Variables.NewServerFileThree#">
 						<cffile action="move" source="#GetTempDirectory()#/#Variables.NewServerFileThree#" Destination="#rc.pc.getFullPath()#/library/EventDocs/#GetSelectedEvent.TContent_ID#/#Variables.NewServerFileThree#">
 						<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EventDoc_FileNameThree = <cfqueryparam value="#Variables.NewServerFileThree#" cfsqltype="cf_sql_varchar">,
 								EventDoc_FileTypeThree = <cfqueryparam value="#Variables.EventDocumentThree.ContentType#/#Variables.EventDocumentThree.ContentSubType#" cfsqltype="cf_sql_varchar">
 							Where TContent_ID = <cfqueryparam value="#GetRegisteredUsersForEvent.EventID#" cfsqltype="cf_sql_integer">
@@ -2903,7 +2862,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cffile action="rename" source="#GetTempDirectory()#/#Variables.EventDocumentFour.ServerFile#" Destination="#Variables.NewServerFileFour#">
 						<cffile action="move" source="#GetTempDirectory()#/#Variables.NewServerFileFour#" Destination="#rc.pc.getFullPath()#/library/EventDocs/#GetSelectedEvent.TContent_ID#/#Variables.NewServerFileFour#">
 						<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EventDoc_FileNameFour = <cfqueryparam value="#Variables.NewServerFileFour#" cfsqltype="cf_sql_varchar">,
 								EventDoc_FileTypeFour = <cfqueryparam value="#Variables.EventDocumentFour.ContentType#/#Variables.EventDocumentFour.ContentSubType#" cfsqltype="cf_sql_varchar">
 							Where TContent_ID = <cfqueryparam value="#GetRegisteredUsersForEvent.EventID#" cfsqltype="cf_sql_integer">
@@ -2918,7 +2877,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cffile action="rename" source="#GetTempDirectory()#/#Variables.EventDocumentFive.ServerFile#" Destination="#Variables.NewServerFileFive#">
 						<cffile action="move" source="#GetTempDirectory()#/#Variables.NewServerFileFive#" Destination="#rc.pc.getFullPath()#/library/EventDocs/#GetSelectedEvent.TContent_ID#/#Variables.NewServerFileFive#">
 						<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EventDoc_FileNameFive = <cfqueryparam value="#Variables.NewServerFileFive#" cfsqltype="cf_sql_varchar">,
 								EventDoc_FileTypeFive = <cfqueryparam value="#Variables.EventDocumentFive.ContentType#/#Variables.EventDocumentFive.ContentSubType#" cfsqltype="cf_sql_varchar">
 							Where TContent_ID = <cfqueryparam value="#GetRegisteredUsersForEvent.EventID#" cfsqltype="cf_sql_integer">
@@ -3016,16 +2975,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 		<cfif not isDefined("URL.EventStatus") and isDefined("URL.EventID")>
 			<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-				Select TContent_ID, ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, LongDescription,
-					Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime,
-					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
-					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
-					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
-					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
-					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
-					WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost
-				From eEvents
+				Select *
+				From p_eventregistration_events
 				Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 			</cfquery>
 
@@ -4525,16 +4476,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 		<cfif not isDefined("FORM.formSubmit") and isDefined("URL.EventID")>
 			<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-				Select TContent_ID, ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, LongDescription,
-					Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime,
-					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
-					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
-					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
-					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
-					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
-					WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost
-				From eEvents
+				Select *
+				From p_eventregistration_events
 				Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 			</cfquery>
 
@@ -4723,16 +4666,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 		<cfif not isDefined("FORM.formSubmit") and isDefined("URL.EventID")>
 			<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-				Select TContent_ID, ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, LongDescription,
-					Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime,
-					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
-					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
-					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
-					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
-					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
-					WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost
-				From eEvents
+				Select *
+				From p_eventregistration_events
 				Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 			</cfquery>
 
@@ -4870,16 +4805,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 		<cfif isDefined("URL.EventID") and isDefined("URL.AutomaticPost")>
 			<cfif URL.AutomaticPost EQ "True">
 				<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-					Select TContent_ID, ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, LongDescription,
-						Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime,
-						EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
-						EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
-						ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-						MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
-						AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
-						LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
-						WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost
-					From eEvents
+					Select *
+					From p_eventregistration_events
 					Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 				</cfquery>
 
@@ -4894,16 +4821,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 			</cfif>
 		<cfelseif not isDefined("Form.PerformAction") and isDefined("URL.EventID") and not isDefined("URL.PerformAction") and isDefined("URL.EventID")>
 			<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-				Select TContent_ID, ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, LongDescription,
-					Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime,
-					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
-					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
-					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
-					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
-					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
-					WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost
-				From eEvents
+				Select *
+				From p_eventregistration_events
 				Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 			</cfquery>
 
@@ -5002,18 +4921,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 		<cfif not isDefined("FORM.formSubmit") and isDefined("URL.EventID")>
 			<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-				Select TContent_ID, ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, LongDescription,
-					Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime,
-					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
-					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
-					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
-					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
-					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
-					WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost,
-					EventDoc_FileNameSix, EventDoc_FileTypeSix, EventDoc_FileNameSeven, EventDoc_FileTypeSeven, EventDoc_FileNameEight, EventDoc_FileTypeEight,
-					EventDoc_FileNameNine, EventDoc_FileTypeNine, EventDoc_FileNameTen, EventDoc_FileTypeTen
-				From eEvents
+				Select *
+				From p_eventregistration_events
 				Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 			</cfquery>
 			<cfquery name="GetSelectedEventAttendees" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
@@ -5130,17 +5039,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 			</cfquery>
 
 			<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-				Select TContent_ID, ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, LongDescription,
-					Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime,
-					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
-					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
-					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
-					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
-					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
-					WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost, EventDoc_FileNameSix, EventDoc_FileTypeSix, EventDoc_FileNameSeven, EventDoc_FileTypeSeven, EventDoc_FileNameEight, EventDoc_FileTypeEight,
-					EventDoc_FileNameNine, EventDoc_FileTypeNine, EventDoc_FileNameTen, EventDoc_FileTypeTen
-				From eEvents
+				Select *
+				From p_eventregistration_events
 				Where TContent_ID = <cfqueryparam value="#GetAttendedUsersForEvent.EventID#" cfsqltype="cf_sql_integer">
 			</cfquery>
 
@@ -5171,7 +5071,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 							</cfif>
 							<cffile action="move" source="#GetTempDirectory()#/#Variables.NewServerFileOne#" Destination="#rc.pc.getFullPath()#/library/EventDocs/#GetSelectedEvent.TContent_ID#/#Variables.NewServerFileOne#">
 							<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-								Update eEvents
+								Update p_eventregistration_events
 								Set EventDoc_FileNameSix = <cfqueryparam value="#Variables.NewServerFileOne#" cfsqltype="cf_sql_varchar">,
 									EventDoc_FileTypeSix = <cfqueryparam value="#Variables.EventDocumentOne.ContentType#/#Variables.EventDocumentOne.ContentSubType#" cfsqltype="cf_sql_varchar">
 								Where TContent_ID = <cfqueryparam value="#GetAttendedUsersForEvent.EventID#" cfsqltype="cf_sql_integer">
@@ -5189,7 +5089,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cffile action="rename" source="#GetTempDirectory()#/#Variables.EventDocumentTwo.ServerFile#" Destination="#Variables.NewServerFileTwo#">
 						<cffile action="move" source="#GetTempDirectory()#/#Variables.NewServerFileTwo#" Destination="#rc.pc.getFullPath()#/library/EventDocs/#GetSelectedEvent.TContent_ID#/#Variables.NewServerFileTwo#">
 						<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EventDoc_FileNameSeven = <cfqueryparam value="#Variables.NewServerFileTwo#" cfsqltype="cf_sql_varchar">,
 								EventDoc_FileTypeSeven = <cfqueryparam value="#Variables.EventDocumentTwo.ContentType#/#Variables.EventDocumentTwo.ContentSubType#" cfsqltype="cf_sql_varchar">
 							Where TContent_ID = <cfqueryparam value="#GetAttendedUsersForEvent.EventID#" cfsqltype="cf_sql_integer">
@@ -5208,7 +5108,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cffile action="rename" source="#GetTempDirectory()#/#Variables.EventDocumentThree.ServerFile#" Destination="#Variables.NewServerFileThree#">
 						<cffile action="move" source="#GetTempDirectory()#/#Variables.NewServerFileThree#" Destination="#rc.pc.getFullPath()#/library/EventDocs/#GetSelectedEvent.TContent_ID#/#Variables.NewServerFileThree#">
 						<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EventDoc_FileNameEight = <cfqueryparam value="#Variables.NewServerFileThree#" cfsqltype="cf_sql_varchar">,
 								EventDoc_FileTypeEight = <cfqueryparam value="#Variables.EventDocumentThree.ContentType#/#Variables.EventDocumentThree.ContentSubType#" cfsqltype="cf_sql_varchar">
 							Where TContent_ID = <cfqueryparam value="#GetAttendedUsersForEvent.EventID#" cfsqltype="cf_sql_integer">
@@ -5226,7 +5126,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cffile action="rename" source="#GetTempDirectory()#/#Variables.EventDocumentFour.ServerFile#" Destination="#Variables.NewServerFileFour#">
 						<cffile action="move" source="#GetTempDirectory()#/#Variables.NewServerFileFour#" Destination="#rc.pc.getFullPath()#/library/EventDocs/#GetSelectedEvent.TContent_ID#/#Variables.NewServerFileFour#">
 						<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EventDoc_FileNameNine = <cfqueryparam value="#Variables.NewServerFileFour#" cfsqltype="cf_sql_varchar">,
 								EventDoc_FileTypeNine = <cfqueryparam value="#Variables.EventDocumentFour.ContentType#/#Variables.EventDocumentFour.ContentSubType#" cfsqltype="cf_sql_varchar">
 							Where TContent_ID = <cfqueryparam value="#GetAttendedUsersForEvent.EventID#" cfsqltype="cf_sql_integer">
@@ -5244,7 +5144,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 						<cffile action="rename" source="#GetTempDirectory()#/#Variables.EventDocumentFive.ServerFile#" Destination="#Variables.NewServerFileFive#">
 						<cffile action="move" source="#GetTempDirectory()#/#Variables.NewServerFileFive#" Destination="#rc.pc.getFullPath()#/library/EventDocs/#GetSelectedEvent.TContent_ID#/#Variables.NewServerFileFive#">
 						<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-							Update eEvents
+							Update p_eventregistration_events
 							Set EventDoc_FileNameTen = <cfqueryparam value="#Variables.NewServerFileFive#" cfsqltype="cf_sql_varchar">,
 								EventDoc_FileTypeTen = <cfqueryparam value="#Variables.EventDocumentFive.ContentType#/#Variables.EventDocumentFive.ContentSubType#" cfsqltype="cf_sql_varchar">
 							Where TContent_ID = <cfqueryparam value="#GetAttendedUsersForEvent.EventID#" cfsqltype="cf_sql_integer">
@@ -5360,7 +5260,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 			</cfquery>
 			<cfquery name="Session.getEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 				Select ShortTitle
-				From eEvents
+				From p_eventregistration_events
 				Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer"> and Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar">
 			</cfquery>
 		<cfelseif isDefined("FORM.formSubmit") and isDefined("URL.EventID")>
@@ -5418,7 +5318,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 			<cfquery name="Session.getEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 				Select ShortTitle
-				From eEvents
+				From p_eventregistration_events
 				Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer"> and Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar">
 			</cfquery>
 		<cfelseif isDefined("FORM.formSubmit") and isDefined("URL.EventID")>
@@ -5438,17 +5338,17 @@ http://www.apache.org/licenses/LICENSE-2.0
 			<cftry>
 				<cfquery name="CheckEventExists"Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 					Select Event_ID
-					From eEventsMatrix
+					From p_eventregistration_eventsMatrix
 				</cfquery>
 				<cfif CheckEventExists.RecordCount>
 					<cfquery name="updateEventIncome" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Update eEventsMatrix
+						Update p_eventregistration_eventsMatrix
 						Set Event_TotalIncomeFromOtherParty = <cfqueryparam value="#NumberFormat(FORM.IncomeAmount, '99999.99')#" cfsqltype="CF_SQL_DOUBLE">
 						Where Event_ID = <cfqueryparam value="#FORM.EventID#" cfsqltype="cf_sql_integer">
 					</cfquery>
 				<cfelse>
 					<cfquery name="insertNewEventIncome" result="insertNewEventExpense" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-						Insert into eEventsMatrix(Event_ID, Event_TotalIncomeFromParticipants, Event_TotalIncomeFromOtherParty)
+						Insert into p_eventregistration_eventsMatrix(Event_ID, Event_TotalIncomeFromParticipants, Event_TotalIncomeFromOtherParty)
 						Values(
 							<cfqueryparam value="#FORM.EventID#" cfsqltype="cf_sql_integer">,
 							<cfqueryparam value="#NumberFormat(0, '99999.99')#" cfsqltype="CF_SQL_DOUBLE">,
@@ -5475,12 +5375,12 @@ http://www.apache.org/licenses/LICENSE-2.0
 			</cflock>
 			<cfquery name="Session.getEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 				Select ShortTitle, MemberCost, NonMemberCost, EarlyBird_RegistrationAvailable, EarlyBird_RegistrationDeadline, EarlyBird_MemberCost, EarlyBird_NonMemberCost, ViewSpecialPricing, SpecialPriceRequirements, SpecialMemberCost, SpecialNonMemberCost, VideoConferenceCost, WebinarMemberCost, WebinarNonMemberCost
-				From eEvents
+				From p_eventregistration_events
 				Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer"> and Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar">
 			</cfquery>
 			<cfquery name="Session.getEventIncomeFromOtherParty" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 				Select Event_TotalIncomeFromOtherParty
-				From eEventsMatrix
+				From p_eventregistration_eventsMatrix
 				Where Event_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 			</cfquery>
 			<cfquery name="Session.getRegistrations" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
@@ -5595,7 +5495,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 			<cfquery name="Session.getEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 				Select ShortTitle, MemberCost, NonMemberCost, EarlyBird_RegistrationAvailable, EarlyBird_RegistrationDeadline, EarlyBird_MemberCost, EarlyBird_NonMemberCost, ViewSpecialPricing, SpecialPriceRequirements, SpecialMemberCost, SpecialNonMemberCost, VideoConferenceCost, WebinarMemberCost, WebinarNonMemberCost
-				From eEvents
+				From p_eventregistration_events
 				Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer"> and Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar">
 			</cfquery>
 
@@ -5608,13 +5508,13 @@ http://www.apache.org/licenses/LICENSE-2.0
 			</cfquery>
 		<cfelseif isDefined("FORM.formSubmit") and isDefined("FORM.EventID") and isDefined("FORM.EnterRebateNumbers")>
 			<cfquery name="updateParticipantCostReview" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-				Update eEventsMatrix
+				Update p_eventregistration_eventsMatrix
 				Set Event_CostPerParticipant = <cfqueryparam value="#FORM.CostPerParticiant#" cfsqltype="cf_sql_double">
 				Where Event_ID = <cfqueryparam value="#FORM.EventID#" cfsqltype="cf_sql_integer">
 			</cfquery>
 			<cfquery name="Session.getEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 				Select ShortTitle, MemberCost, NonMemberCost, EarlyBird_RegistrationAvailable, EarlyBird_RegistrationDeadline, EarlyBird_MemberCost, EarlyBird_NonMemberCost, ViewSpecialPricing, SpecialPriceRequirements, SpecialMemberCost, SpecialNonMemberCost, VideoConferenceCost, WebinarMemberCost, WebinarNonMemberCost
-				From eEvents
+				From p_eventregistration_events
 				Where TContent_ID = <cfqueryparam value="#FORM.EventID#" cfsqltype="cf_sql_integer"> and Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar">
 			</cfquery>
 
@@ -5669,16 +5569,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 		<cfif not isDefined("FORM.PerformAction") and isDefined("URL.EventID")>
 			<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-				Select TContent_ID, ShortTitle, EventDate, EventDate1, EventDate2, EventDate3, EventDate4, EventDate5, LongDescription,
-					Event_StartTime, Event_EndTime, Registration_Deadline, Registration_BeginTime, Registration_EndTime,
-					EventFeatured, Featured_StartDate, Featured_EndDate, Featured_SortOrder, MemberCost, NonMemberCost,
-					EarlyBird_RegistrationDeadline, EarlyBird_RegistrationAvailable, EarlyBird_MemberCost, EarlyBird_NonMemberCost,
-					ViewSpecialPricing, SpecialMemberCost, SpecialNonMemberCost, SpecialPriceRequirements, PGPAvailable, PGPPoints,
-					MealAvailable, MealProvidedBy, MealCost, Meal_Notes, AllowVideoConference, VideoConferenceInfo, VideoConferenceCost,
-					AcceptRegistrations, EventAgenda, EventTargetAudience, EventStrategies, EventSpecialInstructions, Maxparticipants,
-					LocationType, LocationID, LocationRoomID, MaxParticipants, Presenters, Facilitator, dateCreated, lastUpdated, lastUpdateBy, Active,
-					WebinarAvailable, WebinarConnectInfo, WebinarMemberCost, WebinarNonMemberCost
-				From eEvents
+				Select *
+				From p_eventregistration_events
 				Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 			</cfquery>
 
@@ -5773,7 +5665,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 
 			<cfquery name="GetSelectedEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
 				Select TContent_ID, ShortTitle, EventDate, PGPAvailable, PGPPoints
-				From eEvents
+				From p_eventregistration_events
 				Where TContent_ID = <cfqueryparam value="#URL.EventID#" cfsqltype="cf_sql_integer">
 			</cfquery>
 
