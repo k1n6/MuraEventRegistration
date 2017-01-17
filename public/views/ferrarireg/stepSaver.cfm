@@ -1,3 +1,4 @@
+<cfparam default="false" name="reviewmode">
 <cfif isdefined('url.goingback') and url.goingback eq 'true' and arraylen(session.reg_options) gte curstep +1 and isstruct(session.reg_options[curstep + 1])>
 	
 	<cfset input_struct = session.reg_options[curstep + 1]>
@@ -23,17 +24,19 @@
 	</cfloop>
 	<!--- now store the saved values --->
 	<cfset req = getHTTPRequestData()>
-	<cfparam default="false" name="reviewmode">
+	
 	<cfif req.method eq "POST" and reviewmode neq "true">
 		<cfset session.reg_options[curstep] = save_struct>
 	</cfif>
 <cfelse>
 	<!--- else this is the first time the user has visited this page and we just load the variables into the request context --->
-	
-	<cfset save_struct = {}>
-	<cfparam name='rc.fieldnames' default="">
-	<cfloop list="#rc.fieldnames#" index='i'>
-		<cfset save_struct[i] = rc[i]>
-	</cfloop>
-	<cfset session.reg_options[curstep] = save_struct>
+	<cfset req = getHTTPRequestData()>
+	<cfif req.method eq "POST" and reviewmode neq "true">
+		<cfset save_struct = {}>
+		<cfparam name='rc.fieldnames' default="">
+		<cfloop list="#rc.fieldnames#" index='i'>
+			<cfset save_struct[i] = rc[i]>
+		</cfloop>
+		<cfset session.reg_options[curstep] = save_struct>
+	</cfif>
 </cfif>
