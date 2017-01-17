@@ -36,7 +36,7 @@
 	</cfloop>
 	<cfset full_name = rc.member_data.name_first & ' ' & rc.member_data.name_last>
 	<cfif not structkeyexists(input_struct, 'full_name')>
-		<cfset input_strut['full_name'] = full_name>	
+		<cfset input_struct['full_name'] = full_name>	
 	</cfif>
 </cfif>
 <cfif rc.member_data.recordcount gt 0>
