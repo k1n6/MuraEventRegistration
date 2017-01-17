@@ -1,7 +1,7 @@
 <cfoutput>
 	<cfif rc.action does not contain "ferrarireg">
 
-		<div class="container">
+		<div class="container-fluid">
 			<!--- PRIMARY NAV --->
 			<div class="row-fluid">
 				<nav class="navbar">
@@ -86,7 +86,6 @@
 			</div>
 		</div>
 	<cfelse>
-		<div class="container">
 			<div class="container-fluid">
 				<div class="row">
 					<!--- SUB-NAV --->
@@ -103,7 +102,5 @@
 					</div>
 				</div>
 			</div>
-		</div>
-		
 	</cfif>
 </cfoutput>

@@ -27,9 +27,10 @@
 	margin-top: 5px !important;
 }
 .tabs-content-well{
-	    border: 1px solid #dfdfdf !important;
+    border: 1px solid #dfdfdf !important;
     border-radius: 0 !important;
     border-top: 0 !important;
+	background-color: white;
 }
 .group_label_rows > div {
 
@@ -43,7 +44,9 @@
 	font-size: 110% !important;
 }
 
-
+.formly-field-checkbox{
+	margin-top: 23px;
+}
 
 .custom-list-item{
 	

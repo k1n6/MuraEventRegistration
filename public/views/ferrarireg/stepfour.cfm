@@ -13,6 +13,7 @@
 	<script>
 		window.location.href = window.location.href;
 	</script>
+	<cfabort>
 </cfif>
 
 <div class="container-fluid">
@@ -38,7 +39,7 @@
 	<br clear="all" />
 		<div class="container-fluid">
 			<div class="panel panel-default">
-				<form method="post" action="?EventRegistrationaction=public:ferrarireg.stepfive&EventID=<cfoutput>#rc.eventid#</cfoutput>">
+				<form method="post" action="?EventRegistrationaction=public:ferrarireg.stepfive&EventID=<cfoutput>#rc.eventid#</cfoutput>" role="form" data-toggle="validator">
 					<div class="panel-body">
 						<fieldset>
 							<div class="form-group row">
@@ -48,10 +49,10 @@
 								</div>
 							</div>
 							<div class="form-group row">
-								<div class="col-sm-3 pull-left">
+								<div class="col-sm-6 pull-left">
 									<button class="btn btn-primary" onclick="window.location.href = '?EventRegistrationaction=public:ferrarireg.stepthree&EventID=<cfoutput>#rc.eventid#</cfoutput>&goingback=true'; return false;">&lt;- Go Back</button>
 								</div>
-								<div class="col-sm-3 pull-right text-align-right">
+								<div class="col-sm-6 pull-right text-align-right">
 									<button class="btn btn-primary" type="submit">Proceed To Checkout -></button>
 								</div>
 

@@ -2,7 +2,7 @@
 	<div optionoractivityname eventid="eventid" subevent="subevent"></div>
 	<form  name="optionGroupForm" novalidate>
 		<formly-form model="eventOptionGroups[0]" fields="optionGroupFields" form="optionGroupForm">
-			<button type="button" ng-click="saveOptionGroup(eventOptionGroups[0]);" class="deleteOptionGroupButton btn btn-primary" ng-disabled="eventForm.$invalid">Save Option Group</button>
+			<button type="button" ng-click="saveOptionGroup(eventOptionGroups[0]);" class="deleteOptionGroupButton btn btn-primary" ng-disabled="optionGroupForm.$invalid">Save Option Group</button>
 		</formly-form>
 	</form>
 	<!--

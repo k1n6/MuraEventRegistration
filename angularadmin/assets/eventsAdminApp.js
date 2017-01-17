@@ -254,7 +254,7 @@ angular.module('eventsadmin')
 					}
 
 				}
-			}, 300);
+			}, 700);
 			
 	});
 	$http.get('/bootstrap/versions-mapping.json')

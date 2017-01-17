@@ -13,7 +13,9 @@
 <cfparam default="false" name="reviewmode">
 <cfparam name="request.runningTotal" default="0">
 
-<cfif not isdefined('session.stmember.id') or val(session.stmember.id) eq 0>
+
+
+<cfif val(session.event_config.allow_guests) neq 1 and  ((not isdefined('session.stmember.id')) or val(session.stmember.id) eq 0)>
 
 	<cflocation url="/members/member-login/?returnto=#cgi.path_info#?#urlencodedformat(cgi.query_string)#" addtoken="false">
 </cfif>
@@ -23,12 +25,22 @@
 	this only overwrites it if it doesn't already exist in the session (built
 	by the stepsaver as the user moves 	between steps)
 --->
-<cfif rc.member_data.recordcount eq 1>
+<cfset session.isMember = false>
+<cfif rc.member_data.recordcount lte 1>
 	<cfloop list="#rc.member_data.columnlist#" index='i'>
 		<cfif not structkeyexists(input_struct, i)>
-			<cfset input_struct[i] = rc.member_data[i][1]>	
+			<cfif not structkeyexists(input_struct, i)>
+				<cfset input_struct[i] = rc.member_data[i][1]>	
+			</cfif>
 		</cfif>
 	</cfloop>
+	<cfset full_name = rc.member_data.name_first & ' ' & rc.member_data.name_last>
+	<cfif not structkeyexists(input_struct, 'full_name')>
+		<cfset input_strut['full_name'] = full_name>	
+	</cfif>
+</cfif>
+<cfif rc.member_data.recordcount gt 0>
+	<cfset session.isMember = true>
 </cfif>
 
 <!---   
@@ -39,6 +51,7 @@
 	<script>
 		window.location.href = window.location.href;
 	</script>
+	<cfabort>
 </cfif>
 
 <cfoutput>
@@ -50,6 +63,24 @@
 			<p>Provide your contact information and select which activities you'd like to participate in below.</p>
 		</div>
 	</div>
+	<cfif rc.member_data.recordcount lt 1>
+		<div class="row">
+			<div class="col-md-12">
+				<div class="panel-group panel-warning">
+				  <div class="panel panel-default">
+					  <div class="panel-body">
+						  <h4>Registering As Guest</h4>
+							You are registering as a guest as you are not logged in to a Ferrari Members account. <br>
+							<cfif not ( isdefined("reviewmode") and reviewmode eq 'true')>
+								<a href="/members/member-login/?returnto=#cgi.path_info#?#urlencodedformat(cgi.query_string)#">Click here to login to your FCA account.</a>
+						  	</cfif>
+						</div>
+				  </div>
+				</div>
+
+			</div>
+		</div>
+	</cfif>
 	<!---   
 	<div class="row">
 		<div class="col-md-12">
@@ -76,7 +107,13 @@
 				 for(i = 0; i < target; i++)
 					 $('##guest' + i ).css('display', 'block').find('input').prop('required', true);
 			 }).change();
+			 
+			 $('.form-group.required').each(function(){
+				 if($(this).find('.help-block').length ==0)
+					 $(this).find('input,select').after('<div class="help-block with-errors"></div>');
+			 })
 		 });
+		
 	</script>
 </cfif>
 
@@ -84,7 +121,7 @@
 
 	
 		<div class="panel panel-default">
-			<form method="post" action="?EventRegistrationaction=public:ferrarireg.steptwo&EventID=#rc.eventid#">
+			<form method="post" action="?EventRegistrationaction=public:ferrarireg.steptwo&EventID=#rc.eventid#" role="form" data-toggle="validator">
 			<div class="panel-body">
 				<fieldset>
 						<legend>Your Contact Information</legend>
@@ -92,14 +129,18 @@
 				<div class="form-group required"> <!-- Full Name -->
 					<label for="full_name_id" class="control-label">Full Name</label>
 					<input type="text" class="form-control" id="full_name_id" name="full_name" placeholder="Full Name"
-						required 
-						value="#input_struct.name_first# #input_struct.name_last#"
+						required='true' 
+						data-error="Please provide your full name"
+						value="#trim(input_struct['full_name'])#"
 					>
+					<div class="help-block with-errors"></div>
 				</div>	
 
 				<div class="form-group required" > <!-- Street 1 -->
 					<label for="address_1" class="control-label">Street Address 1</label>
-					<input type="text" class="form-control" id="address_1" name="address_1" placeholder="Street address, P.O. box, company name, c/o"
+					<input type="text" 
+						data-error="You have to enter an address"
+					class="form-control" id="address_1" name="address_1" placeholder="Street address, P.O. box, company name, c/o"
 					required  value="#input_struct.address_1#"
 					>
 				</div>					
@@ -142,9 +183,12 @@
 							</cfif>
 						</cfloop>
 					</select>
+				</div>
 				<div class="form-group required"> <!-- State Button -->
 					<label for="StateChoose" class="control-label">State</label>
-					<select required   class="form-control"  name="State" id="StateChoose" >
+					<select required   class="form-control"  name="State" id="StateChoose" 
+						data-error="Please select a state from the list"
+					>
 						<option value="">Choose One...</option>
 
 
@@ -330,7 +374,7 @@
 				<cfif reviewmode neq 'true'>
 					<fieldset>
 						<div class="form-group row">
-							<div class="col-sm-3 pull-right text-align-right">
+							<div class="col-sm-12 pull-right text-align-right">
 								<button class="btn btn-primary" type="submit">Proceed To Next Step -></button>
 							</div>
 

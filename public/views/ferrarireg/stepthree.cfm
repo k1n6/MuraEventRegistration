@@ -36,9 +36,22 @@
 		<script>
 			window.location.href = window.location.href;
 		</script>
+		<cfabort>
 	</cfif>
 
 </cfif>
+<cfif reviewmode neq 'true'>
+	<script>
+		 $(function(){
+			 $('.form-group.required').each(function(){
+				 if($(this).find('.help-block').length ==0)
+					 $(this).find('input,select').after('<div class="help-block with-errors"></div>');
+			 })
+		 });
+		
+	</script>
+</cfif>
+
 <cfparam name="request.runningTotal" default="0">
 
 	<div class="container-fluid" <cfif  getChosenSubData.recordcount eq 0 and reviewmode eq "true"> style="display: none !important;"</cfif> >
@@ -48,7 +61,7 @@
 		</div>
 	</div> 
 		<div class="panel panel-default">
-			<form method="post" action="?EventRegistrationaction=public:ferrarireg.stepfour&EventID=<cfoutput>#rc.eventid#</cfoutput>">
+			<form method="post" action="?EventRegistrationaction=public:ferrarireg.stepfour&EventID=<cfoutput>#rc.eventid#</cfoutput>" role="form" data-toggle="validator">
 				<div class="panel-body">
 				
 					<cfset guest ="">
@@ -73,11 +86,11 @@
 				<cfif reviewmode neq 'true'>
 					<fieldset>
 						<div class="form-group row">
-							<div class="col-sm-3 pull-left">
+							<div class="col-sm-6 pull-left">
 								<button id="prev_page_button_for_stepthree" class="btn btn-primary" onclick="window.location.href = '?EventRegistrationaction=public:ferrarireg.steptwo&EventID=<cfoutput>#rc.eventid#</cfoutput>&goingback=true';  return false;">&lt;- Return to Previous Step</button>
 							</div>
 
-							<div class="col-sm-3 pull-right text-align-right">
+							<div class="col-sm-6 pull-right text-align-right">
 								<button id="next_page_button_for_stepthree" class="btn btn-primary" type="submit">Proceed To Next Step -></button>
 							</div>
 

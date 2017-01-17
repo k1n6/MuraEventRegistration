@@ -38,6 +38,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 		<cfelse>
 			<cfset rc.member_data = fr.getMemberData(-1)>
 		</cfif>
+		<cfset session.event_config = fr.getAdminConfig()>
 	
 	</cffunction>
 	
@@ -45,18 +46,20 @@ http://www.apache.org/licenses/LICENSE-2.0
 		<cfargument name="rc" required="true" type="struct" default="#StructNew()#">
 		<cfobject name="fr" component="cfcs.ferrari_reg">
 		<cfset rc.event_data = fr.getFullEventData(rc.eventid)>
-		
+		<cfparam default="#fr.getAdminConfig()#" name="session.event_config">
 	</cffunction>
 	
 	<cffunction name="thankyou" returntype="any" output="false">
 		<cfargument name="rc" required="true" type="struct" default="#StructNew()#">
-		
+		<cfobject name="fr" component="cfcs.ferrari_reg">
+		<cfparam default="#fr.getAdminConfig()#" name="session.event_config">
 		
 	</cffunction>
 	
 	<cffunction name="stepthree" returntype="any" output="false">
 		<cfargument name="rc" required="true" type="struct" default="#StructNew()#">
 		<cfobject name="fr" component="cfcs.ferrari_reg">
+		<cfparam default="#fr.getAdminConfig()#" name="session.event_config">
 		<cfset rc.event_data = fr.getFullEventData(rc.eventid)>
 		
 	</cffunction>
@@ -64,6 +67,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 	<cffunction name="stepfour" returntype="any" output="false">
 		<cfargument name="rc" required="true" type="struct" default="#StructNew()#">
 		<cfobject name="fr" component="cfcs.ferrari_reg">
+		<cfparam default="#fr.getAdminConfig()#" name="session.event_config">
 		<cfset rc.event_data = fr.getFullEventData(rc.eventid)>
 		<cfif isdefined("session.stmember.ID")>
 			<cfset rc.member_data = fr.getMemberData(session.stmember.ID)>
@@ -75,6 +79,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 	<cffunction name="stepfive" returntype="any" output="false">
 		<cfargument name="rc" required="true" type="struct" default="#StructNew()#">
 		<cfobject name="fr" component="cfcs.ferrari_reg">
+		<cfparam default="#fr.getAdminConfig()#" name="session.event_config">
 		<cfset rc.event_data = fr.getFullEventData(rc.eventid)>
 		<cfif isdefined("session.stmember.ID")>
 			<cfset rc.member_data = fr.getMemberData(session.stmember.ID)>

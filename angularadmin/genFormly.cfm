@@ -48,7 +48,12 @@
 						<cfif lastGroup eq form_group>,</cfif>
 						{
 							"key": "#column_name#",
-							"className" : "col-sm-6",
+							<cfif listfindnocase('text,ntext', data_type)
+								or (listfindnocase('varchar,nvarchar', data_type) and character_maximum_length eq '-1') >
+								"className" : "col-sm-12",
+							<cfelse>
+								"className" : "col-sm-6",
+							</cfif>
 							<cfif dropdown_id eq "">
 								<cfswitch expression="#data_type#">
 									<cfcase value="varchar,nvarchar">

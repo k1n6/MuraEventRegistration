@@ -28,7 +28,20 @@ This pulls in args
 	<script>
 		window.location.href = window.location.href;
 	</script>
+	<cfabort>
 </cfif>
+<cfif reviewmode neq 'true'>
+	<script>
+		 $(function(){
+			 $('.form-group.required').each(function(){
+				 if($(this).find('.help-block').length ==0)
+					 $(this).find('input,select').after('<div class="help-block with-errors"></div>');
+			 })
+		 });
+		
+	</script>
+</cfif>
+
 <div class="container-fluid">
 	<div class="row">
 		<div class="col-md-12">
@@ -36,7 +49,7 @@ This pulls in args
 		</div>
 	</div>
 		<div class="panel panel-default">
-			<form method="post" action="?EventRegistrationaction=public:ferrarireg.stepthree&EventID=<cfoutput>#rc.eventid#</cfoutput>">
+			<form method="post" action="?EventRegistrationaction=public:ferrarireg.stepthree&EventID=<cfoutput>#rc.eventid#</cfoutput>" role="form" data-toggle="validator">
 				<div class="panel-body">
 				<cfset guest ="">
 				<cfset guestName = session.reg_options[2].full_name>	
@@ -54,10 +67,10 @@ This pulls in args
 				<cfif reviewmode neq 'true'>
 					<fieldset>
 						<div class="form-group row">
-							<div class="col-sm-3 pull-left">
+							<div class="col-sm-6 pull-left">
 								<button class="btn btn-primary" onclick="window.location.href = '?EventRegistrationaction=public:ferrarireg.default&EventID=<cfoutput>#rc.eventid#</cfoutput>&goingback=true'; return false;">&lt;- Return to Previous Step</button>
 							</div>
-							<div class="col-sm-3 pull-right text-align-right">
+							<div class="col-sm-6 pull-right text-align-right">
 								<button class="btn btn-primary" type="submit">Proceed To Next Step -></button>
 							</div>
 

@@ -13,6 +13,7 @@
 	<script>
 		window.location.href = window.location.href;
 	</script>
+	<cfabort>
 </cfif>
 <div class="container-fluid">
 	<div class="row">
@@ -23,9 +24,9 @@
 		<div class="panel panel-default">
 			<cfsavecontent variable="summary">
 					<script>
-							$(function(){
-								$('input, select').prop('disabled', 'true');
-							})
+						$(function(){
+							$('input, select').prop('disabled', 'true');
+						})
 					</script>
 					<cfset reviewmode = true>
 					<cfset url.goingback = 'true'>
@@ -66,26 +67,44 @@
 				<fieldset>
 				
 						<div class="form-group row">
-							<div class="col-sm-3 pull-left">
+							<div class="col-sm-6 pull-left">
 								<button class="btn btn-primary" onclick="window.location.href = '?EventRegistrationaction=public:ferrarireg.stepfour&EventID=<cfoutput>#rc.eventid#</cfoutput>&goingback=true';  return false;">&lt;- Return to Review</button>
 							</div>
-							<cfset NOTIFYURL = "http://#cgi.server_name#/notify.cfm">
+							<cfset NOTIFYURL = urlencodedformat("http://#cgi.server_name#/notify.cfm")>
 							<cfset TransactionID= "FCA Events Registration">
-							<cfset return = "">
-							<cfset cancel_return = "">
-							<cfset custom = "">
-							<cfset paypalurl= "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&invoice=#right(getTickcount(), 5)#&notify_url=#notifyurl#&business=dan.baughman@gmail.com&item_name=#TransactionID#&item_number=Registration_7463&amount=#request.runningtotal#&shipping=0%2e00&no_shipping=0&no_note=1&tax=0%2e00&lc=US&currency_code=USD&bn=PP%2dBuyNowBF&charset=UTF%2d8&return=#return#&cancel_return=#cancel_return#&custom=#custom#">
+							<cfset return = urlencodedformat("http://#cgi.server_name##cgi.path_info#?#cgi.query_string#")>
+							<cfset cancel_return = urlencodedformat("http://#cgi.server_name##cgi.path_info#?#cgi.query_string#")>
+							<cfset custom = urlencodedformat("http://#cgi.server_name##cgi.path_info#?#cgi.query_string#")>
+							<cfset paypalemail = session.event_config.paypal_emailaddress>
+							<cfset item_number = "#numberformat(getTickCount() / 1000, '0')#">
+							<cfset paypalurl = "www.paypal.com">
+							<cfif session.event_config.paypal_sandbox_mode eq '1'>
+								<cfset paypalurl = "www.sandbox.paypal.com">
+							</cfif>
+							<cfset paypalurl= "https://#paypalurl#/cgi-bin/webscr?cmd=_xclick&invoice=#right(getTickcount(), 5)#&notify_url=#notifyurl#&business=#paypalemail#&item_name=#TransactionID#&item_number=#item_number#&amount=#request.runningtotal#&shipping=0%2e00&no_shipping=0&no_note=1&tax=0%2e00&lc=US&currency_code=USD&bn=PP%2dBuyNowBF&charset=UTF%2d8&return=#return#&cancel_return=#cancel_return#&custom=#custom#">
 
-							<div class="col-sm-3">
+										
+							<div class="col-sm-6 pull-right text-align-right">
+								<a 
+								   href = "<cfoutput>#paypalurl#</cfoutput>"
+								   class="btn btn-primary" type="submit">Pay Through Pay Pal</a><br>
+									<br>
+								<cfif val(session.event_config.allow_checks) eq 1>
+								<a 
+									href="?EventRegistrationaction=public:ferrarireg.thankyou&payviaCheck=true"
+									class="btn btn-primary">Mail In A Check</a>
+								
+								</cfif>
+
+							</div>
+							<div class="col-sm-12">
+								<br>
+								<br>
 								<a 
 									href="?EventRegistrationaction=public:ferrarireg.thankyou"
 									class="btn btn-primary">Admin Checkout</a>
-							</div>			
-							<div class="col-sm-3 pull-right text-align-right">
-								<a 
-								   href = "<cfoutput>#paypalurl#</cfoutput>"
-								   class="btn btn-primary" type="submit">Pay Through Pay Pal</a>
 							</div>
+							
 
 						</div>
 					
