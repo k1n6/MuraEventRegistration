@@ -13,7 +13,10 @@
 <cfparam default="false" name="reviewmode">
 <cfparam name="request.runningTotal" default="0">
 
+<cfif not isdefined('session.stmember.id') or val(session.stmember.id) eq 0>
 
+	<cflocation url="/members/member-login/?returnto=#cgi.path_info#?#urlencodedformat(cgi.query_string)#" addtoken="false">
+</cfif>
 
 <!---   
 	This pulls member data into the input struct for this form.
