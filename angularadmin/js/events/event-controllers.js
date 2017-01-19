@@ -46,7 +46,20 @@ angular.module('eventsadmin')
 	$scope.eventid = $stateParams.eventid;
 	$scope.subevent = $stateParams.subevent;
 	
+	$scope.loadCarIntoOptionGroup = function(source_event, source_subevent, target_event, target_subevent){
 	
+		var promise = eventServices.eventCopier(source_event, source_subevent, target_event, target_subevent, 'optionsonly');
+		promise.then(function(d){
+				$state.reload();
+		});
+	}
+	$scope.loadTrackExperienceOption = function(source_event, source_subevent, target_event, target_subevent){
+		
+		var promise = eventServices.eventCopier(source_event, source_subevent, target_event, target_subevent, 'loadTrackExperience');
+		promise.then(function(d){
+				$state.reload();
+		});
+	}
 	
 	$scope.deleteOptiongroup = function(optiongroupid, $event){
 		eventServices.deleteOptionGroup(optiongroupid).then(function(res){
@@ -245,25 +258,40 @@ angular.module('eventsadmin')
 
 
 
-.controller("editActivityController", ['$scope', 'eventServices', '$stateParams','$state',  function($scope, eventServices, $stateParams, $state){
+.controller("editActivityController", ['$scope', 'eventServices', '$stateParams','$state', '$timeout', 'eventActivities', 'activityFields',
+								function($scope, eventServices, $stateParams, $state, $timeout, eventActivities, activityFields){
 	
 	//this fetches our form data
-	$scope.activityFields = 	[];
-	eventServices.getFormData('p_eventregistration_subevent').then(function(d){
-		$scope.activityFields = d;
-	});
-	$scope.eventActivities = [];
+	$scope.activityFields = activityFields;
+	$scope.eventActivities = eventActivities;
+									
 	$scope.eventid = $stateParams.eventid;
 	$scope.subevent = $stateParams.subevent;
 	$scope.updateActivities = function(){
 		var data_two = eventServices.getSubEvents($stateParams.eventid, $stateParams.subevent);
 		data_two.then(function(resp){
 			$scope.eventActivities = resp;
+			$scope.$digest();
 		});
 	};
 	
-	$scope.updateActivities();
+	//$timeout($scope.updateActivities, 5000);
 	
+	
+	$scope.loadCarIntoOptionGroup = function(source_event, source_subevent, target_event, target_subevent){
+		data = {};
+		var promise = eventServices.eventCopier(source_event, source_subevent, target_event, target_subevent, 'optionsonly');
+		promise.then(function(d){
+				$state.reload();
+		});
+	}
+	$scope.loadTrackExperienceOption = function(source_event, source_subevent, target_event, target_subevent){
+		
+		var promise = eventServices.eventCopier(source_event, source_subevent, target_event, target_subevent, 'loadTrackExperience');
+		promise.then(function(d){
+				$state.reload();
+		});
+	}
 	$scope.saveActivity = function(subevent_struct){
 		subevent_struct.eventid = $stateParams.eventid;
 		subevent_struct.subevent_event = $stateParams.eventid;

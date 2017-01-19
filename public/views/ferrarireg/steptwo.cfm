@@ -29,6 +29,25 @@ This pulls in args
 		window.location.href = window.location.href;
 	</script>
 	<cfabort>
+<cfelse>
+	<script>
+		$(function(){
+			 $(' label.required').each(function(){
+				 if($(this).find('.help-block').length ==0)
+					 $(this).next().find('input,select').after('<div class="help-block with-errors"></div>');
+			 })
+			 $('.required_data_field').on('keyup', requiredChange);
+		});
+		function requiredChange(){
+			var targid = $(this).attr('data-optiongroupid');
+			if($(this).val() != '')
+				$('#optiongroup' + targid).prop('checked', true);
+			else
+				$('#optiongroup' + targid).prop('checked', false);
+		}
+		
+	</script>
+	
 </cfif>
 <cfif reviewmode neq 'true'>
 	<script>
@@ -42,7 +61,7 @@ This pulls in args
 	</script>
 </cfif>
 
-<div class="container-fluid">
+<div class="">
 	<div class="row">
 		<div class="col-md-12">
 			<h2>Registration Options - Main Event</h2>		

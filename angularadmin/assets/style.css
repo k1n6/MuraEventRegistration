@@ -45,7 +45,8 @@
 }
 
 .formly-field-checkbox{
-	margin-top: 23px;
+    margin-top: 23px;
+    margin-bottom: 8px;
 }
 
 .custom-list-item{

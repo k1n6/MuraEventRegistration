@@ -55,7 +55,8 @@
 				</div>
 			</div>	
 		</cfoutput>
-
+		
+		<cfset lastgroup = "">
 		<cfoutput query="rc.event_data.main_data" group="optiongroupid">
 			<cfif ( guestsuffix eq '' and 
 										(optiongroup_available_to eq 3 
@@ -65,11 +66,16 @@
 									) or (
 										guestsuffix neq '' and listfindnocase('2,3', optiongroup_available_to)
 									)>
-				<cfif field_group neq "">
-					<legend class="sublegend">#field_group#</legend>
+				<cfif lastgroup neq field_group>
+					<cfset lastgroup = field_group>									
+					<cfif field_group neq "">
+						<legend class="sublegend">#field_group#</legend>
+					</cfif>
 				</cfif>
 				<div class="form-group row">
-					<label for="optiongroup#optiongroupid##guestsuffix#" class="control-label col-sm-3">
+					<label for="optiongroup#optiongroupid##guestsuffix#" class="control-label col-sm-3 text-align-right
+																				<cfif required eq 1> required </cfif>
+					">
 						<cfif required eq 1>
 							<input type="checkbox" disabled id="optiongroup#optiongroupid##guestsuffix#" name='optiongroup#guestsuffix#' value='#optiongroupid#'
 									 checked readonly='true' style="display: none;">
@@ -80,55 +86,66 @@
 						#group_name#
 
 					</label>
-					<div class="col-sm-5">
-						#group_description#
-						<cfif require_data neq "">
-							<cfquery name="thisGroupData" dbtype="query">
-								select require_data, field_group, group_description, optiongroupid
-								from rc.event_data.main_data
-								where optiongroupid = #optiongroupid#
-							</cfquery>
-							<cf_requiredDataField groupdata="#thisGroupData#" input_struct="#input_struct#" suffix="#guestsuffix#">
-						</cfif>
-					</div>
-					<div class="col-sm-4">
-						<cfif option_id neq "">
-							<p>Select an option below  for <em>#group_name#</em></p>
-							<cfset usedOptions = {}>
-							<select name="option#guestsuffix#"  class="form-control" onchange="updateCheckbox(this, '#optiongroupid##guestsuffix#');">
-								<cfif required neq 1>
-									<option value="">Make a selection..</option>
-								</cfif>
-								<cfoutput>
-									<cfset cnt += 1>
-									<cfif not structkeyexists(usedOptions, option_id)
-									and (
-										( guestsuffix eq '' and 
-											(option_available_to eq 3 
-											or ( option_available_to eq 2 and not session.isMember)
-											or ( option_available_to eq 1 and session.isMember)
-											)
-										) or (
-											guestsuffix neq '' and listfindnocase('2,3', option_available_to)
-										))
-										>
-										<cfset usedOptions[option_id] = 1>
-										<option value="#option_id#"
-												<cfif listfindnocase(input_struct['option#guestsuffix#'], option_id)>
-													selected
-												  <cfset request.runningTotal += val(price)>
-												</cfif>
-												>
-											#name#
-											#dollarformat(price)#
-										</option>
+					<div class="col-sm-9">
+						<div class="flexparent">
 
+							<div class="flexchild">
+								
+								<cfif require_data neq "">
+									<cfquery name="thisGroupData" dbtype="query">
+										select require_data, field_group, group_description, optiongroupid
+										from rc.event_data.main_data
+										where optiongroupid = #optiongroupid#
+									</cfquery>
+									<cf_requiredDataField groupdata="#thisGroupData#" input_struct="#input_struct#" suffix="#guestsuffix#" required="#required#">
+								</cfif>
+								<cfif group_description neq "<p><br></p>">
+									#group_description#
+								</cfif>
+							</div>
+								
+						<cfif option_id neq "">
+							<div class="flexchild">
+
+								
+								<cfset usedOptions = {}>
+								<select name="option#guestsuffix#"  class="form-control" onchange="updateCheckbox(this, '#optiongroupid##guestsuffix#');">
+									<cfif required neq 1>
+										<option value="">Make a selection..</option>
 									</cfif>
-								</cfoutput>
-							</select>	
+									<cfoutput>
+										<cfset cnt += 1>
+										<cfif not structkeyexists(usedOptions, option_id)
+										and (
+											( guestsuffix eq '' and 
+												(option_available_to eq 3 
+												or ( option_available_to eq 2 and not session.isMember)
+												or ( option_available_to eq 1 and session.isMember)
+												)
+											) or (
+												guestsuffix neq '' and listfindnocase('2,3', option_available_to)
+											))
+											>
+											<cfset usedOptions[option_id] = 1>
+											<option value="#option_id#"
+													<cfif listfindnocase(input_struct['option#guestsuffix#'], option_id)>
+														selected
+													  <cfset request.runningTotal += val(price)>
+													</cfif>
+													>
+												#name#
+												#dollarformat(price)#
+											</option>
+
+										</cfif>
+									</cfoutput>
+								</select>
+								<p>Select an option above for <em>#group_name#</em></p>
+							</div>	
 						<cfelse>
 							<cfset cnt += 1>
-						</cfif>						
+						</cfif>		
+							</div>				
 					</div>
 
 				</div>

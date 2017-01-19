@@ -3,8 +3,8 @@
 	 <h2  ng-if="event.TContent_ID == -1">Create An Event</h2>
 	 <div class="">
 		<formly-form model="event" fields="eventFields" form="eventForm" class="">
-			<button id="SaveEventButton" type="button" ng-click="saveEvent(event);" class="btn btn-primary" ng-disabled="eventForm.$invalid">Submit</button>
+			<button id="SaveEventButton" type="button" ng-click="saveEvent(event);" class="btn btn-primary" ng-disabled="eventForm.$invalid">Save Event</button>
 		</formly-form>
 	</div>
-	<div eventpricelist></div>
 </form>
+<div eventpricelist></div>

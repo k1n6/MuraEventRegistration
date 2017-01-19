@@ -1,7 +1,8 @@
 <div ng-controller="optionGroupListController">
 	<h2>Event Options</h2>
 	<div ng-if="eventOptionGroups.length == 0"><h2>No Option Groups Configured For This Event</h2></div>
-	
+	<button ng-click="loadCarIntoOptionGroup(1, 29, eventid, subevent)" class="btn btn-primary">Load Car Options</button>
+	<button ng-click="loadTrackExperienceOption(1, 29, eventid, subevent)" class="btn btn-primary">Load Track Experience Option</button><br>
 	<div class="input-group col-centered custom-list-item " ng-repeat="optionGroup in eventOptionGroups">
 		<a  class="form-control"  ui-sref="eventDetails.singleoptiongroup({eventid: eventid, optiongroup: optionGroup.optiongroupid, subevent : optionGroup.subevent})">
 				{{optionGroup.group_name}}

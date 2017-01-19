@@ -1,3 +1,4 @@
+<cfparam default="0" name="attributes.required">
 
 <cfset useName = "optionGroupCustomValue_#attributes.groupdata.optiongroupid#">
 
@@ -13,19 +14,34 @@
 
 
 		<cfcase value="date">
-			<input placeholder="Choose a date" class="form-control" type="date-local" value="#useValue#" id="#useName#" name="#useName##attributes.suffix#">
+			<input
+				<cfif attributes.required eq '1'> required='true' </cfif>
+				data-optiongroupid = "#attributes.groupdata.optiongroupid##attributes.suffix#"
+			  placeholder="Choose a date" class="form-control required_data_field" type="date-local" value="#useValue#" id="#useName#" name="#useName##attributes.suffix#">
 		</cfcase>
 		<cfcase value="time">
-			<input placeholder="Choose a time" class="form-control" type="time-local" value="#useValue#" id="#useName#" name="#useName##attributes.suffix#">
+			<input 
+			<cfif attributes.required eq '1'> required='true' </cfif>
+			data-optiongroupid = "#attributes.groupdata.optiongroupid##attributes.suffix#"
+			placeholder="Choose a time" class="form-control required_data_field" type="time-local" value="#useValue#" id="#useName#" name="#useName##attributes.suffix#">
 		</cfcase>
 		<cfcase value="datetime">
-			<input placeholder="Choose a date and time"  class="form-control" type="datetime-local" value="#useValue#" id="#useName#" name="#useName##attributes.suffix#">
+			<input
+			<cfif attributes.required eq '1'> required='true' </cfif>
+			data-optiongroupid = "#attributes.groupdata.optiongroupid##attributes.suffix#"
+			 placeholder="Choose a date and time"  class="form-control required_data_field" type="datetime-local" value="#useValue#" id="#useName#" name="#useName##attributes.suffix#">
 		</cfcase>
 		<cfcase value="number">
-			<input placeholder="Enter a number"  class="form-control" type="number" value="#useValue#" id="#useName#" name="#useName##attributes.suffix#">
+			<input 
+			<cfif attributes.required eq '1'> required='true' </cfif>
+			data-optiongroupid = "#attributes.groupdata.optiongroupid##attributes.suffix#"
+			placeholder="Enter a number"  class="form-control required_data_field" type="number" value="#useValue#" id="#useName#" name="#useName##attributes.suffix#">
 		</cfcase>
 		<cfcase value="string">
-			<input placeholder="Enter a value"  class="form-control" type="text" value="#useValue#" id="#useName#" name="#useName##attributes.suffix#">
+			<input 
+			<cfif attributes.required eq '1'> required='true' </cfif>
+			data-optiongroupid = "#attributes.groupdata.optiongroupid##attributes.suffix#"
+			placeholder="Enter a value"  class="form-control required_data_field" type="text" value="#useValue#" id="#useName#" name="#useName##attributes.suffix#">
 		</cfcase>
 
 	</cfswitch>

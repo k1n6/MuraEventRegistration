@@ -1,6 +1,6 @@
 angular.module('eventsadmin')
 
-.factory('eventServices', ['$http', function($http){
+.factory('eventServices', ['$http', '$window', function($http, $window){
 	function setBooleans(response){
 		try{
 		for(i = 0; i < response.data.length; i++)
@@ -25,6 +25,31 @@ angular.module('eventsadmin')
                     return response.data;
                 });
 			return promise;
+			
+		},
+		eventCopier(source_event, source_subevent, target_event, target_subevent, mode){
+			
+			if(typeof $window.siteid == 'undefined' || $window.siteid == ''){
+				console.log('Error siteid not defined, unable to copy event.');
+				return;
+			}
+			var url= '/Taffy/index.cfm/eventcopier';
+			var input_data = {};
+			input_data.source_event = source_event;
+			input_data.target_event = target_event;
+			input_data.source_subevent = source_subevent;
+			input_data.target_subevent = target_subevent;
+			input_data.mode = mode;
+			input_data.siteid = $window.siteid;
+			var promise;
+			
+			promise = $http.post(url, input_data).then(function(response){
+				response = setBooleans(response);
+				return response.data;
+			});
+			return promise;
+			
+				
 			
 		},
 		deleteSubEvent : function(subeventid){
@@ -188,6 +213,7 @@ angular.module('eventsadmin')
 			var url = '/Taffy/index.cfm/event/' + event.TContent_ID;
 			var wrapped_event = {};
 			wrapped_event.event_data = event;
+
 			var input_data = JSON.stringify(wrapped_event);
 			promise = $http.put(url, input_data).then(function(response){
 				response = setBooleans(response);
@@ -201,6 +227,9 @@ angular.module('eventsadmin')
 			var url = '/Taffy/index.cfm/subevent/' + event.subevent_event + '/subeventid/' + event.subeventid;
 			var wrapped_event = {};
 			wrapped_event.event_data = event;
+			if(typeof wrapped_event.event_data.subevent_description == 'undefined')
+				wrapped_event.event_data.subevent_description = '';
+			
 			var input_data = JSON.stringify(wrapped_event);
 			promise = $http.put(url, input_data).then(function(response){
 				response = setBooleans(response);

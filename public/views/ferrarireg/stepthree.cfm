@@ -3,9 +3,11 @@
 <cfinclude template="stepSaver.cfm">
 <cfparam name="input_struct.optiongroup" default="" >
 <cfparam name="input_struct.option" default="" >
+<cfparam name="input_struct.subevent" default="">
 <cfloop from='0' to ='10' index='i'>
 	<cfparam name="input_struct.optiongroup_#i#" default="" >
 	<cfparam name="input_struct.option_#i#" default="" >
+	<cfparam name="input_struct.subevent_#i#" default="">
 </cfloop>
 
 <cfparam name="session.reg_options[2].subevent" default='-1'>
@@ -23,7 +25,7 @@
 			<cfelse>
 				$('#next_page_button_for_stepthree').click();
 			</cfif>
-		})
+		})	 
 	</script>
 <cfelse>
 
@@ -38,7 +40,42 @@
 		</script>
 		<cfabort>
 	</cfif>
-
+	<script>
+		$(function(){
+			 $(' label.required').each(function(){
+				 if($(this).find('.help-block').length ==0)
+					 $(this).next().find('input,select').after('<div class="help-block with-errors"></div>');
+			 })
+			 $('.required_data_field').on('keyup', requiredChange);
+		});
+		function requiredChange(){
+			var targid = $(this).attr('data-optiongroupid');
+			if($(this).val() != '')
+				$('#optiongroup' + targid).prop('checked', true);
+			else
+				$('#optiongroup' + targid).prop('checked', false);
+		}
+		$(function(){
+			$('.sub_event_checkbox').on('change', function(){
+				var targsub = $(this).attr('data-subeventid');
+				if($(this).prop('checked')){
+					$('#sub_event_options_' + targsub).show()
+					.find('.wasRequired').removeClass('wasRequired').addClass('required')
+							.next()
+							.find('input,select').attr('required', 'true');
+					
+					
+				}else{
+					$('#sub_event_options_' + targsub).hide()
+							.find('.required').removeClass('required').addClass('wasRequired')
+							.next()
+							.find('input,select').removeAttr('required');
+					
+				}
+				$('.validated_form').validator()
+			}).change();
+		})
+	</script>
 </cfif>
 <cfif reviewmode neq 'true'>
 	<script>
@@ -54,19 +91,20 @@
 
 <cfparam name="request.runningTotal" default="0">
 
-	<div class="container-fluid" <cfif  getChosenSubData.recordcount eq 0 and reviewmode eq "true"> style="display: none !important;"</cfif> >
+	<div class="" <cfif  getChosenSubData.recordcount eq 0 and reviewmode eq "true"> style="display: none !important;"</cfif> >
 	<div class="row">
 		<div class="col-md-12">
 			<h2>Registration Options - Activities</h2>		
+			<p>Select the activities you and/or your guests would like to participate in at thise event.</p>
 		</div>
 	</div> 
 		<div class="panel panel-default">
-			<form method="post" action="?EventRegistrationaction=public:ferrarireg.stepfour&EventID=<cfoutput>#rc.eventid#</cfoutput>" role="form" data-toggle="validator">
+			<form class="validated_form" method="post" action="?EventRegistrationaction=public:ferrarireg.stepfour&EventID=<cfoutput>#rc.eventid#</cfoutput>" role="form" data-toggle="validator">
 				<div class="panel-body">
 				
 					<cfset guest ="">
 					<cfset guestName = session.reg_options[2].full_name>	
-					<div class="panel panel-default">	
+					<div class="panel panel-default ">	
 						<fieldset>		
 							<cfinclude template="stepThreeOptions.cfm">
 						</fieldset>
@@ -76,7 +114,7 @@
 						<cfset guest = i>
 						<cfset guestLabel = i + 1>
 						<cfset guestName = session.reg_options[2]['guest#i#first'] & " " & session.reg_options[2]['guest#i#last']>
-						<div class="panel panel-default">
+						<div class="panel panel-default ">
 							<fieldset>		
 								<cfinclude template="stepThreeOptions.cfm">
 							</fieldset>

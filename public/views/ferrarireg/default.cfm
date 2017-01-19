@@ -15,9 +15,13 @@
 
 
 
-<cfif val(session.event_config.allow_guests) neq 1 and  ((not isdefined('session.stmember.id')) or val(session.stmember.id) eq 0)>
+<cfif ( 
+		val(session.event_config.allow_guests) neq 1 
+		or rc.event_data.main_data.allow_guest_registration neq 1
+	)
+		and  ((not isdefined('session.stmember.id')) or val(session.stmember.id) eq 0)>
 
-	<cflocation url="/members/member-login/?returnto=#cgi.path_info#?#urlencodedformat(cgi.query_string)#" addtoken="false">
+	<cflocation url="/members/member-login/?logintoregisterforevents=true&returnto=#cgi.path_info#?#urlencodedformat(cgi.query_string)#" addtoken="false">
 </cfif>
 
 <!---   
@@ -55,8 +59,8 @@
 </cfif>
 
 <cfoutput>
-<div class="container-fluid">
-	<div class="container-fluid">
+<div class="">
+	<div class="">
 	<div class="row">
 		<div class="col-md-12">
 			<h2>Basic Information</h2>		

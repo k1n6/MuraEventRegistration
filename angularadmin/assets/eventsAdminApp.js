@@ -60,7 +60,25 @@ app
  var eventActivityForm = {
 	 name: 'eventDetails.subeventdetails',
 	 url: '/subevent/:subevent',
-	 templateUrl: 'templates/activity-form.html'
+	 templateUrl: 'templates/activity-form.html',
+	 controller: 'editActivityController',
+	 resolve: {
+		  eventActivities: function (eventServices, $stateParams) {
+			var promise =  eventServices.getSubEvents($stateParams.eventid, $stateParams.subevent);
+			 promise.then(function (response) {
+                    return response;
+                });
+			 return promise;
+		  },
+		 activityFields : function(eventServices, $stateParams){
+			 var promise = eventServices.getFormData('p_eventregistration_subevent')
+			 promise.then(function (response) {
+                    return response;
+                });
+			 return promise;
+		 }
+		}
+	 
 	 
  }
  var eventDetailsReporting = {
@@ -254,7 +272,7 @@ angular.module('eventsadmin')
 					}
 
 				}
-			}, 700);
+			}, 300);
 			
 	});
 	$http.get('/bootstrap/versions-mapping.json')
