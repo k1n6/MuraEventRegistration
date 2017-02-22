@@ -68,7 +68,7 @@
 						  <div class="panel panel-default">
 							  <div class="panel-body">
 							  	<cfif $.siteConfig('disableregistrationemails') eq "true">
-									<strong>Email Confirmations not sent becuase that is turned off in the configuration.</strong>
+									<strong>Email Confirmations not sent because that is turned off in the configuration.</strong>
 								<cfelse>
 									<strong>Unable to send email confirmations - Either the email address you entered is invalid or the site is not configured to send emails from a valid address.</strong>
 								</cfif>
