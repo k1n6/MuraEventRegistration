@@ -4,6 +4,18 @@
 This pulls in args
 --->
 
+<cfif isdefined('rc.nonMemberGuests')>
+	<cfloop from='1' to ="#rc.nonMemberGuests#" index='i'>
+
+		<cfif structkeyexists(rc, 'guest#i#first') and rc['guest#i#first'] eq "">
+			<cfset rc['guest#i#first'] = "Guest">
+		</cfif>
+		<cfif structkeyexists(form, 'guest#i#last') and rc['guest#i#last'] eq "">
+			<cfset rc['guest#i#last'] = "###i#">
+		</cfif>
+	</cfloop>
+</cfif>
+
 
 
 <cfparam default="2" name="curstep">
@@ -19,6 +31,8 @@ This pulls in args
 <cfparam name="session.reg_options[2].nonMemberGuests" default="0">
 <cfset numberGuests = session.reg_options[2].nonMemberGuests>
 <cfparam name="request.runningTotal" default="0">
+<cfparam name="request.total_items" default="#structnew()#">
+
 <cfparam default="false" name="reviewmode">
 <!---   
 	This prevents the back button / reload page confirmation prompt to users.
@@ -75,7 +89,7 @@ This pulls in args
 				<div class="panel panel-default">			
 					<cfinclude template="stepTwoOptions.cfm">
 				</div>
-				<cfloop from='0' to ="#session.reg_options[2].nonMemberGuests - 1#" index='i'>
+				<cfloop from='1' to ="#session.reg_options[2].nonMemberGuests#" index='i'>
 					<cfset guest = i>
 					<cfset guestLabel = i + 1>
 					<cfset guestName = session.reg_options[2]['guest#i#first'] & " " & session.reg_options[2]['guest#i#last']>

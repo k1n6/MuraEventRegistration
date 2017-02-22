@@ -5,6 +5,7 @@
 	<cfset session.reg_options = arraynew(1)>
 </cfif>
 <cfparam default="1" name="curstep">
+
 <cfinclude template="stepSaver.cfm">
 
 <cfparam default="" name="input_struct.subevent">
@@ -12,8 +13,9 @@
 <cfparam default="" name="input_struct.main_eventprice">
 <cfparam default="false" name="reviewmode">
 <cfparam name="request.runningTotal" default="0">
-
-
+<cfparam name="request.total_items" default="#structnew()#">
+<cfinclude template="../main/createMuraUserIfneeded.cfm">
+	
 
 <cfif ( 
 		val(session.event_config.allow_guests) neq 1 
@@ -21,7 +23,7 @@
 	)
 		and  ((not isdefined('session.stmember.id')) or val(session.stmember.id) eq 0)>
 
-	<cflocation url="/members/member-login/?logintoregisterforevents=true&returnto=#cgi.path_info#?#urlencodedformat(cgi.query_string)#" addtoken="false">
+	<cflocation url="#$.siteConfig('memberloginpage')#?logintoregisterforevents=true&returnto=#cgi.path_info#?#urlencodedformat(cgi.query_string)#" addtoken="false">
 </cfif>
 
 <!---   
@@ -31,7 +33,7 @@
 --->
 <cfset session.isMember = false>
 <cfif rc.member_data.recordcount lte 1>
-	<cfloop list="#rc.member_data.columnlist#" index='i'>
+	<cfloop list="address_1,address_2,address_3,city,country,zip,name_last,name_first,state,membernumber,Email" index='i'>
 		<cfif not structkeyexists(input_struct, i)>
 			<cfif not structkeyexists(input_struct, i)>
 				<cfset input_struct[i] = rc.member_data[i][1]>	
@@ -43,6 +45,7 @@
 		<cfset input_struct['full_name'] = full_name>	
 	</cfif>
 </cfif>
+
 <cfif rc.member_data.recordcount gt 0>
 	<cfset session.isMember = true>
 </cfif>
@@ -73,10 +76,10 @@
 				<div class="panel-group panel-warning">
 				  <div class="panel panel-default">
 					  <div class="panel-body">
-						  <h4>Registering As Guest</h4>
+						  <h4>Registering As Guest!</h4>
 							You are registering as a guest as you are not logged in to a Ferrari Members account. <br>
 							<cfif not ( isdefined("reviewmode") and reviewmode eq 'true')>
-								<a href="/members/member-login/?returnto=#cgi.path_info#?#urlencodedformat(cgi.query_string)#">Click here to login to your FCA account.</a>
+								<a href="#$.siteConfig('memberloginpage')#?returnto=#urlencodedformat('#cgi.path_info#?#cgi.query_string#')#">Click here to login to your FCA account.</a>
 						  	</cfif>
 						</div>
 				  </div>
@@ -106,10 +109,16 @@
 			 $("##StateChoose").chained("##Country");
 			 $("##nonMemberGuests").on('change', function(){
 				 var target = $(this).val();
-				 for(i = 0; i < 11; i++)
-					 $('##guest' + i ).css('display', 'none').find('input').prop('required', false);
-				 for(i = 0; i < target; i++)
-					 $('##guest' + i ).css('display', 'block').find('input').prop('required', true);
+				 for(i = 1; i < 11; i++)
+					 $('##guest' + i ).css('display', 'none').find('input');//.prop('required', false)
+				 for(i = 1; i <= target; i++)
+					 $('##guest' + i ).css('display', 'block').find('input');//.prop('required', true)
+				 
+				if(target >= 1)
+					 $('.guest_name_instructions').css('display', 'block');
+				else
+					 $('.guest_name_instructions').css('display', 'none');
+					
 			 }).change();
 			 
 			 $('.form-group.required').each(function(){
@@ -126,6 +135,7 @@
 	
 		<div class="panel panel-default">
 			<form method="post" action="?EventRegistrationaction=public:ferrarireg.steptwo&EventID=#rc.eventid#" role="form" data-toggle="validator">
+			<input type="hidden" name="eventid" value="#url.eventid#">
 			<div class="panel-body">
 				<fieldset>
 						<legend>Your Contact Information</legend>
@@ -138,7 +148,28 @@
 						value="#trim(input_struct['full_name'])#"
 					>
 					<div class="help-block with-errors"></div>
-				</div>	
+				</div>
+				<div class="form-group required"> <!-- Email Address-->
+					<label for="full_name_id" class="control-label">Email Address</label>
+					<input type="text" class="form-control" id="email_address" name="email_address" placeholder="Email Address"
+						required='true' 
+						data-error="Please provide a valid email address"
+						value="#trim(input_struct['Email'])#"
+					>
+					<div class="help-block with-errors"></div>
+				</div>
+				
+				<div class="form-group required"> <!-- Member Number -->
+					<label for="full_name_id" class="control-label">Member Number </label>
+					<input type="text" class="form-control" id="membernumber" name="membernumber" placeholder="Member Number"
+						required='false' 
+						readonly='true'
+						data-error=""
+						value="#trim(input_struct['membernumber'])#"
+					>
+					<div class="help-block with-errors"></div>
+				</div>
+					
 
 				<div class="form-group required" > <!-- Street 1 -->
 					<label for="address_1" class="control-label">Street Address 1</label>
@@ -222,100 +253,7 @@
 					value="#input_struct.zip#"
 					>
 				</div>	
-				<!---   
-					Activities and related price selection was moved to the main event options page and the activities option page, perspectively.
-					Otherwise, we are basically asking them twice.
-
-
-							<fieldset>
-								<legend>Select Acitivities</legend>
-							</fieldset>
-							<div class="form-group">
-								<div class="col-sm-4 form-header">
-									<h4>Event</h4>
-								</div>
-								<div class="col-sm-6">
-									<h4>Date / Time</h4>
-								</div>
-								<div class="col-sm-2">
-									<h4>Cost</h4>
-								</div>
-							</div>
-							<div class="form-group row" >
-								<label for="MainEvent" class="control-label col-sm-3">
-									<input type="checkbox" disabled  name='MainEvent' value='1' checked readonly='true'>
-									Main Event (required)
-								</label>
-								<div class="col-sm-5">
-
-									<p>#dateformat(rc.event_data.main_data.eventdate, 'long')# #timeformat(rc.event_data.main_data.event_startTime, 'short')# to #timeformat(rc.event_data.main_data.event_endTime, 'short')#</p>
-								</div>
-								<div class="col-sm-4">
-									<cfset usedPrices = {}>
-									<select name="main_eventprice"  class="form-control">
-										<cfloop query="rc.event_data.price_data">
-											<cfif not structkeyexists(usedPrices, price_id)>
-												<cfset usedPrices[price_id] = 1>
-												<option value="#price_id#"
-														<cfif listfindnocase(input_struct.main_eventprice, price_id)>
-															<cfset request.runningTotal += val(price)>
-															selected 
-														</cfif>
-												>
-												#dollarformat(price)# / 
-													#price_name#
-
-												</option>
-
-											</cfif>
-										</cfloop>
-									</select>							
-								</div>
-							</div>	
-							<cfset usedActs = {}>
-							<cfloop query="rc.event_data.sub_data">
-								<cfif not structkeyexists(usedActs, subeventid)>
-
-										<cfset usedActs[subeventid] = 1>
-										<div class="form-group row">
-											<label for="subevent#subeventid#" class="control-label col-sm-3">
-												<cfif subevent_required eq 1>
-													<cfset request.runningTotal += val(subevent_price)>
-													<input type="checkbox" disabled id="subevent#subeventid#" name='subevent' value='#subeventid#' checked readonly='true'>
-													<input type="hidden" name="subevent" value="#subeventid#" />
-												<cfelse>
-													<input type="checkbox" 
-															<cfif listfindnocase(input_struct.subevent, subeventid)> 
-																checked
-																<cfset request.runningTotal += val(subevent_price)>
-															</cfif>
-
-													id="subevent#subeventid#" name='subevent' value='#subeventid#' >
-												</cfif>
-												#subevent_name# <cfif subevent_required eq 1>(required)</cfif>
-											</label>
-											<div class="col-sm-5">
-												#dateformat(subevent_start, 'long')# #timeformat(subevent_startTime, 'short')# 
-												to 
-												#timeformat(subevent_endtime, 'short')#
-											</div>
-											<div class="col-sm-4">
-
-												<cfif subevent_price eq 0>
-													Free
-												<cfelse>
-													#dollarformat(subevent_price)#
-													</cfif>
-											</div>
-											<div class="col-md-12">
-												#subevent_description#
-											</div>
-										</div>
-
-								</cfif>
-
-							</cfloop>
-				--->
+				
 				<fieldset>
 					<legend>Additional Participants</legend>
 					<p>Select how many guests you'd like to bring as guests</p>
@@ -333,7 +271,7 @@
 							</select>
 						</div>
 					</div>
-					<cfloop from='0' to ="10" index='i'>
+					<cfloop from='1' to ="10" index='i'>
 				
 						<cfif not isdefined('input_struct.guest#i#first')>
 							<cfset input_struct['guest#i#first'] = "">
@@ -341,37 +279,32 @@
 						<cfif not isdefined('input_struct.guest#i#last')>
 							<cfset input_struct['guest#i#last'] = "">
 						</cfif>
-						<cfif not isdefined('input_struct.guest#i#email')>
-							<cfset input_struct['guest#i#email'] = "">
-						</cfif>
+						
 						<div class="guest#i#  form-group row" id="guest#i#" style="display: none;">
 							<fieldset class="col-md-12">
-								<legend>Guest #i+1# Information</legend>
+								<legend>Guest #i# Information</legend>
 							</fieldset>
 						
-							<div class="form-group required col-md-6" >
-								<label for="guest#i#first" class="control-label">Guest #i+1# First Name</label>
+							<div class="form-group  col-md-6" >
+								<label for="guest#i#first" class="control-label">Guest #i# First Name</label>
 								<input type="text" class="form-control" id="guest#i#first" name="guest#i#first" placeholder="First Name"
-								required  value="#input_struct['guest#i#first']#"
+								  value="#input_struct['guest#i#first']#"
 								>
 							</div>					
 
-							<div class="form-group col-md-6 required"> 
-								<label for="guest#i#last" class="control-label">Guest #i+1# Last Name</label>
+							<div class="form-group col-md-6 "> 
+								<label for="guest#i#last" class="control-label">Guest #i# Last Name</label>
 								<input type="text" class="form-control" id="guest#i#last" name="guest#i#last" placeholder="Last Name"
 								value="#input_struct['guest#i#last']#"
 								>
 							</div>
 
-							<div class="form-group required col-md-12"> 
-								<label for="guest#i#email" class="control-label">Guest #i+1# Email Address</label>
-								<input type="email" class="form-control" id="guest#i#email" name="guest#i#email" placeholder="Email Address"
-								value="#input_struct['guest#i#email']#"
-								>
-							</div>
+							
 						</div>
 					</cfloop>
-
+					<div class="guest_name_instructions">
+						Guest names are optional and we will use placeholders such as "Guest ##1" if you don't enter a name.
+					</div>
 						
 						
 				</fieldset>

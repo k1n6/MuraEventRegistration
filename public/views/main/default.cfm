@@ -1,86 +1,16 @@
-
-	<!---
+<cfparam default="0" name="regcount">
+<cfset session.reg_completed = false>
+		<!---
 		This file is part of MuraFW1
 
 		Copyright 2010-2015 Stephen J. Withington, Jr.
 		Licensed under the Apache License, Version v2.0
 		http://www.apache.org/licenses/LICENSE-2.0
 	--->
-	<cfobject name="em" component="cfcs.event_members">
-	
-	
-	<cfsavecontent variable="debug">
-	<cfif isdefined("session.stmember.id") and session.stmember.id gt 0 and not Session.Mura.IsLoggedIn EQ True>
-		<!---
-			Here they are logged into as a ferrari member, so lets create the mura session
-		--->
-		Attempting mura login.
-		<cfset userLogin = em.logUserInToMura(0, session.stmember.membernumber, session.stmember.id)>
-			<cfoutput>#userLogin#</cfoutput>
-		<cfif userLogin contains "no matrix entry">
-			Attempting to create user....
-			<cfset res = em.createUserFromMember(session.stmember.membernumber, session.stmember.id)>
-			
-			<cfset userLogin = em.logUserInToMura(0, session.stmember.membernumber, session.stmember.id)>
-		</cfif>
-		<cfoutput>userLogin results: #userLogin#</cfoutput><br>
-
-		Done.
-		
-	</cfif>
-	
-	<cfif Session.Mura.IsLoggedIn EQ True>
-		<cfset currentuser = $.currentUser().getUserid()>
-		
-		<!---   
-			here we are log into the ferrari session to make sure they are synch'd
-		 ---> 
-		 <cfif isdefined('session.stmember.id') and val(session.stmember.id) gt 0>
-			 <cfset t = em.createFerrariSession(0, session.stmember.id, session.stmember.membernumber, currentuser)>
-			 <cfif t eq "true">
-
-			 <cfelse>
-				Error creating ferrari session: <cfoutput> #t#</cfoutput>.<br><br>
-
-				<cfabort>
-			</cfif>
-		 </cfif>
-			
-		
-		<cfparam name="Session.Mura.EventCoordinatorRole" default="0" type="boolean">
-		<cfparam name="Session.Mura.EventPresenterRole" default="0" type="boolean">
-		<cfparam name="Session.Mura.SuperAdminRole" default="0" type="boolean">
-		<cfset UserMembershipQuery = #$.currentUser().getMembershipsQuery()#>
-		<cfloop query="#Variables.UserMembershipQuery#">
-			<cfif UserMembershipQuery.GroupName EQ "Event Facilitator"><cfset Session.Mura.EventCoordinatorRole = true></cfif>
-			<cfif UserMembershipQuery.GroupName EQ "Event Presentator"><cfset Session.Mura.EventPresenterRole = true></cfif>
-		</cfloop>
-		<cfif Session.Mura.Username EQ "admin"><cfset Session.Mura.SuperAdminRole = true></cfif>
-		<cfif Session.Mura.EventCoordinatorRole EQ "True"><cfoutput>#Variables.this.redirect(action = "eventcoord:main.default", path = cgi.path_info)#</cfoutput></cfif>
-		<cfif Session.Mura.SuperAdminRole EQ "true"><cfoutput>#Variables.this.redirect(action = "siteadmin:main.default", path = cgi.path_info)#</cfoutput></cfif>
-
-	<!---   
-		<cfif isDefined("Session.UserRegistrationInfo")>
-			<cfif DateDiff("n", Session.UserRegistrationInfo.DateRegistered, Now()) LTE 5>
-				<cflocation url="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:registerevent.default&EventID=#Session.UserRegistrationInfo.EventID#" addtoken="false">
-			<cfelse>
-				<cflocation url="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.UserRegistrationInfo.EventID#" addtoken="false">
-			</cfif>
-		</cfif>
-		--->
-	<cfelse>
-		<cfparam name="Session.Mura.EventCoordinatorRole" default="0" type="boolean">
-		<cfparam name="Session.Mura.EventPresenterRole" default="0" type="boolean">
-		<cfparam name="Session.Mura.SuperAdminRole" default="0" type="boolean">
-	</cfif>
-			</cfsavecontent>
-			
-		<cfif isdefined("url.debug") and url.debug eq "true">
-				<h2>debug output</h2>
-				<cfoutput>debug output: '#debug#'</cfoutput>
-		</cfif>
+	<cfinclude template="createMuraUserIfneeded.cfm">
 	
 <cfoutput>
+
 	<cfif isDefined("URL.UserAction")>
 		<cfswitch expression="#URL.UserAction#">
 			<cfcase value="PasswordChanged">
@@ -731,7 +661,7 @@
 										<a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small" alt="Event Information">More Info</a>
 										 
 										<cfif DateDiff("d", Now(), Session.getFeaturedEvents.Registration_Deadline) GTE 0>
-											| <a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:ferrarireg.default&EventID=#Session.getFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small" alt="Register Event">Register</a>
+											| <a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:ferrarireg.default&EventID=#Session.getFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small register_#regcount++#" id="register_#regcount++#"  alt="Register Event">Register</a>
 										</cfif>
 									<CFELSE>
 										<a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small" alt="Event Information">More Info</a>
@@ -811,7 +741,7 @@
 									<cfif Session.getNonFeaturedEvents.AcceptRegistrations EQ 1>
 										<a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getNonFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small" alt="Event Information">More Info</a>
 										<cfif  DateDiff("d", Now(), Session.getNonFeaturedEvents.Registration_Deadline) GTE 0>
-											| <a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:ferrarireg.default&EventID=#Session.getNonFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small" alt="Register Event">Register</a>
+											| <a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:ferrarireg.default&EventID=#Session.getNonFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small register_#regcount++#" id="register_#regcount++#" alt="Register Event">Register</a>
 										</cfif>
 									<CFELSE>
 										<a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getNonFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small" alt="Event Information">More Info</a>

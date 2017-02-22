@@ -346,7 +346,51 @@ angular.module('eventsadmin')
 
 			}
 
+			,
+			getpaymentss : function(eventid, payment_id, subevent){
+				var promise;
+				 var url = '/Taffy/index.cfm/payments/' + payment_id + '/eventid/' + eventid ;
+					promise = $http.get(url)
+					 .then(function (response) {
+						response = setBooleans(response);
+						return response.data;
+					});
+				return promise;
 
+			},
+			savepayments : function(eventid, payment_id, payments, subevent){
+				var promise;
+				var url = '/Taffy/index.cfm/payments/'+payment_id+'/eventid/' + eventid;
+				var wrapped_payments = {};
+				wrapped_payments.input_data = payments;
+				wrapped_payments.input_data.payment_id = payment_id;
+				wrapped_payments.input_data.eventid = eventid;
+				wrapped_payments.input_data.subevent = subevent;
+				var input_data = JSON.stringify(wrapped_payments);
+				promise = $http.put(url, input_data).then(function(response){
+					response = setBooleans(response);
+					return response.data;
+				});
+				return promise;
+
+			},
+			deletepayments : function(payment_id){
+				var promise;
+				var eventid = 0;
+				var subevent = 0;
+				 var url = '/Taffy/index.cfm/payments/'+payment_id + '/eventid/' + eventid;
+					promise = $http.delete(url)
+					 .then(function (response) {
+						response = setBooleans(response);
+						return response.data;
+					});
+				return promise;	
+
+			}
+
+
+
+		
 
 		
 

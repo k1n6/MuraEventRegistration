@@ -1,4 +1,77 @@
-<div ng-controller="eventDetailsController">
+<div ng-controller="reportsController" ng-init="getStoredActive();">
 	<h2>Event Reporting</h2>
-	<p>Event specific reporting goes here - registrations, monies paid, etc.</p>
+	  <div class="row">
+            <div class="col-md-12">
+			   <style type="text/css">
+					  form.tab-form-demo .tab-pane {
+						margin: 20px 20px;
+					  }
+				</style>
+				<uib-tabset active="activeReport">
+
+	 			<uib-tab 
+						ui-sref="eventDetails.reporting.report({eventid: eventid, type: 'registrations', optiongroupid: 0})" 
+						index="0"
+						ng-click="setActiveTab(0);"
+						select = ""					
+						heading="Registrations"></uib-tab>
+						
+		 			<uib-tab 
+						ui-sref="eventDetails.reporting.report({eventid: eventid, type: 'optionCounts', optiongroupid: 0})" 
+						index="1"
+						ng-click="setActiveTab(1);"
+						select = ""
+						heading="Option Counts"></uib-tab>
+					<uib-tab 
+						ui-sref="eventDetails.reporting.payments({eventid: eventid})" 
+						index="2"
+						ng-click="setActiveTab(2);"
+						select = ""					
+						heading="Payments"></uib-tab>
+					<uib-tab 
+						ui-sref="eventDetails.reporting.report({eventid: eventid, type: 'balance', optiongroupid: 0})" 
+						index="3"
+						ng-click="setActiveTab(3);"
+						select = ""					
+						heading="Balances"></uib-tab>
+						<!--
+					<uib-tab 
+						ui-sref="eventDetails.reporting.report({eventid: eventid, type: 'transactions', optiongroupid: 0})" 
+						index="3"
+						ng-click="setActiveTab(3);"
+						select = ""					
+						heading="Transactions"></uib-tab>
+						-->
+					<uib-tab 
+						ui-sref="eventDetails.reporting.report({eventid: eventid, type: 'optionDetails', optiongroupid: 0})" 
+						index="4"
+						ng-click="setActiveTab(4);"
+						select = ""					
+						heading="Option Details"></uib-tab>
+					<uib-tab 
+						ui-sref="eventDetails.reporting.report({eventid: eventid, type: 'attendees', optiongroupid: 0})" 
+						index="5"
+						ng-click="setActiveTab(5);"
+						select = ""					
+						heading="Attendees"></uib-tab>
+					
+					<uib-tab 
+						ui-sref="eventDetails.reporting.customreports({eventid: eventid})" 
+						index="6"
+						ng-click="setActiveTab(6);"
+						select = ""					
+						heading="Custom Reports"></uib-tab>
+					 	
+						
+				</ul>
+			</div>
+		</div>
+		<div class="row">
+            <div class="col-md-12">		
+            	<div id="tabs-views-reports" class="tabs-content-well" data-ui-view></div>
+            	
+			</div>
+		</div>
+	
+	
 </div>

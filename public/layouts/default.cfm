@@ -23,7 +23,7 @@
 										</li>
 									<cfelse>
 										<li class="<cfif rc.action eq 'public:main.login'>active</cfif>">
-											<a href="/members/member-login/?returnto=#cgi.path_info#"><i class="icon-home"></i> Account Login</a>
+											<a href="#$.siteConfig('memberloginpage')#?returnto=#cgi.path_info#"><i class="icon-home"></i> Account Login</a>
 										</li>
 										<li class="<cfif rc.action eq 'public:register.account'>active</cfif>">
 											<a href="#buildURL('public:registeruser.default', cgi.path_info)#"><i class="icon-home"></i> Register Account</a>
@@ -63,7 +63,7 @@
 					</div>
 				<cfelse>
 					<div class="text-right">
-						Guest User <a href="/members/member-login/?returnto=#cgi.path_info#" class="btn btn-sm btn-primary">Login</a> | <a href="https://www.ferrariclubofamerica.org/index.cfm/ID/43/" class="btn btn-sm btn-primary">Create Account</a>
+						Guest User <a href="#$.siteConfig('memberloginpage')#?returnto=#cgi.path_info#" class="btn btn-sm btn-primary">Login</a> | <a href="https://www.ferrariclubofamerica.org/index.cfm/ID/43/" class="btn btn-sm btn-primary">Create Account</a>
 						<hr>
 					</div>
 				</cfif>

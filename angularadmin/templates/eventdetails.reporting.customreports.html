@@ -1,0 +1,102 @@
+<div class="customreport-htmlclass">
+	<ng-include src="'templates/customreport-list.html'"></ng-include>
+	
+	<button class="btn btn-primary" ng-click="addNewReportForm();">Add New Report</button>
+ 	<div ng-show="addReportFormVisible">
+		<h4>Main Event Options</h4>
+		<label class="customReportLabel"  for="selected_activity{{activity.subevent}}" >
+				<input id="selected_activity{{activity.subevent}}"  
+						type="checkbox" 
+						value="{{activity.subevent}}" checklist-value="activity.subevent"
+						ng-click="checkSubs('0');"
+						checklist-model="selectedActivities">
+						Check All Main Event Options<br>
+			</label>
+			
+		<div ng-repeat="mainEventOption in eventData.MAIN_DATA | unique: 'optiongroupid'" class="reporting_subgroup">
+			<label  class="customReportLabel" for="optiongroup{{mainEventOption.optiongroupid}}">
+				<input type="checkbox" 
+					class="checklist-0"
+					value="{{mainEventOption.optiongroupid}}"
+					checklist-value="mainEventOption.optiongroupid"
+					checklist-model="selectedOptionGroups" 
+					id="optiongroup{{mainEventOption.optiongroupid}}" >{{mainEventOption.group_name}}<br />
+			</label>
+		</div>
+
+		<h4>Main Event Prices</h4>
+			<label class="customReportLabel"  for="selected_price_all" >
+				<input id="selected_price_all"  
+						type="checkbox" 
+						ng-click="checkPrices();"
+						>
+						Check All Prices<br>
+			</label>
+			
+		<div ng-repeat="price in eventData.PRICE_DATA | unique: 'price_id'" class="reporting_subgroup">
+			<label class="customReportLabel"  for="selected_price{{price.price_id}}">
+				<input type="checkbox" 
+					class="priceChecklist"
+					value="{{price.price_id}}"
+					checklist-value="price.price_id"
+					checklist-model="selectedPrices" id="selected_price{{price.price_id}}" >{{price.price_name}}<br />
+			</label>
+		</div>
+		<h4>Activity & Options</h4>
+		<div ng-repeat="activity in eventData.SUB_DATA | unique: 'subevent'" class="reporting_subevent">
+			<label class="customReportLabel"  for="selected_activity{{activity.subevent}}" >
+				<input id="selected_activity{{activity.subevent}}"  
+						type="checkbox" 
+						value="{{activity.subevent}}" checklist-value="activity.subevent"
+						ng-click="checkSubs(activity.subevent);"
+						checklist-model="selectedActivities">
+						{{activity.subevent_name}}<br>
+			</label>
+			<div class="activity_optiongroup reporting_optiongroup reporting_subgroup" ng-repeat="activityoption in (eventData.SUB_DATA | filter: {subevent: activity.subevent} )| unique: 'optiongroupid'">
+				<label class="customReportLabel"  for="optiongroup{{activityoption.optiongroupid}}">
+					<input type="checkbox" 
+						data-subevent="{{activity.subevent}}"
+						class="checklist-{{activity.subevent}}"
+						value="{{activityoption.optiongroupid}}"
+						checklist-value="activityoption.optiongroupid"
+						
+						checklist-model="selectedOptionGroups" id="optiongroup{{activityoption.optiongroupid}}" >{{activityoption.group_name}}<br />
+				</label>
+			</div>
+		</div>
+		<div class="row">
+		<div  class="formly-field col-sm-12 formly-field-input" >
+		  	<div class="form-group " >
+			  <div>
+			  <!-- ngIf: to.label --><label for="customreport_name" class="control-label " >
+				Report Name
+			  </label><!-- end ngIf: to.label -->
+			  <input class="form-control"
+			  	 ng-model="report_name" id="customreport_name" name="customreport_name" placeholder="Enter a name to save this report">
+			</div>
+
+			</div>
+		</div>
+		<div  class="formly-field col-sm-12 formly-field-input" >
+		  	<div class="form-group " >
+			  <div>
+				<button class="btn btn-primary" ng-click="buildReport();">Save Report</button>
+				</div>
+			</div>
+		</div>
+		</div>
+	</div>
+	<!---
+ 	<pre>
+ 		{{selectedOptionGroups}}
+ 	</pre>
+ 	
+ 	<pre>
+ 		{{selectedPrices}}
+ 	</pre>
+ 	
+ 	<pre>
+ 		{{selectedActivities}}
+ 	</pre>
+ 	--->
+</div> 

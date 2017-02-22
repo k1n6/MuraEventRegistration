@@ -1,4 +1,4 @@
-var app = angular.module('eventsadmin', ['ui.bootstrap',  'formly', 'formlyBootstrap', 'ngTouch', 'ngAnimate', 'ngSanitize','ui.router', 'ui.bootstrap.datetimepicker'], function($httpProvider){
+var app = angular.module('eventsadmin', [ 'tableSort', 'checklist-model', 'angular.filter', 'ui.grid', 'ui.bootstrap',  'formly', 'formlyBootstrap', 'ngTouch', 'ngAnimate', 'ngSanitize','ui.router', 'ui.bootstrap.datetimepicker', 'ui.bootstrap.modal', 'ngMaterial'], function($httpProvider){
 
   delete $httpProvider.defaults.headers.common['X-Requested-With'];
 })
@@ -17,6 +17,40 @@ app
     templateUrl: 'templates/eventdetails.html'
   }
   
+ var eventDetailsReporting = {
+	  abstract: true,
+	 name: 'eventDetails.reporting',
+	 url: '/reporting',
+	 templateUrl: 'templates/eventdetails.reporting.html'
+	 
+ }
+ var eventDetailsReportingReport = {
+	name: 'eventDetails.reporting.report',
+	url: '/report/{type}/optiongroupid/{optiongroupid}',
+	templateUrl: 'templates/eventdetails.reporting.report.html',
+	 controller : 'singleReportController'
+ }
+ 
+ var eventDetailsReportingPayments = {
+	name: 'eventDetails.reporting.payments',
+	url: '/report/payments',
+	templateUrl: 'templates/payment-list.html'
+ }
+ 
+
+ var eventDetailsReportingSinglePayment = {
+	name: 'eventDetails.reporting.payment',
+	url: '/report/payment/{payment_id}',
+	templateUrl: 'templates/payment-single.html'
+ }
+  
+ var eventDetailsReportingCustomReports = {
+	name: 'eventDetails.reporting.customreports',
+	url: '/customreports',
+	templateUrl: 'templates/eventdetails.reporting.customreports.html',
+	 controller : 'customReportsController'
+ } 
+ 
   var eventDetailseventinformation = {
     name: 'eventDetails.eventinformation',
     //url: '/eventDetails/:eventid/eventinformation',
@@ -24,6 +58,7 @@ app
     templateUrl: 'templates/eventdetails.eventinformation.html'
   }
    
+ 	
   var eventDetailseventoptiongroups = {
     name: 'eventDetails.eventoptiongroups',
     url: '/eventoptions/:subevent',
@@ -81,12 +116,7 @@ app
 	 
 	 
  }
- var eventDetailsReporting = {
-	 name: 'eventDetails.reporting',
-	 url: '/reporting/:subevent',
-	 templateUrl: 'templates/eventdetails.reporting.html'
-	 
- }
+ 
  
   var administrationState = {
     name: 'administration',
@@ -144,8 +174,13 @@ app
 	$stateProvider.state(coordinatorList);
 	
 	$stateProvider.state(eventDetailsReporting);
+	$stateProvider.state(eventDetailsReportingReport);
+	$stateProvider.state(eventDetailsReportingCustomReports);
 	
 	$stateProvider.state(singleConfigState);
+	
+	$stateProvider.state(eventDetailsReportingPayments);
+ 	$stateProvider.state(eventDetailsReportingSinglePayment);
 })
 
 
@@ -219,6 +254,97 @@ angular.module('eventsadmin')
 	$rootScope.$on('$stateChangeSuccess', 
 	function(event, toState, toParams, fromState, fromParams){ 
 		console.log('changing state to: ' + toState.name);
+		if(typeof $window.lastTimeout != 'undefined')
+				$timeout.cancel($window.lastTimeout);
+		
+		$window.updateTables = function(){
+				$('.csv-button').remove();
+
+				$('table.hascsv').each(function () {
+					var $table = $(this);
+
+					var $button = $("<button type='button' class='btn btn-primary csv-button'>");
+					$button.text("Export to spreadsheet");
+					$button.insertAfter($table.parent());
+
+					$button.click(function () {
+
+						window.buildCSV($(this).prev().find('table.hascsv'));
+					});
+
+				});
+				$(".tablesorter").not('.hassorter').addClass('hassorter').DataTable(
+						{
+							paging: false,
+							"footerCallback": function ( row, data, start, end, display ) {
+					
+								var api = this.api(), data;
+
+								// Remove the formatting to get integer data for summation
+								var intVal = function ( i ) {
+									return typeof i === 'string' ?
+										i.replace(/[\$,]/g, '')*1.0 :
+										typeof i === 'number' ?
+											i : 0;
+								};
+
+								// Total over all pages
+								for(i =0; i < 21; i++){
+									//console.log("Starting: " + i + "-------------------------------------")
+									try{
+										if($(api.column(i).header() && api.column(i).header()).hasClass('showtotal')){
+
+									
+											
+											
+
+											// Total over this page
+											pageTotal = api
+												.column( i , {page : 'current'})
+												.data()
+												.reduce( function (a, b, c) {
+													//console.log(c);
+													var $tr = $('#' + api.table().toJQuery().context[0].sTableId + ' tbody tr').get(c);
+													
+													
+													if($($tr).filter(':visible').length > 0){
+														$td = $($tr).find('td').get(i);
+														useval = $td.innerHTML;
+														//console.log(c + ': (visible) a: ' + a + " b:" + intVal(useval));
+														return intVal(a) + intVal(useval);
+													}else{
+														//console.log(c + ': (hidden) a: ' + a + " b:" + intVal(useval));	
+														return intVal(a);
+													}
+												}, 0 );
+
+											// Update footer
+											$( api.column( i ).footer() ).html(
+												 pageTotal.toFixed(2)
+											);
+										}
+									}catch(e){
+
+									}
+								}
+							}
+						} 
+				);
+				$('.ng-valid-required').not('form').parent().parent().addClass("field-required");
+
+				$('.ng-valid-required').not('form').parent().parent().find('label').each(function(){
+					$(this).html($(this).html().replace('*',''));
+				});
+			}
+
+		$window.lastTimeout = $timeout($window.updateTables, 500);
+		$timeout(function(){
+			$('.ng-valid-required').not('form').parent().parent().addClass("field-required");
+		
+			$('.ng-valid-required').not('form').parent().parent().find('label').each(function(){
+				$(this).html($(this).html().replace('*',''));
+			});
+		}, 1500)
 	});
 	
 	$scope.$on('$viewContentLoaded', function(){

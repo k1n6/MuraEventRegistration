@@ -1,3 +1,8 @@
+<cfif isdefined("session.reg_completed") and session.reg_completed  and curstep neq 1>
+	<cfset session.reg_completed = false>
+	<cflocation url="/public-registration-page/">
+</cfif>
+
 <cfparam default="false" name="reviewmode">
 <cfif isdefined('url.goingback') and url.goingback eq 'true' and arraylen(session.reg_options) gte curstep +1 and isstruct(session.reg_options[curstep + 1])>
 	

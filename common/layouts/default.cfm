@@ -14,6 +14,7 @@ http://www.apache.org/licenses/LICENSE-2.0
     & '/plugins/'
     & rc.pluginConfig.getPackage() />
 	<cfsavecontent variable="htmlhead"><cfoutput>
+		<script type="text/javascript" src="/global/validator.js"></script>
 		<link rel="stylesheet" href="#pluginPath#/library/bootstrap/css/bootstrap.css">
 		<link rel="stylesheet" href="#pluginPath#/library/bootstrap/css/bootstrap-theme.css">
 	    <link rel="stylesheet" href="#pluginPath#/library/jqGrid_5.1.0/css/ui.jqgrid-bootstrap.css" />

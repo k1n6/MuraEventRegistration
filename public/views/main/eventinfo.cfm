@@ -81,22 +81,25 @@
 					
 					
 					
+					<cfset used_subEvents = {}>
 					<cfif rc.event_data.sub_data.recordcount gt 0>
-						
-							<tr>
-							<td style="width: 155px; valign: middle;"><span style="font-weight: bold;">Event Activities:</span></td>
-							<td colspan="3">
-								<cfloop query="rc.event_data.sub_data">
+						<tr>
+						<td style="width: 155px; valign: middle;"><span style="font-weight: bold;">Event Activities:</span></td>
+						<td colspan="3">
+							<cfloop query="rc.event_data.sub_data">
+								<cfif not structkeyexists(used_subEvents, rc.event_data.sub_data.subeventid)>
+									<cfset used_subEvents[rc.event_data.sub_data.subeventid] = 1>
 									<h5 class="event_header">#subevent_name# <cfif subevent_price gt 0> / #dollarformat(subevent_price)#</cfif> <cfif subevent_required eq 1>(required)</cfif></h5>
 									<div>#dateformat(subevent_start, 'long')# #timeformat(subevent_startTime, 'short')# 
 									to 
 										#timeformat(subevent_endtime, 'short')#</div><br>
 									#subevent_description#
-								</cfloop>
-							</td>
-							</tr>
-					
+								</cfif>	
+							</cfloop>
+						</td>
+						</tr>
 					</cfif>
+
 					<cfif Session.EventInfo.SelectedEvent.PGPAvailable GT 0 and Session.EventInfo.SelectedEvent.MealAvailable EQ 1>
 						<tr>
 						<td style="width: 155px;"><span style="font-weight: bold;">PGP Points:</span></td>
@@ -200,15 +203,17 @@
 								<td>Registration Deadline:</td>
 								<td colspan="1">#DateFormat(price_cutoff_date, "mm/dd/yyyy")#</td>
 							
-								<td>Available To</td>
-								<td colspan="1">
-									<cfif available_to eq 1>
-										Members
-									<cfelseif available_to eq 2>
-										Public
-									<cfelse>
-										Everyone
-									</cfif>
+								<td colspan=2>Available To
+								
+									<strong>
+										<cfif available_to eq 1>
+											Members
+										<cfelseif available_to eq 2>
+											Public
+										<cfelse>
+											Everyone
+										</cfif>
+									</strong>
 									
 								</td>
 							</tr>
@@ -252,15 +257,9 @@
 					</cfdefaultcase>
 				</cfswitch>
 				<cfif DateDiff("d", Now(), Session.EventInfo.SelectedEvent.Registration_Deadline) GTE 0>
-					
 						<cfif Session.EventInfo.ParticipantRegistered EQ false>
-							| <a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:registerevent.default&EventID=#URL.EventID#" class="btn btn-primary">Register</a>
-						<cfelse>
-							| <a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:registerevent.default&EventID=#URL.EventID#" class="btn btn-primary">Register Additional Participants</a>
+							| <a href="/event-registration/public-registration-page/?EventRegistrationaction=public:ferrarireg.default&EventID=#URL.EventID#" class="btn btn-primary">Register</a>
 						</cfif>
-
-				
-				<cfelse>
 				</cfif>
 				<br /><br />
 			<cfelse>

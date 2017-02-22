@@ -3,7 +3,7 @@
 	<cfset cnt = 0>
 	<cfif guest eq "">
 		<legend class="main_legend">Your Options</legend>
-		<cfset guestsuffix = "">
+		<cfset guestsuffix = "_0">
 	<cfelse>
 		<legend class="main_legend"><cfoutput>#guestName#</cfoutput> Options</legend>
 		<cfset guestsuffix = "_#guest#">
@@ -26,7 +26,7 @@
 						<cfloop query="rc.event_data.price_data">
 							<cfif not structkeyexists(usedPrices, price_id)
 								and (
-									( guestsuffix eq '' and 
+									( guestsuffix eq '_0' and 
 										(available_to eq 3 
 										or ( available_to eq 2 and not session.isMember)
 										or ( available_to eq 1 and session.isMember)
@@ -41,6 +41,8 @@
 								<option value="#price_id#"
 										<cfif listfindnocase(input_struct['main_eventprice#guestsuffix#'], price_id)>
 											<cfset request.runningTotal += val(price)>
+											<cfset request.total_items['main_eventprice_#val(guest)#'] = {id = price_id, price=val(price), guest=val(guest)}>
+											
 											selected 
 										</cfif>
 								>
@@ -58,7 +60,7 @@
 		
 		<cfset lastgroup = "">
 		<cfoutput query="rc.event_data.main_data" group="optiongroupid">
-			<cfif ( guestsuffix eq '' and 
+			<cfif ( guestsuffix eq '_0' and 
 										(optiongroup_available_to eq 3 
 										or ( optiongroup_available_to eq 2 and not session.isMember)
 										or ( optiongroup_available_to eq 1 and session.isMember)
@@ -77,11 +79,13 @@
 																				<cfif required eq 1> required </cfif>
 					">
 						<cfif required eq 1>
-							<input type="checkbox" disabled id="optiongroup#optiongroupid##guestsuffix#" name='optiongroup#guestsuffix#' value='#optiongroupid#'
+							<input type="checkbox" disabled id="optiongroup#optiongroupid##guestsuffix#" 
+								 	name='optiongroup#guestsuffix#' value='#optiongroupid#'
 									 checked readonly='true' style="display: none;">
-							<input type="hidden" name="optiongroup" value="#optiongroupid#" />
+							<input type="hidden" name="optiongroup#guestsuffix#" value="#optiongroupid#" />
 						<cfelse>
-							<input style="display: none;" <cfif listfindnocase(input_struct['optiongroup#guestsuffix#'], optiongroupid)>checked</cfif> type="checkbox" id="optiongroup#optiongroupid##guestsuffix#" name='optiongroup#guestsuffix#' value='#optiongroupid#' >
+							<input style="display: none;" <cfif listfindnocase(input_struct['optiongroup#guestsuffix#'], optiongroupid)>checked</cfif>
+								type="checkbox" id="optiongroup#optiongroupid##guestsuffix#" name='optiongroup#guestsuffix#' value='#optiongroupid#' >
 						</cfif>
 						#group_name#
 
@@ -117,7 +121,7 @@
 										<cfset cnt += 1>
 										<cfif not structkeyexists(usedOptions, option_id)
 										and (
-											( guestsuffix eq '' and 
+											( guestsuffix eq '_0' and 
 												(option_available_to eq 3 
 												or ( option_available_to eq 2 and not session.isMember)
 												or ( option_available_to eq 1 and session.isMember)
@@ -129,7 +133,8 @@
 											<cfset usedOptions[option_id] = 1>
 											<option value="#option_id#"
 													<cfif listfindnocase(input_struct['option#guestsuffix#'], option_id)>
-														selected
+													  selected
+													  <cfset request.total_items['option_#option_id#_#val(guest)#'] = {id = option_id, price=val(price), guest=val(guest)}>
 													  <cfset request.runningTotal += val(price)>
 													</cfif>
 													>

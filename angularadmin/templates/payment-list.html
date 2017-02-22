@@ -1,0 +1,49 @@
+<div ng-controller="paymentsListController" ng-show="eventid != -1">
+	<h2>Payments</h2>
+	<div ng-if="paymentss.length == 0"><h2>No Payments Present</h2></div>
+	
+	<div class="row">
+		<div class="table-responsive">
+			<table class="table hascsv tablesorter">
+				<thead>
+					<tr>
+						<th class="header">Date</th>
+						<th class="header showtotal">Amount</th>
+						<th class="header">Reg#</th>
+						<th class="header">Txn ID</th>
+						<th class="header">Actions</th>
+					</tr>
+				</thead>
+				<tfoot>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tfoot>
+				<tbody>
+					<tr ng-repeat="payments in paymentss">
+						<td>{{payments.payment_created}}</td>
+						<td>{{payments.amount | currency}}</td>
+						<td class="flex-display"><button ng-click="viewRegistration(payments.registration_id);" class="btn btn-primary">View #{{payments.registration_id}}</button></td>
+						<td>{{payments.transactionid}}</td>
+						<td class="flex-display">
+							<button ui-sref="eventDetails.reporting.payment({payment_id: payments.payment_id})" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span> Edit</button>
+							<button id="deletepaymentsbutton" ng-click="deletepayments(payments.payment_id, $event);" type="button" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span> Delete</button>
+						</td>
+					</tr>
+
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-12">
+			<button id="AddApaymentsButton" class="btn btn-primary ng-scope" ui-sref="eventDetails.reporting.payment({payment_id: -1})"><span class="glyphicon glyphicon-plus"></span> Add A Payment</button>
+		</div>
+	</div>
+
+
+</div>		
+
+		

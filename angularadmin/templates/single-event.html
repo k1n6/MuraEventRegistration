@@ -41,11 +41,11 @@
 					heading="Activities"></uib-tab>
 					
 				<uib-tab 
-					
+					 
 					ng-click="setActiveTab(3)"
 					select = ""
 					ng-if="event.TContent_ID != -1" 
-					ui-sref=".reporting({eventid: event.TContent_ID})" 
+					ui-sref="eventDetails.reporting.report({type: 'registrations', optiongroupid: 0, eventid: event.TContent_ID})" 
 					index="3"
 					heading="Reporting"></uib-tab>
 					

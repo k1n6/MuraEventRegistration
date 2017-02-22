@@ -3,6 +3,7 @@
 <cfinclude template="stepSaver.cfm">
 <cfparam name="input_struct.optiongroup" default="" >
 <cfparam name="request.runningTotal" default="0">
+<cfparam name="request.total_items" default="#structnew()#">
 <cfparam default="false" name="reviewmode">
 
 <!---   
@@ -43,11 +44,20 @@
 					<div class="panel-body">
 						<fieldset>
 							<div class="form-group row">
-								<div class="col-sm-12">
+								<div class="col-sm-12 text-align-right">
 									<h3>Total price of all acivities and options selected: <cfoutput>#dollarformat(request.runningTotal)#</cfoutput><br></h3>
-
+									<cfif session.event_config.charge_tax eq 1 and val(session.event_config.taxrate) gt 0>
+										<cfoutput>
+											<h3>Tax: #dollarformat(rc.FERRARI_REG.roundPenniesUp(request.runningTotal * (session.event_config.taxrate / 100)))#</h3>
+											<h3>Total: #dollarformat(request.runningTotal + request.runningTotal * (session.event_config.taxrate / 100))#</h3>
+										</cfoutput>
+										<input type="hidden" name="taxAmount" value="#rc.FERRARI_REG.roundPenniesUp(request.runningTotal * (session.event_config.taxrate / 100))#">
+									<cfelse>
+										<input type="hidden" name="taxAmount" value="0">
+									</cfif>
 								</div>
 							</div>
+							
 							<div class="form-group row">
 								<div class="col-sm-6 pull-left">
 									<button class="btn btn-primary" onclick="window.location.href = '?EventRegistrationaction=public:ferrarireg.stepthree&EventID=<cfoutput>#rc.eventid#</cfoutput>&goingback=true'; return false;">&lt;- Go Back</button>

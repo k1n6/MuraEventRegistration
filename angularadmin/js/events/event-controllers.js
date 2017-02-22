@@ -596,6 +596,92 @@ angular.module('eventsadmin')
 	
 }])
 
+.controller('paymentsListController', ['$scope', 'eventServices', '$stateParams', '$state', 'RegistrationDetails','$mdDialog',
+									   	function($scope, eventServices, $stateParams, $state, RegistrationDetails, $mdDialog){
+	$scope.paymentss = [];
+	$scope.eventid = $stateParams.eventid;
+	$scope.subevent = $stateParams.subevent;
+	if(typeof $scope.subevent == 'undefined' || $scope.subevent == null){
+		$scope.subevent = -1;
+		$stateParams.subevent = -1;
+	}
+	console.log($scope.subevent);
+	
+	$scope.deletepayments = function(payment_id, $event){
+		 var confirm = $mdDialog.confirm()
+				  .title('Are you sure you want to delete this payment?')
+				  .textContent('Deletion is permanent')
+				  .targetEvent($event)
+				  .ok('Delete It')
+				  .cancel('Cancel');
+
+			$mdDialog.show(confirm).then(function() {
+			 	eventServices.deletepayments(payment_id).then(function(res){
+					$state.go('eventDetails.reporting.payments', {eventid: $stateParams.eventid}, {reload: true});
+				});
+			}, function() {
+			 
+			});
+
+		return;
+	
+		
+		$event.stopPropagation();
+		$event.preventDefault();
+		
+	}
+	data = eventServices.getpaymentss($stateParams.eventid,0, $scope.subevent);
+	data.then(function(resp){
+		$scope.paymentss = resp;
+	});
+	$scope.viewRegistration = function(regid){
+		RegistrationDetails.showDetailsPopup(regid, $scope);
+	}
+	
+}])
+
+.controller('singlepaymentsController', ['$scope', 'eventServices', '$stateParams', '$state', function($scope, eventServices, $stateParams, $state){
+	$scope.paymentss = [];
+	//we need to figure out / decide if we are viewing a main events options for an acitivities events
+	$scope.eventid = $stateParams.eventid;
+	$scope.payment_id = $stateParams.payment_id;
+	$scope.subevent = $stateParams.subevent;
+	if(typeof $scope.subevent == 'undefined' || $scope.subevent == null){
+		$scope.subevent = -1;
+		$stateParams.subevent = -1;
+	}
+	
+	//here we load our form variables
+	$scope.paymentsFields = 	[];
+	eventServices.getFormData('p_eventregistration_payments').then(function(d){
+		$scope.paymentsFields = d;
+	});
+	
+	
+	$scope.updatepaymentsData= function(){
+
+			data = eventServices.getpaymentss($scope.eventid, $scope.payment_id, $scope.subevent );
+			data.then(function(resp){
+				$scope.paymentss = resp;
+			});
+		}
+	$scope.updatepaymentsData();
+	
+	$scope.savepayments = function(payments){
+		
+		payments.payment_id = $scope.payment_id;
+		payments.subevent = $scope.subevent;
+		payments.mainevent = $scope.eventid;
+		
+		eventServices.savepayments($scope.eventid, payments.payment_id, payments, payments.subevent ).then(function(d){
+
+				$state.go('eventDetails.reporting.payments', {eventid: $stateParams.eventid}, {reload: true});
+		});
+	};	
+	
+}])
+
+		
 
 
 ;

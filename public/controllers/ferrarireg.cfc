@@ -39,7 +39,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 			<cfset rc.member_data = fr.getMemberData(-1)>
 		</cfif>
 		<cfset session.event_config = fr.getAdminConfig()>
-	
+		<cfset rc.FERRARI_REG = fr>
+		
 	</cffunction>
 	
 	<cffunction name="steptwo" returntype="any" output="false">
@@ -47,13 +48,14 @@ http://www.apache.org/licenses/LICENSE-2.0
 		<cfobject name="fr" component="cfcs.ferrari_reg">
 		<cfset rc.event_data = fr.getFullEventData(rc.eventid)>
 		<cfparam default="#fr.getAdminConfig()#" name="session.event_config">
+		<cfset rc.FERRARI_REG = fr>
 	</cffunction>
 	
 	<cffunction name="thankyou" returntype="any" output="false">
 		<cfargument name="rc" required="true" type="struct" default="#StructNew()#">
 		<cfobject name="fr" component="cfcs.ferrari_reg">
-		<cfparam default="#fr.getAdminConfig()#" name="session.event_config">
-		
+		<cfset session.event_config = fr.getAdminConfig()>
+		<cfset rc.FERRARI_REG = fr>
 	</cffunction>
 	
 	<cffunction name="stepthree" returntype="any" output="false">
@@ -61,7 +63,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 		<cfobject name="fr" component="cfcs.ferrari_reg">
 		<cfparam default="#fr.getAdminConfig()#" name="session.event_config">
 		<cfset rc.event_data = fr.getFullEventData(rc.eventid)>
-		
+		<cfset rc.FERRARI_REG = fr>
 	</cffunction>
 	
 	<cffunction name="stepfour" returntype="any" output="false">
@@ -74,6 +76,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 		<cfelse>
 			<cfset rc.member_data = fr.getMemberData(-1)>
 		</cfif>
+		<cfset rc.FERRARI_REG = fr>
+			<cfset session.event_config = fr.getAdminConfig()>
 	</cffunction>
 	
 	<cffunction name="stepfive" returntype="any" output="false">
@@ -86,7 +90,8 @@ http://www.apache.org/licenses/LICENSE-2.0
 		<cfelse>
 			<cfset rc.member_data = fr.getMemberData(-1)>
 		</cfif>
-		
+		<cfset rc.FERRARI_REG = fr>
+		<cfset session.event_config = fr.getAdminConfig()>
 	</cffunction>
 	
 

@@ -1,0 +1,14 @@
+<div ng-controller="singlepaymentsController">
+	
+	<form  name="paymentsForm" novalidate>
+		<formly-form model="paymentss[0]" fields="paymentsFields" form="paymentsForm">
+			<button id="savepaymentsButton" type="button" ng-click="savepayments(paymentss[0]);" class="btn btn-primary" ng-disabled="paymentsForm.$invalid">Save Payment</button>
+		</formly-form>
+	</form>
+	<!--
+		Here we need to list the existing option for this option group, and provide an add feature.	
+	-->
+		
+	</div>
+</div>
+		

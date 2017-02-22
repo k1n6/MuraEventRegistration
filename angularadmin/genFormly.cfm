@@ -1,11 +1,28 @@
 <cftry><cfparam name="url.table" default="">
-<cfparam name="request.dsn" default="mura_events">
+<cfscript>
+ private struct function get$() {
+		if ( !StructKeyExists(arguments, '$') ) {
+			var siteid = StructKeyExists(session, 'siteid') ? session.siteid : 'default';
+
+			arguments.$ = StructKeyExists(request, 'murascope')
+				? request.murascope
+				: StructKeyExists(application, 'serviceFactory')
+					? application.serviceFactory.getBean('$').init(siteid)
+					: {};
+		}
+
+		return arguments.$;
+	}
+	$ = get$();
+</cfscript>
+
+<cfparam name="request.dsn" default="#$.siteConfig('datasource')#">
 <cfif len(url.table) eq 0>
 
 
 <cfquery name="getTables" datasource="#request.dsn#">
 	select distinct table_name from INFORMATION_SCHEMA.columns
-	where table_catalog = 'mura_events'
+	where table_catalog = '#$.siteConfig('datasource')#'
 	order by table_name asc
 </cfquery>
 <form method="get">
@@ -27,7 +44,7 @@
 		 and form_meta.column_name = i.column_name
 		 left join form_meta_dropdown f
 		 on form_meta.meta_id = f.form_meta_id
-		 where table_catalog = 'mura_events'
+		 where table_catalog = '#$.siteConfig('datasource')#'
 		 and i.table_name = '#url.table#'
 		order by form_meta.sort_order, f.sort_order
 	</cfquery>

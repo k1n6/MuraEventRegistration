@@ -46,7 +46,7 @@
 				 if($(this).find('.help-block').length ==0)
 					 $(this).next().find('input,select').after('<div class="help-block with-errors"></div>');
 			 })
-			 $('.required_data_field').on('keyup', requiredChange);
+			 $('.required_data_field').on('change', requiredChange).on('keyup', requiredChange).change();
 		});
 		function requiredChange(){
 			var targid = $(this).attr('data-optiongroupid');
@@ -55,25 +55,60 @@
 			else
 				$('#optiongroup' + targid).prop('checked', false);
 		}
-		$(function(){
+		
+		//this hides and disables form controls so they don't submit data
+		function updateVisibleElements(){
 			$('.sub_event_checkbox').on('change', function(){
 				var targsub = $(this).attr('data-subeventid');
 				if($(this).prop('checked')){
+					//first we mark all the fields which are required to required
 					$('#sub_event_options_' + targsub).show()
-					.find('.wasRequired').removeClass('wasRequired').addClass('required')
-							.next()
-							.find('input,select').attr('required', 'true');
+						.find('.wasRequired')
+						.addClass('required')
+						.next()
+						.find('input')
+						.addClass('required');
+					
+					//then we update all the marked as required fields to be required
+					$('#sub_event_options_' + targsub)
+						.find('.required')
+						.attr('required', 'true');
+					
+					//then we update the form inputs to not be disabled so they submit
+					$('#sub_event_options_' + targsub)
+						.find('input,select,label')
+						.removeAttr('disabled');
+					
 					
 					
 				}else{
+					//first we mark all the required fields which are required as required
 					$('#sub_event_options_' + targsub).hide()
-							.find('.required').removeClass('required').addClass('wasRequired')
+							.find('.required')
+							.removeClass('required')
+							.addClass('wasRequired')
 							.next()
-							.find('input,select').removeAttr('required');
+							.find('input')
+							.removeClass('required')
+							.addClass('wasRequired');
+					
+					//then we update all inputs to NOT be required and disable them so they dont submit input
+					$('#sub_event_options_' + targsub)							
+							.find('input,select,label')
+							.removeAttr('required')
+							.attr('disabled', true);
 					
 				}
-				$('.validated_form').validator()
+				try{
+					$('.validated_form').validator()
+				}catch(e){
+					console.log('unable to update form validation: ' + e.message);
+				}
 			}).change();
+			
+		}
+		$(function(){
+			 updateVisibleElements();
 		})
 	</script>
 </cfif>
@@ -90,7 +125,7 @@
 </cfif>
 
 <cfparam name="request.runningTotal" default="0">
-
+<cfparam name="request.total_items" default="#structnew()#">
 	<div class="" <cfif  getChosenSubData.recordcount eq 0 and reviewmode eq "true"> style="display: none !important;"</cfif> >
 	<div class="row">
 		<div class="col-md-12">
@@ -110,7 +145,7 @@
 						</fieldset>
 					</div>
 				
-					<cfloop from='0' to ="#session.reg_options[2].nonMemberGuests - 1#" index='i'>
+					<cfloop from='1' to ="#session.reg_options[2].nonMemberGuests#" index='i'>
 						<cfset guest = i>
 						<cfset guestLabel = i + 1>
 						<cfset guestName = session.reg_options[2]['guest#i#first'] & " " & session.reg_options[2]['guest#i#last']>
@@ -141,7 +176,7 @@
 					
 </div>
 	
-	
+
 	
 		<script>
 	

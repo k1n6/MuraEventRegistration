@@ -1,6 +1,6 @@
 <cfif guest eq "">
 	<legend class="main_legend">Your Activities</legend>
-	<cfset guestsuffix = "">
+	<cfset guestsuffix = "_0">
 <cfelse>
 	<legend class="main_legend"><cfoutput>#guestName#</cfoutput> Activities</legend>
 	<cfset guestsuffix = "_#guest#">
@@ -11,15 +11,16 @@
 <cfset cnt = 0>
 <cfset eventWasVisible = false>
 <cfoutput query="getChosenSubData" group="subeventid">
+<cfset activity_chosen = false>
 	<cfif (
-										( guestsuffix eq '' and 
-											(subevent_available_to eq 3 
-											or ( subevent_available_to eq 2 and not session.isMember)
-											or ( subevent_available_to eq 1 and session.isMember)
-											)
-										) or (
-											guestsuffix neq '' and listfindnocase('2,3', subevent_available_to)
-										))>
+		( guestsuffix eq '_0' and 
+			(subevent_available_to eq 3 
+			or ( subevent_available_to eq 2 and not session.isMember)
+			or ( subevent_available_to eq 1 and session.isMember)
+			)
+		) or (
+			guestsuffix neq '' and listfindnocase('2,3', subevent_available_to)
+		))>
 		<cfset eventWasVisible = true>
 		<cfset used_activities += 1>
 		<div class="col-md-12 pad_10 clearfix">
@@ -35,9 +36,11 @@
 						   <cfif subevent_required eq '1'>disabled</cfif>
 						<cfif subevent_required eq '1'
 						or listfindnocase(input_struct['subevent#guestsuffix#'], subeventid)
-						>
+							>
+							<cfset activity_chosen = true>
 							checked="true"
 							<cfset request.runningTotal += val(subevent_price)>
+							<cfset request.total_items['subevent_#val(guest)#'] = {id = subeventid, price=val(subevent_price), guest=val(guest)}>
 						</cfif>
 					/>
 					<cfif subevent_required eq '1'>
@@ -49,7 +52,7 @@
 					<label for="subevent#guestsuffix#_#subeventid#">
 						#subevent_name#  
 							<cfif val(subevent_price) gt 0>
-								/ #dollarformat(subevent_price)#
+								
 							<cfelse>
 
 							</cfif>
@@ -64,10 +67,24 @@
 
 
 		
-		<cfset activity_chosen = false>
+	
 		<div id="sub_event_options_#subevent##guestsuffix#">
 			<cfset lastgroup = "">
 			<cfoutput group="optiongroupid">
+				<cfset optiongroup_chosen = false>
+				<cfif  (
+						( guestsuffix eq '_0' and 
+							(optiongroup_available_to eq 3 
+							or ( optiongroup_available_to eq 2 and not session.isMember)
+							or ( optiongroup_available_to eq 1 and session.isMember)
+							)
+						) or (
+							guestsuffix neq '' and listfindnocase('2,3', optiongroup_available_to)
+						))
+
+
+						>
+
 				<cfif lastgroup neq field_group>
 					<cfset lastgroup = field_group>									
 					<cfif field_group neq "">
@@ -83,20 +100,23 @@
 				<div class="form-group row">
 					<div class="col-md-12 ">
 						<label for="optiongroup#subeventid##guestsuffix#" class="control-label col-sm-3 text-align-right
-																				 <cfif required eq 1> required <cfelse> wasRequired </cfif> ">
+																				 <cfif required eq 1> required <cfelse>  </cfif> ">
+							
 							<cfif required eq 1>
-								<cfset activity_chosen = true>
 								<!---   
 								<input type="checkbox" disabled id="optiongroup#subeventid#" name='optiongroup#guestsuffix#' value='#subeventid#'
 										 checked readonly='true'>
 										--->
-								<cfset request.runningTotal += val(price)>
-								<input type="hidden" id="optiongroup#optiongroupid##guestsuffix#" name="optiongroup#guestsuffix#" value="#optiongroupid#" />
+				
+								<input type="hidden" id="optiongroup#guestsuffix#" name="optiongroup#guestsuffix#" value="#optiongroupid#" />
+								<cfset optiongroup_chosen = true>
 							<cfelse>
-								<input type="checkbox"  <cfif listfindnocase(input_struct['optiongroup#guestsuffix#'], optiongroupid)>checked
-								<cfset activity_chosen = true>
-								<cfset request.runningTotal += val(price)>
-								</cfif> id="optiongroup#optiongroupid##guestsuffix#" name='optiongroup#guestsuffix#' value='#optiongroupid#' 
+								<input type="checkbox"  
+								<cfif listfindnocase(input_struct['optiongroup#guestsuffix#'], optiongroupid)>
+									checked
+									<cfset optiongroup_chosen = true>
+								</cfif>
+									id="optiongroup#optiongroupid##guestsuffix#" name='optiongroup#guestsuffix#' value='#optiongroupid#' 
 									class="no_visible"
 								>
 							</cfif>
@@ -112,10 +132,12 @@
 						</label>
 							
 						<div class="col-sm-9">
+				
+
 							<div class="flexparent">
 
 								<div class="flexchild">
-								
+										
 									<cfif require_data neq "">
 										<cfquery name="thisGroupData" dbtype="query">
 											select require_data, field_group, group_description, optiongroupid
@@ -141,7 +163,7 @@
 													<cfset cnt += 1>
 													<cfif not structkeyexists(usedOptions, option_id)
 														and (
-															( guestsuffix eq '' and 
+															( guestsuffix eq '_0' and 
 																(option_available_to eq 3 
 																or ( option_available_to eq 2 and not session.isMember)
 																or ( option_available_to eq 1 and session.isMember)
@@ -157,8 +179,12 @@
 														<cfset usedOptions[option_id] = 1>
 														<option value="#option_id#"
 														<cfif listfindnocase(input_struct['option#guestsuffix#'], option_id)>
-															<cfset request.runningTotal += val(price)>
+															<cfif optiongroup_chosen and activity_choseN>
+																<cfset request.runningTotal += val(price)>
+																<cfset request.total_items['option_#option_id#_#val(guest)#'] = {id = option_id, price=val(price), guest=val(guest)}>
+															</cfif>
 															selected
+															
 														</cfif>
 														>
 															#name#
@@ -185,7 +211,12 @@
 
 					</cfif>
 				</div>
-					
+				
+				<cfelse>
+					<cfoutput>
+						<cfset cnt += 1>
+					</cfoutput>
+				</cfif>	
 			</cfoutput>
 		</div>
 		
