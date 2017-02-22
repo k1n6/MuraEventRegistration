@@ -587,8 +587,8 @@
 			</cfcase>
 		</cfswitch>
 	</cfif>
-	<div class="panel panel-default">
-		<div class="panel-body">
+	<div class="panel panel-default no-border">
+		<div class="panel-body no-border">
 			<fieldset>
 				<legend><h2>Calendar of Events</h2></legend>
 			</fieldset>
@@ -597,6 +597,54 @@
 				<fieldset>
 					<legend><h2>Featured</h2></legend>
 				</fieldset>
+				
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+                <!---
+                <tr><td colspan="3" align="right">
+                <button onclick="location.href='#cgi.SCRIPT_NAME#/ID/#url.ID#/archived/1/'" title="View Past Events" 
+              style="border: 1px solid ##F00;	background-color: ##FFB0B0;"
+                class="ui-button  ui-corner-all ui-button-text-icon-primary" role="button" aria-disabled="false"><span class="ui-button-icon-primary ui-icon ui-icon-calendar"></span><span class="ui-button-text"><strong>View Past Events</strong></span></button>
+                </td></tr>
+                --->
+                
+                    <cfloop query="Session.getFeaturedEvents">
+                    
+                        <!--- Bld Date Txt --->
+                        <cfif EventDate eq dtEndDate >
+                            <cfset dtTxt = DateFormat(Session.getNonFeaturedEvents.EventDate,"mmm dd, yyyy") >
+                            
+                        <cfelseif Month(Session.getNonFeaturedEvents.EventDate) eq Month(Session.getNonFeaturedEvents.dtEndDate) >
+                            <cfset dtTxt = DateFormat(Session.getNonFeaturedEvents.EventDate,"mmm dd") & '-' & DateFormat(Session.getNonFeaturedEvents.dtEndDate,"dd, yyyy") >
+                        
+                        <cfelseif Month(Session.getNonFeaturedEvents.EventDate) neq Month(Session.getNonFeaturedEvents.dtEndDate) >
+                            <cfset dtTxt = DateFormat(Session.getNonFeaturedEvents.EventDate,"mmm dd") & '-' & DateFormat(Session.getNonFeaturedEvents.dtEndDate,"mmm dd, yyyy") >
+                            
+                        <cfelse>
+                            <cfset dtTxt = DateFormat(Session.getNonFeaturedEvents.EventDate,"mmm dd, yyyy") >
+                        </cfif>
+                        
+                        
+                         <tr>
+                        <td valign="top" width="150" align="left"><span class="hdrDt">#dtTxt#</span></td>
+                        <td width="10">&nbsp;</td>
+                        <td>
+                        <cfif Len(Session.getNonFeaturedEvents.txtDescription) >
+                        <span ><a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getNonFeaturedEvents.TContent_ID#">#Session.getNonFeaturedEvents.ShortTitle#</a></span> 
+                        #Session.getNonFeaturedEvents.txtDescription# &nbsp;<span class="calTitle"><a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getNonFeaturedEvents.TContent_ID#">[See more...]</a></span> 
+                        <!---<cfif val(Session.getNonFeaturedEvents.FormID) gt 0>
+                            [ <a href='/index.cfm/ID/8/Registration?formID=#Session.getNonFeaturedEvents.formID#&siteuserID=0' title="SignUp for an Event" ><strong>SignUp!</strong></a> ]
+                        </cfif>--->
+                        <cfelse>
+                        	<strong>#Session.getNonFeaturedEvents.ShortTitle#.</strong>
+                        </cfif>
+                        
+                        </td></tr>
+                  <tr height="10"><td>&nbsp;</td></tr>
+                    </cfloop>
+                </table>
+          
+          		<!---
+          
 				<table class="table table-striped table-bordered">
 					<thead class="thead-default">
 						<tr>
@@ -672,9 +720,50 @@
 						</cfloop>
 					</tbody>
 				</table>
+				--->
 				</div>
 			</cfif>
 			<cfif Session.getNonFeaturedEvents.RecordCount>
+			
+			<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+                <!---
+                <tr><td colspan="3" align="right">
+                <button onclick="location.href='#cgi.SCRIPT_NAME#/ID/#url.ID#/archived/1/'" title="View Past Events" 
+              style="border: 1px solid ##F00;	background-color: ##FFB0B0;"
+                class="ui-button  ui-corner-all ui-button-text-icon-primary" role="button" aria-disabled="false"><span class="ui-button-icon-primary ui-icon ui-icon-calendar"></span><span class="ui-button-text"><strong>View Past Events</strong></span></button>
+                </td></tr>
+                --->
+                
+                    <cfloop query="Session.getNonFeaturedEvents">
+                    
+                        <!--- Bld Date Txt --->
+                        <cfset dtTxt = DateFormat(Session.getNonFeaturedEvents.EventDate,"mmm dd, yyyy") >
+                        
+                         <tr>
+                        <td valign="top" width="150" align="left"><span class="hdrDt">#dtTxt#</span></td>
+                        <td width="10">&nbsp;</td>
+                        <td>
+                        <cfif Len(Session.getNonFeaturedEvents.longDescription) >
+							<span ><a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getNonFeaturedEvents.TContent_ID#">#Session.getNonFeaturedEvents.ShortTitle#</a></span> 
+							#Session.getNonFeaturedEvents.longDescription# &nbsp;<span class="calTitle"><a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getNonFeaturedEvents.TContent_ID#">[More Info...]</a></span> 
+							<cfif  DateDiff("d", Now(), Session.getNonFeaturedEvents.Registration_Deadline) GTE 0>
+								<a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:ferrarireg.default&EventID=#Session.getNonFeaturedEvents.TContent_ID#" title="Signup for Event" id="register_#regcount++#" alt="Register Event">[Register]</a>
+							</cfif>
+										
+							<!---
+							
+							<cfif val(Session.getNonFeaturedEvents.FormID) gt 0>
+								[ <a href='/index.cfm/ID/8/Registration?formID=#Session.getNonFeaturedEvents.formID#&siteuserID=0' title="SignUp for an Event" ><strong>SignUp!</strong></a> ]
+							</cfif>--->
+                        <cfelse>
+                        	<strong>#Session.getNonFeaturedEvents.ShortTitle#.</strong>
+                        </cfif>
+                        
+                        </td></tr>
+                  		<tr height="10"><td>&nbsp;</td></tr>
+                    </cfloop>
+                </table>
+                <!---
 				<table class="table table-striped table-bordered">
 					<thead class="thead-default">
 						<tr>
@@ -752,6 +841,7 @@
 						</cfloop>
 					</tbody>
 				</table>
+				--->
 			</cfif>
 		</div>
 		
