@@ -230,6 +230,7 @@ angular.module('eventsadmin')
 			if(typeof wrapped_event.event_data.subevent_description == 'undefined')
 				wrapped_event.event_data.subevent_description = '';
 			
+			wrapped_event.siteid = $window.siteid;
 			var input_data = JSON.stringify(wrapped_event);
 			promise = $http.put(url, input_data).then(function(response){
 				response = setBooleans(response);

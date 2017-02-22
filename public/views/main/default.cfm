@@ -610,36 +610,30 @@
                     <cfloop query="Session.getFeaturedEvents">
                     
                         <!--- Bld Date Txt --->
-                        <cfif EventDate eq dtEndDate >
-                            <cfset dtTxt = DateFormat(Session.getNonFeaturedEvents.EventDate,"mmm dd, yyyy") >
-                            
-                        <cfelseif Month(Session.getNonFeaturedEvents.EventDate) eq Month(Session.getNonFeaturedEvents.dtEndDate) >
-                            <cfset dtTxt = DateFormat(Session.getNonFeaturedEvents.EventDate,"mmm dd") & '-' & DateFormat(Session.getNonFeaturedEvents.dtEndDate,"dd, yyyy") >
-                        
-                        <cfelseif Month(Session.getNonFeaturedEvents.EventDate) neq Month(Session.getNonFeaturedEvents.dtEndDate) >
-                            <cfset dtTxt = DateFormat(Session.getNonFeaturedEvents.EventDate,"mmm dd") & '-' & DateFormat(Session.getNonFeaturedEvents.dtEndDate,"mmm dd, yyyy") >
-                            
-                        <cfelse>
-                            <cfset dtTxt = DateFormat(Session.getNonFeaturedEvents.EventDate,"mmm dd, yyyy") >
-                        </cfif>
-                        
+                        <cfset dtTxt = DateFormat(Session.getFeaturedEvents.EventDate,"mmm dd, yyyy") >
                         
                          <tr>
                         <td valign="top" width="150" align="left"><span class="hdrDt">#dtTxt#</span></td>
                         <td width="10">&nbsp;</td>
                         <td>
-                        <cfif Len(Session.getNonFeaturedEvents.txtDescription) >
-                        <span ><a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getNonFeaturedEvents.TContent_ID#">#Session.getNonFeaturedEvents.ShortTitle#</a></span> 
-                        #Session.getNonFeaturedEvents.txtDescription# &nbsp;<span class="calTitle"><a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getNonFeaturedEvents.TContent_ID#">[See more...]</a></span> 
-                        <!---<cfif val(Session.getNonFeaturedEvents.FormID) gt 0>
-                            [ <a href='/index.cfm/ID/8/Registration?formID=#Session.getNonFeaturedEvents.formID#&siteuserID=0' title="SignUp for an Event" ><strong>SignUp!</strong></a> ]
-                        </cfif>--->
+                        <cfif Len(Session.getFeaturedEvents.longDescription) >
+							<span ><a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getFeaturedEvents.TContent_ID#">#Session.getFeaturedEvents.ShortTitle#</a></span> 
+							#Session.getFeaturedEvents.longDescription# &nbsp;<span class="calTitle"><a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getFeaturedEvents.TContent_ID#">[More Info...]</a></span> 
+							<cfif  DateDiff("d", Now(), Session.getFeaturedEvents.Registration_Deadline) GTE 0>
+								<a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:ferrarireg.default&EventID=#Session.getFeaturedEvents.TContent_ID#" title="Signup for Event" id="register_#regcount++#" alt="Register Event">[Register]</a>
+							</cfif>
+										
+							<!---
+							
+							<cfif val(Session.getFeaturedEvents.FormID) gt 0>
+								[ <a href='/index.cfm/ID/8/Registration?formID=#Session.getFeaturedEvents.formID#&siteuserID=0' title="SignUp for an Event" ><strong>SignUp!</strong></a> ]
+							</cfif>--->
                         <cfelse>
-                        	<strong>#Session.getNonFeaturedEvents.ShortTitle#.</strong>
+                        	<strong>#Session.getFeaturedEvents.ShortTitle#.</strong>
                         </cfif>
                         
                         </td></tr>
-                  <tr height="10"><td>&nbsp;</td></tr>
+                  		<tr height="10"><td>&nbsp;</td></tr>
                     </cfloop>
                 </table>
           
