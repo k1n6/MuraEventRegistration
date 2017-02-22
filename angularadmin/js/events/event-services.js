@@ -213,7 +213,7 @@ angular.module('eventsadmin')
 			var url = '/Taffy/index.cfm/event/' + event.TContent_ID;
 			var wrapped_event = {};
 			wrapped_event.event_data = event;
-
+			wrapped_event.event_data.siteid = $window.siteid;
 			var input_data = JSON.stringify(wrapped_event);
 			promise = $http.put(url, input_data).then(function(response){
 				response = setBooleans(response);
