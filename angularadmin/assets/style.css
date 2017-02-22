@@ -206,3 +206,6 @@ a, label{
 	padding: 16px 15px 12px 3px !important;
 	vertical-align: middle !important;
 }
+.dataTables_filter{
+	margin-right: 10px;
+}
