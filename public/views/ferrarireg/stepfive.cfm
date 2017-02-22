@@ -101,7 +101,7 @@
 							<div class="col-sm-6 pull-left">
 								<button class="btn btn-primary" onclick="window.location.href = '?EventRegistrationaction=public:ferrarireg.stepfour&EventID=<cfoutput>#rc.eventid#</cfoutput>&goingback=true';  return false;">&lt;- Return to Review</button>
 							</div>
-							<cfset NOTIFYURL 			= urlencodedformat("http://#cgi.server_name#:9191/notify.cfm")>
+							<cfset NOTIFYURL 			= urlencodedformat("http://#cgi.server_name#:#cgi.SERVER_PORT#/notify.cfm")>
 							<cfset TransactionID		= "FCA Events Registration">
 							<cfset return				= urlencodedformat("http://#cgi.server_name#/event-registration/public-registration-page/?EventRegistrationaction=public:ferrarireg.lastReg")>
 							<cfset cancel_return 		= urlencodedformat("http://#cgi.server_name##cgi.path_info#?#cgi.query_string#")>
