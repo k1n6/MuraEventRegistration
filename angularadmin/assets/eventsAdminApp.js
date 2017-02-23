@@ -1,4 +1,4 @@
-var app = angular.module('eventsadmin', [ 'tableSort', 'checklist-model', 'angular.filter', 'ui.grid', 'ui.bootstrap',  'formly', 'formlyBootstrap', 'ngTouch', 'ngAnimate', 'ngSanitize','ui.router', 'ui.bootstrap.datetimepicker', 'ui.bootstrap.modal', 'ngMaterial'], function($httpProvider){
+var app = angular.module('eventsadmin', [ 'ng.httpLoader', 'tableSort', 'checklist-model', 'angular.filter', 'ui.grid', 'ui.bootstrap',  'formly', 'formlyBootstrap', 'ngTouch', 'ngAnimate', 'ngSanitize','ui.router', 'ui.bootstrap.datetimepicker', 'ui.bootstrap.modal', 'ngMaterial'], function($httpProvider){
 
   delete $httpProvider.defaults.headers.common['X-Requested-With'];
 })
@@ -185,7 +185,16 @@ app
 
 
 
+.config([
+  'httpMethodInterceptorProvider',
+  function (httpMethodInterceptorProvider) {
+    httpMethodInterceptorProvider.whitelistDomain('10.0.0.180');
+    httpMethodInterceptorProvider.whitelistDomain('dan370.ddns.net');
+	  httpMethodInterceptorProvider.whitelistDomain('fca');
+    httpMethodInterceptorProvider.whitelistLocalRequests();
 
+  }
+])
 
 ;
 
@@ -330,14 +339,75 @@ angular.module('eventsadmin')
 							}
 						} 
 				);
+			
+				//updates our required fields
 				$('.ng-valid-required').not('form').parent().parent().addClass("field-required");
-
 				$('.ng-valid-required').not('form').parent().parent().find('label').each(function(){
 					$(this).html($(this).html().replace('*',''));
 				});
+			
+				//enhance our textareas
+				$timeout(function(){
+					jQuery('textarea:visible').not('.ckeditoradded').addClass('ckeditoradded').each(function(){
+						try{
+							$(this).ckeditor(
+
+								{ toolbar :
+										[
+											{ name: 'basicstyles', items : [ 'Bold','Italic' ] },
+											{ name: 'paragraph', items : [ 'NumberedList','BulletedList' ] },
+											{ name: 'tools', items : [ 'Maximize','-','About' ] },
+											{ name: 'links', items : [ 'Link','Unlink','Anchor' ] },
+											{ name: 'insert', items : [ 'Image','Flash','Table','HorizontalRule','Smiley','SpecialChar','PageBreak','Iframe' ] }
+										],
+								customConfig : 'config.js.cfm'}
+								,
+								function(editorInstance){
+									htmlEditorOnComplete(editorInstance);
+
+								}
+
+							);
+
+
+
+
+
+						}catch(e){
+							console.log('error: ');
+							console.log(e);
+						}
+					}
+					);
+					 for (var i in CKEDITOR.instances) {
+						try{
+							CKEDITOR.instances[i].on('change', function(d) { 
+								try{
+									var useid = d.editor.name;							
+									mys = angular.element($("#" + useid)).scope();
+									mys.model[mys.options.key] = $('.cke_editor_' + useid + ' iframe').contents().find('body').html();
+								}catch(e){
+									console.log("Unable to update instance of ckeditor: " + e.message);
+								}
+
+							});
+						}catch(e){
+							console.log("Unable to update instance of ckeditor: " + e.message);
+						}
+
+					}
+				}, 300);
+
 			}
 
-		$window.lastTimeout = $timeout($window.updateTables, 500);
+		$window.checkToUpdateTables = function(){
+			if($('#http_request_in_progress').filter(":visible").length > 0){
+				$timeout($window.checkToUpdateTables, 100);
+			}else{
+				$window.lastTimeout = $timeout($window.updateTables, 50);		
+			}
+		}
+		$window.checkToUpdateTables();
 		$timeout(function(){
 			$('.ng-valid-required').not('form').parent().parent().addClass("field-required");
 		
@@ -347,58 +417,10 @@ angular.module('eventsadmin')
 		}, 1500)
 	});
 	
+	//this used to beused to enhance our text areas
 	$scope.$on('$viewContentLoaded', function(){
 		
-			$timeout(function(){
-				jQuery('textarea:visible').not('.ckeditoradded').addClass('ckeditoradded').each(function(){
-					try{
-						$(this).ckeditor(
-						
-							{ toolbar :
-									[
-										{ name: 'basicstyles', items : [ 'Bold','Italic' ] },
-										{ name: 'paragraph', items : [ 'NumberedList','BulletedList' ] },
-										{ name: 'tools', items : [ 'Maximize','-','About' ] },
-										{ name: 'links', items : [ 'Link','Unlink','Anchor' ] },
-										{ name: 'insert', items : [ 'Image','Flash','Table','HorizontalRule','Smiley','SpecialChar','PageBreak','Iframe' ] }
-									],
-							customConfig : 'config.js.cfm'}
-							,
-							function(editorInstance){
-								htmlEditorOnComplete(editorInstance);
-								
-							}
-
-						);
-					
-					
-						
-				
-						
-					}catch(e){
-						console.log('error: ');
-						console.log(e);
-					}
-				}
-				);
-				 for (var i in CKEDITOR.instances) {
-                	try{
-						CKEDITOR.instances[i].on('change', function(d) { 
-							try{
-								var useid = d.editor.name;							
-								mys = angular.element($("#" + useid)).scope();
-								mys.model[mys.options.key] = $('.cke_editor_' + useid + ' iframe').contents().find('body').html();
-							}catch(e){
-								console.log("Unable to update instance of ckeditor: " + e.message);
-							}
-							
-						});
-					}catch(e){
-						console.log("Unable to update instance of ckeditor: " + e.message);
-					}
-
-				}
-			}, 300);
+			
 			
 	});
 	$http.get('/bootstrap/versions-mapping.json')

@@ -10,6 +10,7 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.4.0/jszip.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
    
+	<script src="js/ng-http-loader.js"></script>
     <link rel="stylesheet" type="text/css" href="node_modules/angular-ui-grid/ui-grid.min.css">
 	<script src="node_modules/angular-ui-grid/ui-grid.min.js"></script>
    
@@ -98,11 +99,15 @@
             <h1>
                Ferrari Regional / Chapter Events Administration
             </h1>
+            <div ng-http-loader  ttl="0.5" template="templates/loader.html">
         </div>
-		<div loading-indicator class="myLoadingIndicator" />
+	
     </header>
     <div class="container-fluid main-container">
-  
+
+	  	
+	  	
+	  </div>
         <div class="row">
             <div class="col-md-12">
 			   <style type="text/css">
