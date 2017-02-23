@@ -99,7 +99,7 @@
             <h1>
                Ferrari Regional / Chapter Events Administration
             </h1>
-            <div ng-http-loader  ttl="0.5" template="templates/loader.html">
+            <div ng-http-loader  ttl="1" template="templates/loader.html">
         </div>
 	
     </header>

@@ -188,8 +188,7 @@ app
 .config([
   'httpMethodInterceptorProvider',
   function (httpMethodInterceptorProvider) {
-    httpMethodInterceptorProvider.whitelistDomain('10.0.0.180');
-    httpMethodInterceptorProvider.whitelistDomain('dan370.ddns.net');
+
 
     httpMethodInterceptorProvider.whitelistLocalRequests();
 
@@ -267,77 +266,79 @@ angular.module('eventsadmin')
 				$timeout.cancel($window.lastTimeout);
 		
 		$window.updateTables = function(){
-				$('.csv-button').remove();
+				console.log("attempting to update");
+				try{
+					$('.csv-button').remove();
 
-				$('table.hascsv').each(function () {
-					var $table = $(this);
+					$('table.hascsv').each(function () {
+						var $table = $(this);
 
-					var $button = $("<button type='button' class='btn btn-primary csv-button'>");
-					$button.text("Export to spreadsheet");
-					$button.insertAfter($table.parent());
+						var $button = $("<button type='button' class='btn btn-primary csv-button'>");
+						$button.text("Export to spreadsheet");
+						$button.insertAfter($table.parent());
 
-					$button.click(function () {
+						$button.click(function () {
 
-						window.buildCSV($(this).prev().find('table.hascsv'));
+							window.buildCSV($(this).prev().find('table.hascsv'));
+						});
+
 					});
+					$(".tablesorter").not('.hassorter').addClass('hassorter').DataTable(
+							{
+								paging: false,
+								"footerCallback": function ( row, data, start, end, display ) {
 
-				});
-				$(".tablesorter").not('.hassorter').addClass('hassorter').DataTable(
-						{
-							paging: false,
-							"footerCallback": function ( row, data, start, end, display ) {
-					
-								var api = this.api(), data;
+									var api = this.api(), data;
 
-								// Remove the formatting to get integer data for summation
-								var intVal = function ( i ) {
-									return typeof i === 'string' ?
-										i.replace(/[\$,]/g, '')*1.0 :
-										typeof i === 'number' ?
-											i : 0;
-								};
+									// Remove the formatting to get integer data for summation
+									var intVal = function ( i ) {
+										return typeof i === 'string' ?
+											i.replace(/[\$,]/g, '')*1.0 :
+											typeof i === 'number' ?
+												i : 0;
+									};
 
-								// Total over all pages
-								for(i =0; i < 21; i++){
-									//console.log("Starting: " + i + "-------------------------------------")
-									try{
-										if($(api.column(i).header() && api.column(i).header()).hasClass('showtotal')){
+									// Total over all pages
+									for(i =0; i < 21; i++){
+										//console.log("Starting: " + i + "-------------------------------------")
+										try{
+											if($(api.column(i).header() && api.column(i).header()).hasClass('showtotal')){
 
-									
-											
-											
 
-											// Total over this page
-											pageTotal = api
-												.column( i , {page : 'current'})
-												.data()
-												.reduce( function (a, b, c) {
-													//console.log(c);
-													var $tr = $('#' + api.table().toJQuery().context[0].sTableId + ' tbody tr').get(c);
-													
-													
-													if($($tr).filter(':visible').length > 0){
-														$td = $($tr).find('td').get(i);
-														useval = $td.innerHTML;
-														//console.log(c + ': (visible) a: ' + a + " b:" + intVal(useval));
-														return intVal(a) + intVal(useval);
-													}else{
-														//console.log(c + ': (hidden) a: ' + a + " b:" + intVal(useval));	
-														return intVal(a);
-													}
-												}, 0 );
 
-											// Update footer
-											$( api.column( i ).footer() ).html(
-												 pageTotal.toFixed(2)
-											);
+
+
+												// Total over this page
+												pageTotal = api
+													.column( i , {page : 'current'})
+													.data()
+													.reduce( function (a, b, c) {
+														//console.log(c);
+														var $tr = $('#' + api.table().toJQuery().context[0].sTableId + ' tbody tr').get(c);
+
+
+														if($($tr).filter(':visible').length > 0){
+															$td = $($tr).find('td').get(i);
+															useval = $td.innerHTML;
+															//console.log(c + ': (visible) a: ' + a + " b:" + intVal(useval));
+															return intVal(a) + intVal(useval);
+														}else{
+															//console.log(c + ': (hidden) a: ' + a + " b:" + intVal(useval));	
+															return intVal(a);
+														}
+													}, 0 );
+
+												// Update footer
+												$( api.column( i ).footer() ).html(
+													 pageTotal.toFixed(2)
+												);
+											}
+										}catch(e){
+
 										}
-									}catch(e){
-
 									}
 								}
-							}
-						} 
+							} 
 				);
 			
 				//updates our required fields
@@ -398,16 +399,22 @@ angular.module('eventsadmin')
 					}
 				}, 300);
 
+				}catch(e){
+					console.log("Unable to update inerface: " + e.message);
+				}
 			}
 
 		$window.checkToUpdateTables = function(){
 			if($('#http_request_in_progress').filter(":visible").length > 0){
-				$timeout($window.checkToUpdateTables, 100);
+				console.log("rescheduling");
+				$timeout($window.checkToUpdateTables, 125);
 			}else{
-				$window.lastTimeout = $timeout($window.updateTables, 50);		
+				console.log("setting to update");
+				$window.lastTimeout = $timeout($window.updateTables, 125);		
 			}
 		}
-		$window.checkToUpdateTables();
+		$window.lastTimeout = $timeout($window.checkToUpdateTables, 250);	
+		
 		$timeout(function(){
 			$('.ng-valid-required').not('form').parent().parent().addClass("field-required");
 		
