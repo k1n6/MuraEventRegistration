@@ -158,17 +158,20 @@
 					>
 					<div class="help-block with-errors"></div>
 				</div>
-				
-				<div class="form-group required"> <!-- Member Number -->
-					<label for="full_name_id" class="control-label">Member Number </label>
-					<input type="text" class="form-control" id="membernumber" name="membernumber" placeholder="Member Number"
-						required='false' 
-						readonly='true'
-						data-error=""
-						value="#trim(input_struct['membernumber'])#"
-					>
-					<div class="help-block with-errors"></div>
-				</div>
+				<cfif val(input_struct['membernumber']) gt 0>
+					<div class="form-group"> <!-- Member Number -->
+						<label for="membernumber" class="control-label">Member Number </label>
+						<input type="text" class="form-control" id="membernumber" name="membernumber" placeholder="Member Number"
+							required='false' 
+							readonly='true'
+							data-error=""
+							value="#trim(input_struct['membernumber'])#"
+						>
+						<div class="help-block with-errors"></div>
+					</div>
+				<cfelse>
+					<input type="hidden" name="membernumber" value="0">
+				</cfif>
 					
 
 				<div class="form-group required" > <!-- Street 1 -->

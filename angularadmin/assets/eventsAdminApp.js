@@ -190,7 +190,7 @@ app
   function (httpMethodInterceptorProvider) {
     httpMethodInterceptorProvider.whitelistDomain('10.0.0.180');
     httpMethodInterceptorProvider.whitelistDomain('dan370.ddns.net');
-	  httpMethodInterceptorProvider.whitelistDomain('fca');
+
     httpMethodInterceptorProvider.whitelistLocalRequests();
 
   }
