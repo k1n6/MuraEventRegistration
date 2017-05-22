@@ -158,15 +158,15 @@ border-color: #fff !important;
   text-align: center !important;
   text-shadow: 2px 2px 0 rgba(0,0,0,.3) !important;
   color: #cdbfe3 !important;
-  background-color: #FF0000 !important;
+  background-color: #E30504 !important;
   /*background-image: url(header.png) !important;*/
 }
 .bs-header a {
-  color: #FFFF00 !important;
+  color: #FFCA13 !important;
   font-weight: normal !important;
 }
 .bs-header h1 {
-  color: #FFFF00 !important;
+  color: #FFCA13 !important;
 }
 .bs-header p {
   font-weight: 200 !important;

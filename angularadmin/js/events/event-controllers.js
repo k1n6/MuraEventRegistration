@@ -3,9 +3,11 @@ angular.module('eventsadmin')
 .controller('eventsListController', ['eventServices','$scope','$state', function (eventServices, $scope, $state){
 	
 	$scope.events = [];
+	$scope.loading = true;
 	//pasing zero gets all events
 	data = eventServices.getEvents(0);
 	data.then(function(resp){
+		$scope.loading = false;
 		$scope.events = resp;
 	});
 	localStorage.setItem("activeTab", parseInt(0));
@@ -16,15 +18,37 @@ angular.module('eventsadmin')
 		$event.stopPropagation();
 		$event.preventDefault();
 	};
+	$scope.copyEvent = function(sourceEventID, $event){
+		$state.go("eventDetails.eventinformation", {eventid : -1, sourceEventID : sourceEventID})
+		$event.stopPropagation();
+		$event.preventDefault();
+	}
 }])
 
 .controller('eventDetailsController', ['eventServices','$scope','$stateParams', function (eventServices, $scope, $stateParams){
 	
 	$scope.event = [];
-	
+	$scope.sourceEventID = $stateParams.sourceEventID;
+	$scope.sourceEvent = {};
+	$scope.loading = true;
 	data = eventServices.getEvents($stateParams.eventid);
 	data.then(function(resp){
 		$scope.event = resp[0];
+		if(typeof $scope.sourceEventID != 'undefined' && !isNaN($scope.sourceEventID) && $scope.sourceEventID > 0){
+			var sourcedata = eventServices.getEvents($scope.sourceEventID);
+			sourcedata.then(function(resp){
+				console.log("source event fetched");
+				$scope.sourceEvent = resp[0];
+				for(i in $scope.event)
+					if(i != 'TContent_ID')
+						$scope.event[i] = $scope.sourceEvent[i];
+				$scope.loading = false;
+
+			})
+		}else{
+			$scope.loading = false;
+		}
+
 	});
 	
 	
@@ -33,11 +57,13 @@ angular.module('eventsadmin')
 .controller('singleEventEdit', ['eventServices','$scope','$stateParams', function (eventServices, $scope, $stateParams){
 	
 	$scope.event = [];
-	
+	$scope.sourceEventID = $stateParams.sourceEventID;
+	/*
 	data = eventServices.getEvents($stateParams.eventid);
 	data.then(function(resp){
 		$scope.event = resp[0];
 	});
+	*/
 	
 	
 }])
@@ -331,9 +357,19 @@ angular.module('eventsadmin')
 	
 }])
 	
-.controller("eventEditController", ['$scope', 'eventServices', '$state',  function($scope, eventServices, $state){
+.controller("eventEditController", ['$scope', 'eventServices', '$state', '$stateParams', function($scope, eventServices, $state, $stateParams){
 	
 	$scope.eventFields = 	[];
+	$scope.sourceEventID = $stateParams.sourceEventID;
+	$scope.targetEventID = $stateParams.eventid;
+	$scope.sourceTitle = $scope.event.ShortTitle;
+	//if we have a source event, we copy that into the event object if we are creating an event
+	//this basically allows us the "copy" event feature to pull in the event details
+	$scope.creatingCopy = false;
+	if($stateParams.eventid == -1 && typeof $scope.sourceEventID != 'undefined' && !isNaN($scope.sourceEventID) && $scope.sourceEventID > 0)
+		$scope.creatingCopy = true;
+
+	
 	eventServices.getFormData('p_eventregistration_events').then(function(d){
 		$scope.eventFields = d;
 	});
@@ -348,7 +384,14 @@ angular.module('eventsadmin')
 		$scope.optionFields = d;
 	});
 	
-	$scope.saveEvent = function(){
+	$scope.saveEvent = function(event, creatingCopy){
+		//if we are creating a copy, we set the type to be the source event
+		if(!creatingCopy)
+			creatingCopy = false;
+		$scope.event.creatingCopy = creatingCopy;
+		$scope.event.sourceEventID = $scope.sourceEventID;
+		$scope.event.creatingCopy = creatingCopy;
+		$scope.event.sourceEventID = $scope.sourceEventID;
 		eventServices.saveEvent($scope.event).then(function(d){
 			$state.go('eventlist');	
 		});

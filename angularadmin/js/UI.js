@@ -7,7 +7,12 @@ angular.module('eventsadmin')
 			reportsServices
 			.getRegistration(regid)
 			.then(function(d){
-				$scope.summary_html = d[0].summary_html;
+			    $scope.summary_html = d.data[0].summary_html;
+			    $scope.flags = [];
+			    $scope.reg_id = regid;
+			    for (x in d.flags)
+			        if (d.flags[x].reg_id == regid)
+			            $scope.flags.push(d.flags[x]);
 				var x = new Date();
 				$scope.useid = 'modalid' + x.getTime();
 				var modalInstance = $uibModal.open({
@@ -24,6 +29,9 @@ angular.module('eventsadmin')
 								$e.find('h2').next('p').remove();
 							}, 100);
 						}, 300);
+						$scope.removeFlag = function (flag, regid) {
+
+						}
 						
 						
 					}],

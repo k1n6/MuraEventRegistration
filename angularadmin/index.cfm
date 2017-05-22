@@ -41,6 +41,8 @@
     <script src="js/events/event-services.js"></script>
     <script src="js/reports/reports-controllers.js"></script> 
     <script src="js/reports/reports-services.js"></script>
+	<script src="js/flags/flags-controllers.js"></script> 
+    <script src="js/flags/flags-services.js"></script>
     <script src="js/directives.js"></script>
     <script src="js/UI.js"></script>
     <script src="js/table2csv.js"></script>
@@ -88,6 +90,11 @@
 				console.log("csv: " + csv);
 				$('#csvdata').val(csv);
 				$('#csvform').submit();
+			}
+			window.addRegFlags = function(table){
+				var checks = $(table).find('.action_checkbox').filter(':checked');
+				console.log(checks);
+				
 			}
 			$(function(){
 				$('.block-constrain').addClass('plugin-container').removeClass('block-constrain');
@@ -179,6 +186,16 @@
 		<textarea style="display: none;"  name="csvdata" id="csvdata"></textarea>
 	</form>
 </div>
+<script>
+	$(function(){
+		$(document.body).on('click', '.action_checkbox_container_td', function(){
+			if($(this).find("input[type=checkbox]").prop("checked"))
+				$(this).find("input[type=checkbox]").prop("checked", false);
+			else
+				$(this).find("input[type=checkbox]").prop("checked", true);
+		})
+	});
+</script>
 </cfsavecontent>
 <cfscript>
  private struct function get$() {

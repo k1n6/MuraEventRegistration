@@ -2,7 +2,8 @@
 	 
 	<div class="row">
 		<div class="col-sm-12">
-			<h2 class="tab-content-header">{{event.ShortTitle}}</h2>
+			<h2 ng-show="!creatingCopy" class="tab-content-header">{{event.ShortTitle}}</h2>
+			<h2 ng-show="creatingCopy" class="tab-content-header">Creating Copy of Event From "{{sourceTitle}}"</h2>
 		</div>
 	</div>
 	<div class="row">

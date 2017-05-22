@@ -1,16 +1,22 @@
 <div ng-controller="eventsListController" class="container-fluid">
 
 
-
-		<div class="input-group col-centered custom-list-item " ng-repeat="event in events">
-			<a  class="form-control"  ui-sref="eventDetails.eventinformation({eventid: event.TContent_ID})">
-					{{event.ShortTitle}}
-				
-			</a>
-			 <span class="input-group-btn">
-				<button ng-click="deleteEvent(event.TContent_ID, $event);" type="button" class="btn btn-danger deleteEventButton"><span class="glyphicon glyphicon-remove"></span> Delete</button>
-			</span>
+	<div ng-show="loading" class="loading-div-outer">
+		<div class="loading-div-inner">
+			
 		</div>
+	</div>
+	<div class="input-group col-centered custom-list-item " ng-repeat="event in events">
+		<a  class="form-control"  ui-sref="eventDetails.eventinformation({eventid: event.TContent_ID})">
+				{{event.ShortTitle}}
+		</a>
+		 <span class="input-group-btn">
+			<button ng-click="copyEvent(event.TContent_ID, $event);" type="button" 
+					class="btn btn-green copyEventButton"><span class="glyphicon glyphicon-copy"></span> Copy</button>
+			<button ng-click="deleteEvent(event.TContent_ID, $event);" type="button" 
+				class="btn btn-danger deleteEventButton"><span class="glyphicon glyphicon-remove"></span> Delete</button>
+		</span>
+	</div>
 	
 	<div class="col-md-12">
 		<button id="AddEventButton" type="button" class="btn btn-primary ng-scope" ui-sref="eventDetails.eventinformation({eventid: -1})">Create Event</button>

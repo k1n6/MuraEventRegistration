@@ -1,3 +1,9 @@
 <div ng-controller="eventDetailsController">
-	<div singleeventedit event="event" />
+	<div ng-show="loading" class="loading-div-outer">
+		<div class="loading-div-inner">
+			
+		</div>
+	</div>
+	
+	<div ng-if="!loading" singleeventedit event="event" sourceevent="sourceEvent" />
 </div>

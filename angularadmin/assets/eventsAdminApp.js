@@ -13,7 +13,7 @@ app
   var eventDetails = {
 	 abstract: true,
     name: 'eventDetails',
-    url: '/eventDetails/:eventid',
+    url: '/eventDetails/:eventid/:sourceEventID?',
     templateUrl: 'templates/eventdetails.html'
   }
   
@@ -277,6 +277,14 @@ angular.module('eventsadmin')
 						$button.text("Export to spreadsheet");
 						$button.insertAfter($table.parent());
 
+						/*
+						var $flag_button = $("<button type='button' class='btn btn-primary add-flag-button'>");
+						$flag_button.text("Add Flag");
+						$flag_button.insertBefore($table.parent());
+						$flag_button.click(function(){
+							window.addRegFlags($(this).next().find('table.hascsv'));
+						})
+						 */
 						$button.click(function () {
 
 							window.buildCSV($(this).prev().find('table.hascsv'));
@@ -285,6 +293,10 @@ angular.module('eventsadmin')
 					});
 					$(".tablesorter").not('.hassorter').addClass('hassorter').DataTable(
 							{
+								"columnDefs": [ {
+									  "targets": 'no-sort',
+									  "orderable": false,
+								} ],
 								paging: false,
 								"footerCallback": function ( row, data, start, end, display ) {
 

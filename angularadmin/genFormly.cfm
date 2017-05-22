@@ -36,6 +36,7 @@
 
 	
 <cfelseif len(url.table) gt 0>
+	<cfheader name="Content-Type" value="application/json">
 	<cfquery name="getColumns" datasource="#request.dsn#">
 		select distinct i.column_name, meta_id,  data_type, character_maximum_length, form_meta.sort_order, form_group, required, friendly_label, place_holder, label, value, f.sort_order as dropdown_sort, dropdown_id
 		 from INFORMATION_SCHEMA.columns i

@@ -25,11 +25,12 @@
 					<tr ng-repeat="payments in paymentss">
 						<td>{{payments.payment_created}}</td>
 						<td>{{payments.amount | currency}}</td>
-						<td class="flex-display"><button ng-click="viewRegistration(payments.registration_id);" class="btn btn-primary">View #{{payments.registration_id}}</button></td>
+						<td>{{payments.registration_id}}</td>
 						<td>{{payments.transactionid}}</td>
-						<td class="flex-display">
+						<td class="flex-display no-sort">
 							<button ui-sref="eventDetails.reporting.payment({payment_id: payments.payment_id})" type="button" class="btn btn-primary"><span class="glyphicon glyphicon-pencil"></span> Edit</button>
 							<button id="deletepaymentsbutton" ng-click="deletepayments(payments.payment_id, $event);" type="button" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span> Delete</button>
+							<button ng-click="viewRegistration(payments.registration_id);" class="btn btn-primary">View #{{payments.registration_id}}</button>
 						</td>
 					</tr>
 

@@ -208,6 +208,7 @@ angular.module('eventsadmin')
 			return promise;
 		},
 		saveEvent : function (event){
+
 			
 			var promise;
 			var url = '/Taffy/index.cfm/event/' + event.TContent_ID;

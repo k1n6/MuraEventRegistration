@@ -16,7 +16,8 @@ angular.module('eventsadmin')
 		restrict: 'A',
 		templateUrl: 'templates/single-event.html',
 		scope: {
-			event : '=event'
+			event : '=event',
+			sourceevent : '=?sourceevent'
 		}
 	}
 })

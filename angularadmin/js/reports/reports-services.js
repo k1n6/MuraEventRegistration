@@ -48,7 +48,9 @@ angular.module('eventsadmin')
 			var promise;
 			var url= '/Taffy/index.cfm/registrations/'+regid+'/summary/1';
 			promise = $http.get(url).then(function(response){
-				response = setBooleans(response);
+				
+				response.data = setBooleans(response.data);
+				console.log(response.data);
 				return response.data;
 			});
 			return promise;			

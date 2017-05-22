@@ -1,8 +1,8 @@
 angular.module('eventsadmin')
 	
 .controller('singleReportController', 
-			['reportsServices','$scope','$state','$stateParams', '$element', '$timeout','$compile', 'RegistrationDetails',
-			function (reportsServices,  $scope, $state, $stateParams, $element, $timeout, $compile, RegistrationDetails){
+			['reportsServices','$scope','$state','$stateParams', '$element', '$timeout','$compile', 'RegistrationDetails', '$uibModal', 'Flags',
+			function (reportsServices,  $scope, $state, $stateParams, $element, $timeout, $compile, RegistrationDetails, $uibModal, Flags){
 	
 	$scope.reportHTML = "";
 	$scope.data = {};
@@ -15,7 +15,44 @@ angular.module('eventsadmin')
 	console.log($stateParams);
 	var promise = reportsServices.getReport($stateParams.eventid, '_' + $stateParams.type + '_');
 				
-				
+			
+	$scope.addFlags = function(){
+			
+			var searchIDs = $('input.action_checkbox:checked').map(function(){
+
+			  return $(this).val();
+
+			});
+			$scope.checked_boxes = searchIDs.get();
+			$scope.flags = [];
+			$scope.modalInstance = $uibModal.open({
+				templateUrl: 'templates/registration-flags.html',
+				scope: $scope,
+				controller : ['$scope', '$timeout', '$http',  function($scope, $timeout, $http){
+					Flags.getFlags().then(function(response){
+						$scope.flags = response.data;
+						console.log($scope.flags);
+					});
+					$scope.saveFlags = function(checked_boxes, flags, extra_flag){
+						var use_flags = [];
+						for(d in flags)
+							use_flags[d] = flags[d];
+						
+						if(extra_flag)
+								use_flags.push(extra_flag);
+						
+						console.log(checked_boxes);
+						console.log(use_flags);
+						Flags.saveFlags(checked_boxes, use_flags).then(function(resp){
+							if(resp)
+								$scope.modalInstance.close('');
+								
+						});
+					}
+				}],
+				windowClass: 'app-modal-window narrow-dialog'
+			});
+	}
 	//this grabs the HTML from the server, loads in the data, loads in the HTML and then compiles it.
 	promise.then(function(d){
 		$element.find('.report-htmlclass').append(d.REPORTHTML);
