@@ -594,248 +594,66 @@
 			</fieldset>
 			<cfif Session.getFeaturedEvents.RecordCount>
 				<div class="alert alert-featured">
-				<fieldset>
-					<legend><h2>Featured</h2></legend>
-				</fieldset>
-				
-				<table width="100%" border="0" cellpadding="0" cellspacing="0" >
-                <!---
-                <tr><td colspan="3" align="right">
-                <button onclick="location.href='#cgi.SCRIPT_NAME#/ID/#url.ID#/archived/1/'" title="View Past Events" 
-              style="border: 1px solid ##F00;	background-color: ##FFB0B0;"
-                class="ui-button  ui-corner-all ui-button-text-icon-primary" role="button" aria-disabled="false"><span class="ui-button-icon-primary ui-icon ui-icon-calendar"></span><span class="ui-button-text"><strong>View Past Events</strong></span></button>
-                </td></tr>
-                --->
-                
+					<fieldset>
+						<legend><h2>Featured Events</h2></legend>
+					</fieldset>
                     <cfloop query="Session.getFeaturedEvents">
                     
                         <!--- Bld Date Txt --->
-                        <cfset dtTxt = DateFormat(Session.getFeaturedEvents.EventDate,"mmm dd, yyyy") >
+                        <cfset dtTxt = DateFormat(Session.getFeaturedEvents.EventDate,"mmmm dd, yyyy") >
                         
-                         <tr>
-                        <td valign="top" width="150" align="left"><span class="hdrDt">#dtTxt#</span></td>
-                        <td width="10">&nbsp;</td>
-                        <td>
-                        <cfif Len(Session.getFeaturedEvents.longDescription) >
-							<span ><a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getFeaturedEvents.TContent_ID#">#Session.getFeaturedEvents.ShortTitle#</a></span> 
-							#Session.getFeaturedEvents.longDescription# &nbsp;<span class="calTitle"><a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getFeaturedEvents.TContent_ID#">[More Info...]</a></span> 
-							<cfif  DateDiff("d", Now(), Session.getFeaturedEvents.Registration_Deadline) GTE 0>
-								<a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:ferrarireg.default&EventID=#Session.getFeaturedEvents.TContent_ID#" title="Signup for Event" id="register_#regcount++#" alt="Register Event">[Register]</a>
-							</cfif>
-										
-							<!---
+                         <div class="row events-row">
+							 <div class="col-sm-2">
+							 	<span class="hdrDt">#dtTxt#</span>
+							 </div>
 							
-							<cfif val(Session.getFeaturedEvents.FormID) gt 0>
-								[ <a href='/index.cfm/ID/8/Registration?formID=#Session.getFeaturedEvents.formID#&siteuserID=0' title="SignUp for an Event" ><strong>SignUp!</strong></a> ]
-							</cfif>--->
-                        <cfelse>
-                        	<strong>#Session.getFeaturedEvents.ShortTitle#.</strong>
-                        </cfif>
-                        
-                        </td></tr>
-                  		<tr height="10"><td>&nbsp;</td></tr>
+							<div class="col-sm-10">
+								 <cfif Len(Session.getFeaturedEvents.longDescription) >
+									<span ><a class="event-title" href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getFeaturedEvents.TContent_ID#">#Session.getFeaturedEvents.ShortTitle#</a></span> 
+									#Session.getFeaturedEvents.longDescription# &nbsp;<span class="calTitle"><a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getFeaturedEvents.TContent_ID#" class="btn btn-primary" >More Info</a></span> 
+									<cfif  DateDiff("d", Now(), Session.getFeaturedEvents.Registration_Deadline) GTE 0>
+										<a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:ferrarireg.default&EventID=#Session.getFeaturedEvents.TContent_ID#" class="btn btn-primary btn-red pull-right" title="Signup for Event" id="register_#regcount++#" alt="Register Event">Register</a>
+									</cfif>
+								<cfelse>
+									<strong>#Session.getFeaturedEvents.ShortTitle#.</strong>
+								</cfif>
+							</div>
+						 </div>
                     </cfloop>
-                </table>
-          
-          		<!---
-          
-				<table class="table table-striped table-bordered">
-					<thead class="thead-default">
-						<tr>
-							<th style="background: white;" width="50%">Event Title</th>
-							<th style="background: white;" width="15%">Event Date</th>
-							<th style="background: white;" width="20%">Event Actions</th>
-							<th style="background: white;" width="15%">Event Attributes</th>
-						</tr>
-					</thead>
-					<tbody>
-						<cfloop query="#Session.getFeaturedEvents#">
-							<cfquery name="getCurrentRegistrationsbyEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-								Select Count(TContent_ID) as CurrentNumberofRegistrations
-								From p_EventRegistration_UserRegistrations
-								Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
-									EventID = <cfqueryparam value="#Session.getFeaturedEvents.TContent_ID#" cfsqltype="cf_sql_integer">
-							</cfquery>
-							<cfset EventSeatsLeft = #Session.getFeaturedEvents.MaxParticipants# - #getCurrentRegistrationsbyEvent.CurrentNumberofRegistrations#>
-							<tr>
-								<td><span class="event_header">#Session.getFeaturedEvents.ShortTitle#</span><cfif LEN(Session.getFeaturedEvents.Presenters)><cfquery name="getPresenter" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">Select FName, LName From tusers where UserID = <cfqueryparam value="#Session.getFeaturedEvents.Presenters#" cfsqltype="cf_sql_varchar"></cfquery><br><em>Presenter: #getPresenter.FName# #getPresenter.Lname#</em></cfif></td>
-								<td>
-									<cfif LEN(Session.getFeaturedEvents.EventDate) and LEN(Session.getFeaturedEvents.EventDate1) or LEN(Session.getFeaturedEvents.EventDate2) or LEN(Session.getFeaturedEvents.EventDate3) or LEN(Session.getFeaturedEvents.EventDate4)>
-										<cfif DateDiff("d", Now(), Session.getFeaturedEvents.EventDate) LT 0>
-											<div style="Color: ##CCCCCC;">#DateFormat(Session.getFeaturedEvents.EventDate, "mm/dd/yyyy")# (#DateFormat(Session.getFeaturedEvents.EventDate, "ddd")#)</div>
-										<cfelse>
-											#DateFormat(Session.getFeaturedEvents.EventDate, "mm/dd/yyyy")# (#DateFormat(Session.getFeaturedEvents.EventDate, "ddd")#)<br>
-										</cfif>
-										<cfif LEN(Session.getFeaturedEvents.EventDate1)>
-											<cfif DateDiff("d", Now(), Session.getFeaturedEvents.EventDate1) LT 0>
-												<div style="Color: ##AAAAAA;">#DateFormat(Session.getFeaturedEvents.EventDate1, "mm/dd/yyyy")# (#DateFormat(Session.getFeaturedEvents.EventDate1, "ddd")#)</div>
-											<cfelse>
-												#DateFormat(Session.getFeaturedEvents.EventDate1, "mm/dd/yyyy")# (#DateFormat(Session.getFeaturedEvents.EventDate1, "ddd")#)<br>
-											</cfif>
-										</cfif>
-										<cfif LEN(Session.getFeaturedEvents.EventDate2)>
-											<cfif DateDiff("d", Now(), Session.getFeaturedEvents.EventDate2) LT 0>
-												<div class="text-danger">#DateFormat(Session.getFeaturedEvents.EventDate2, "mm/dd/yyyy")# (#DateFormat(Session.getFeaturedEvents.EventDate2, "ddd")#)</div>
-											<cfelse>
-												#DateFormat(Session.getFeaturedEvents.EventDate2, "mm/dd/yyyy")# (#DateFormat(Session.getFeaturedEvents.EventDate2, "ddd")#)<br>
-											</cfif>
-										</cfif>
-										<cfif LEN(Session.getFeaturedEvents.EventDate3)>
-											<cfif DateDiff("d", Now(), Session.getFeaturedEvents.EventDate3) LT 0>
-												<div class="text-danger">#DateFormat(Session.getFeaturedEvents.EventDate3, "mm/dd/yyyy")# (#DateFormat(Session.getFeaturedEvents.EventDate3, "ddd")#)</div>
-											<cfelse>
-												#DateFormat(Session.getFeaturedEvents.EventDate3, "mm/dd/yyyy")# (#DateFormat(Session.getFeaturedEvents.EventDate3, "ddd")#)<br>
-											</cfif>
-										</cfif>
-										<cfif LEN(Session.getFeaturedEvents.EventDate4)>
-											<cfif DateDiff("d", Now(), Session.getFeaturedEvents.EventDate4) LT 0>
-												<div class="text-danger">#DateFormat(Session.getFeaturedEvents.EventDate4, "mm/dd/yyyy")# (#DateFormat(Session.getFeaturedEvents.EventDate4, "ddd")#)</div>
-											<cfelse>
-												#DateFormat(Session.getFeaturedEvents.EventDate4, "mm/dd/yyyy")# (#DateFormat(Session.getFeaturedEvents.EventDate4, "ddd")#)
-											</cfif>
-										</cfif>
-									<cfelse>
-										#DateFormat(Session.getFeaturedEvents.EventDate, "mm/dd/yyyy")# (#DateFormat(Session.getFeaturedEvents.EventDate, "ddd")#)
-									</cfif>
-								</td>
-								<td>
-									<cfif Session.getFeaturedEvents.AcceptRegistrations EQ 1>
-										<a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small" alt="Event Information">More Info</a>
-										 
-										<cfif DateDiff("d", Now(), Session.getFeaturedEvents.Registration_Deadline) GTE 0>
-											| <a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:ferrarireg.default&EventID=#Session.getFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small register_#regcount++#" id="register_#regcount++#"  alt="Register Event">Register</a>
-										</cfif>
-									<CFELSE>
-										<a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small" alt="Event Information">More Info</a>
-									</cfif>
-								</td>
-								<td><cfif Session.getFeaturedEvents.PGPAvailable EQ 1><a href="##eventPGPCertificate" data-toggle="modal"><img src="/plugins/#HTMLEditFormat(rc.pc.getPackage())#/includes/assets/images/award.png" alt="PGP Certificate" border="0"></cfif><cfif Session.getFeaturedEvents.AllowVideoConference EQ 1 or Session.getFeaturedEvents.WebinarAvailable EQ 1><img src="/plugins/#HTMLEditFormat(rc.pc.getPackage())#/includes/assets/images/wifi.png" "Online Learning" border="0"></a></cfif></td>
-							</tr>
-						</cfloop>
-					</tbody>
-				</table>
-				--->
 				</div>
 			</cfif>
 			<cfif Session.getNonFeaturedEvents.RecordCount>
 			
-			<table width="100%" border="0" cellpadding="0" cellspacing="0" >
-                <!---
-                <tr><td colspan="3" align="right">
-                <button onclick="location.href='#cgi.SCRIPT_NAME#/ID/#url.ID#/archived/1/'" title="View Past Events" 
-              style="border: 1px solid ##F00;	background-color: ##FFB0B0;"
-                class="ui-button  ui-corner-all ui-button-text-icon-primary" role="button" aria-disabled="false"><span class="ui-button-icon-primary ui-icon ui-icon-calendar"></span><span class="ui-button-text"><strong>View Past Events</strong></span></button>
-                </td></tr>
-                --->
-                
+			<div class="well">
+         
+					<fieldset>
+						<legend><h2>Upcoming Events</h2></legend>
+					</fieldset>
                     <cfloop query="Session.getNonFeaturedEvents">
                     
                         <!--- Bld Date Txt --->
-                        <cfset dtTxt = DateFormat(Session.getNonFeaturedEvents.EventDate,"mmm dd, yyyy") >
+                        <cfset dtTxt = DateFormat(Session.getNonFeaturedEvents.EventDate,"mmmm dd, yyyy") >
                         
-                         <tr>
-                        <td valign="top" width="150" align="left"><span class="hdrDt">#dtTxt#</span></td>
-                        <td width="10">&nbsp;</td>
-                        <td>
-                        <cfif Len(Session.getNonFeaturedEvents.longDescription) >
-							<span ><a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getNonFeaturedEvents.TContent_ID#">#Session.getNonFeaturedEvents.ShortTitle#</a></span> 
-							#Session.getNonFeaturedEvents.longDescription# &nbsp;<span class="calTitle"><a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getNonFeaturedEvents.TContent_ID#">[More Info...]</a></span> 
-							<cfif  DateDiff("d", Now(), Session.getNonFeaturedEvents.Registration_Deadline) GTE 0>
-								<a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:ferrarireg.default&EventID=#Session.getNonFeaturedEvents.TContent_ID#" title="Signup for Event" id="register_#regcount++#" alt="Register Event">[Register]</a>
-							</cfif>
-										
-							<!---
+                         <div class="row events-row <cfif Session.getNonFeaturedEvents.recordcount eq currentrow>no-border</cfif> ">
+							 <div class="col-sm-2">
+							 	<span class="hdrDt">#dtTxt#</span>
+							 </div>
 							
-							<cfif val(Session.getNonFeaturedEvents.FormID) gt 0>
-								[ <a href='/index.cfm/ID/8/Registration?formID=#Session.getNonFeaturedEvents.formID#&siteuserID=0' title="SignUp for an Event" ><strong>SignUp!</strong></a> ]
-							</cfif>--->
-                        <cfelse>
-                        	<strong>#Session.getNonFeaturedEvents.ShortTitle#.</strong>
-                        </cfif>
-                        
-                        </td></tr>
-                  		<tr height="10"><td>&nbsp;</td></tr>
+							<div class="col-sm-10">
+								 <cfif Len(Session.getNonFeaturedEvents.longDescription) >
+									<span ><a class="event-title" href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getNonFeaturedEvents.TContent_ID#">#Session.getNonFeaturedEvents.ShortTitle#</a></span> 
+									#Session.getNonFeaturedEvents.longDescription# &nbsp;<span class="calTitle"><a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getNonFeaturedEvents.TContent_ID#" class="btn btn-primary" >More Info</a></span> 
+									<cfif  DateDiff("d", Now(), Session.getNonFeaturedEvents.Registration_Deadline) GTE 0>
+										<a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:ferrarireg.default&EventID=#Session.getNonFeaturedEvents.TContent_ID#" class="btn btn-primary btn-red pull-right" title="Signup for Event" id="register_#regcount++#" alt="Register Event">Register</a>
+									</cfif>
+								<cfelse>
+									<strong>#Session.getNonFeaturedEvents.ShortTitle#.</strong>
+								</cfif>
+							</div>
+						 </div>
                     </cfloop>
-                </table>
-                <!---
-				<table class="table table-striped table-bordered">
-					<thead class="thead-default">
-						<tr>
-							<th width="50%">Event Title</th>
-							<th width="15%">Event Date</th>
-							<th width="20%">Event Actions</th>
-							
-						</tr>
-					</thead>
-					<tbody>
-						<cfloop query="#Session.getNonFeaturedEvents#">
-							<cfquery name="getCurrentRegistrationsbyEvent" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">
-								Select Count(TContent_ID) as CurrentNumberofRegistrations
-								From p_EventRegistration_UserRegistrations
-								Where Site_ID = <cfqueryparam value="#rc.$.siteConfig('siteID')#" cfsqltype="cf_sql_varchar"> and
-									EventID = <cfqueryparam value="#Session.getNonFeaturedEvents.TContent_ID#" cfsqltype="cf_sql_integer">
-							</cfquery>
-							<cfset EventSeatsLeft = #Session.getNonFeaturedEvents.MaxParticipants# - #getCurrentRegistrationsbyEvent.CurrentNumberofRegistrations#>
-							<tr>
-								<td><span class="event_header">#Session.getNonFeaturedEvents.ShortTitle#</span>
-								<cfif LEN(Session.getNonFeaturedEvents.Presenters)><cfquery name="getPresenter" Datasource="#rc.$.globalConfig('datasource')#" username="#rc.$.globalConfig('dbusername')#" password="#rc.$.globalConfig('dbpassword')#">Select FName, LName From tusers where UserID = <cfqueryparam value="#Session.getNonFeaturedEvents.Presenters#" cfsqltype="cf_sql_varchar"></cfquery><br><em>Presenter: #getPresenter.FName# #getPresenter.Lname#</em></cfif><br>
-								#Session.getNonFeaturedEvents.longDescription#
-</td>
-								<td>
-									<cfif LEN(Session.getNonFeaturedEvents.EventDate) and LEN(Session.getNonFeaturedEvents.EventDate1) or LEN(Session.getNonFeaturedEvents.EventDate2) or LEN(Session.getNonFeaturedEvents.EventDate3) or LEN(Session.getNonFeaturedEvents.EventDate4)>
-										<cfif DateDiff("d", Now(), Session.getNonFeaturedEvents.EventDate) LT 0>
-											<div style="Color: ##CCCCCC;">#DateFormat(Session.getNonFeaturedEvents.EventDate, "mm/dd/yyyy")# (#DateFormat(Session.getNonFeaturedEvents.EventDate, "ddd")#)</div>
-										<cfelse>
-											#DateFormat(Session.getNonFeaturedEvents.EventDate, "mm/dd/yyyy")# (#DateFormat(Session.getNonFeaturedEvents.EventDate, "ddd")#)<br>
-										</cfif>
-										<cfif LEN(Session.getNonFeaturedEvents.EventDate1)>
-											<cfif DateDiff("d", Now(), Session.getNonFeaturedEvents.EventDate1) LT 0>
-												<div style="Color: ##AAAAAA;">#DateFormat(Session.getNonFeaturedEvents.EventDate1, "mm/dd/yyyy")# (#DateFormat(Session.getNonFeaturedEvents.EventDate1, "ddd")#)</div>
-											<cfelse>
-												#DateFormat(Session.getNonFeaturedEvents.EventDate1, "mm/dd/yyyy")# (#DateFormat(Session.getNonFeaturedEvents.EventDate1, "ddd")#)<br>
-											</cfif>
-										</cfif>
-										<cfif LEN(Session.getNonFeaturedEvents.EventDate2)>
-											<cfif DateDiff("d", Now(), Session.getNonFeaturedEvents.EventDate2) LT 0>
-												<div class="text-danger">#DateFormat(Session.getNonFeaturedEvents.EventDate2, "mm/dd/yyyy")# (#DateFormat(Session.getNonFeaturedEvents.EventDate2, "ddd")#)</div>
-											<cfelse>
-												#DateFormat(Session.getNonFeaturedEvents.EventDate2, "mm/dd/yyyy")# (#DateFormat(Session.getNonFeaturedEvents.EventDate2, "ddd")#)<br>
-											</cfif>
-										</cfif>
-										<cfif LEN(Session.getNonFeaturedEvents.EventDate3)>
-											<cfif DateDiff("d", Now(), Session.getNonFeaturedEvents.EventDate3) LT 0>
-												<div class="text-danger">#DateFormat(Session.getNonFeaturedEvents.EventDate3, "mm/dd/yyyy")# (#DateFormat(Session.getNonFeaturedEvents.EventDate3, "ddd")#)</div>
-											<cfelse>
-												#DateFormat(Session.getNonFeaturedEvents.EventDate3, "mm/dd/yyyy")# (#DateFormat(Session.getNonFeaturedEvents.EventDate3, "ddd")#)<br>
-											</cfif>
-										</cfif>
-										<cfif LEN(Session.getNonFeaturedEvents.EventDate4)>
-											<cfif DateDiff("d", Now(), Session.getNonFeaturedEvents.EventDate4) LT 0>
-												<div class="text-danger">#DateFormat(Session.getNonFeaturedEvents.EventDate4, "mm/dd/yyyy")# (#DateFormat(Session.getNonFeaturedEvents.EventDate4, "ddd")#)</div>
-											<cfelse>
-												#DateFormat(Session.getNonFeaturedEvents.EventDate4, "mm/dd/yyyy")# (#DateFormat(Session.getNonFeaturedEvents.EventDate4, "ddd")#)
-											</cfif>
-										</cfif>
-									<cfelse>
-										#DateFormat(Session.getNonFeaturedEvents.EventDate, "mm/dd/yyyy")# (#DateFormat(Session.getNonFeaturedEvents.EventDate, "ddd")#)
-									</cfif>
-								</td>
-								<td>
-									<cfif Session.getNonFeaturedEvents.AcceptRegistrations EQ 1>
-										<a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getNonFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small" alt="Event Information">More Info</a>
-										<cfif  DateDiff("d", Now(), Session.getNonFeaturedEvents.Registration_Deadline) GTE 0>
-											| <a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:ferrarireg.default&EventID=#Session.getNonFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small register_#regcount++#" id="register_#regcount++#" alt="Register Event">Register</a>
-										</cfif>
-									<CFELSE>
-										<a href="#CGI.Script_name##CGI.path_info#?#HTMLEditFormat(rc.pc.getPackage())#action=public:main.eventinfo&EventID=#Session.getNonFeaturedEvents.TContent_ID#" class="btn btn-primary btn-small" alt="Event Information">More Info</a>
-									</cfif>
-								</td>
-								
-							</tr>
-						</cfloop>
-					</tbody>
-				</table>
-				--->
+				</div>
+              
 			</cfif>
 		</div>
 		

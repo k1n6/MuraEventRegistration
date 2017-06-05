@@ -1,25 +1,35 @@
 <div ng-controller="customreportsListController" ng-show="eventid != -1">
-	<h3>Saved Custom Reports</h3>
-	<div ng-if="customreportss.length == 0"><h4>No Custom Reports Present</h4></div>
-	<div class="single-custom-report-content"></div>	
-	<div class="input-group col-centered custom-list-item " ng-repeat="customreports in customreportss | unique : 'report_name'">
-		<a  class="form-control"  ng-click="displayReport(customreports.report_name)">
-				{{customreports.report_name}}
+	<h2>Saved Custom Reports</h2>
+	<div ng-show="loading" class="loading-div-outer">
+		<div class="loading-div-inner">
 
-		</a>
-		
-		
-		 <span class="input-group-btn">
-		 	<button id="deletecustomreportsbutton" ng-click="editcustomreport(customreports.reportid);" type="button" class="btn"><span class="glyphicon glyphicon-pencil"></span> Edit</button>
-			<button id="deletecustomreportsbutton" ng-click="deletecustomreports(customreports.reportid, $event);" type="button" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span> Delete</button>
-		</span>
+		</div>
 	</div>
+	<div ng-show="!loading">
+	
+		<div ng-if="customreportss.length == 0"><h4>No Custom Reports Present</h4></div>
+		<div class="single-custom-report-content"></div>	
+		<div class="input-group col-centered custom-list-item " ng-repeat="customreports in customreportss | unique : 'report_name'">
+			<a  class="form-control"  ng-click="displayReport(customreports.report_name)">
+					{{customreports.report_name}}
 
-		
-	<!---	
-	<br>
-	<button id="AddAcustomreportsButton" class="btn btn-primary ng-scope" ui-sref="eventDetails.singlecustomreports({eventid: eventid, reportid: -1, subevent : subevent})">Add A customreports</button>
-	--->
+			</a>
+
+
+			 <span class="input-group-btn">
+			 	<!--
+				<button id="deletecustomreportsbutton" ng-click="editcustomreport(customreports.reportid);" type="button" class="btn"><span class="glyphicon glyphicon-pencil"></span> Edit</button>
+				-->
+				<button id="deletecustomreportsbutton" confirmation-needed="Are you sure?" ng-click="deletecustomreports(customreports.reportid, $event);" type="button" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span> Delete</button>
+			</span>
+		</div>
+
+
+		<!---	
+		<br>
+		<button id="AddAcustomreportsButton" class="btn btn-primary ng-scope" ui-sref="eventDetails.singlecustomreports({eventid: eventid, reportid: -1, subevent : subevent})">Add A customreports</button>
+		--->
+	</div>
 
 </div>		
 

@@ -1,20 +1,40 @@
 angular.module('eventsadmin')
 	
-.controller('eventsListController', ['eventServices','$scope','$state', function (eventServices, $scope, $state){
+.controller('eventsListController', ['eventServices','$scope','$state', '$timeout', 'modalService', function (eventServices, $scope, $state, $timeout, modalService){
 	
 	$scope.events = [];
 	$scope.loading = true;
 	//pasing zero gets all events
 	data = eventServices.getEvents(0);
+	
+	$scope.selectedEvents = [1,2];
+	$scope.pastevents 			= 1;
+	$scope.futureevents 		= 2;
+	$scope.current_date = new Date();
+	
 	data.then(function(resp){
 		$scope.loading = false;
 		$scope.events = resp;
 	});
+	$scope.getDateFromString = function(s){
+		return new Date(s);
+	}
 	localStorage.setItem("activeTab", parseInt(0));
 	$scope.deleteEvent = function(eventid, $event){
-		eventServices.deleteEvent(eventid).then(function(res){
-			$state.go("eventlist", {}, {reload: true});	
-		});
+  		var modalOptions = {
+            closeButtonText: 'Cancel',
+            actionButtonText: 'Delete Event',
+            headerText: 'Delete event?',
+            bodyText: 'Are you sure you want to delete this event?'
+        };
+
+        modalService.showModal({}, modalOptions).then(function (result) {
+			eventServices.deleteEvent(eventid).then(function(res){
+				$state.go("eventlist", {}, {reload: true});	
+			});
+        });
+		
+
 		$event.stopPropagation();
 		$event.preventDefault();
 	};
@@ -23,6 +43,13 @@ angular.module('eventsadmin')
 		$event.stopPropagation();
 		$event.preventDefault();
 	}
+	$scope.updateFooter = function(){
+		$timeout(function(){
+			$(".tablesorter").DataTable().draw();	
+		}, 50)
+		
+	}
+		
 }])
 
 .controller('eventDetailsController', ['eventServices','$scope','$stateParams', function (eventServices, $scope, $stateParams){
@@ -71,7 +98,7 @@ angular.module('eventsadmin')
 	$scope.eventOptionGroups = [];
 	$scope.eventid = $stateParams.eventid;
 	$scope.subevent = $stateParams.subevent;
-	
+	$scope.loading = true;
 	$scope.loadCarIntoOptionGroup = function(source_event, source_subevent, target_event, target_subevent){
 	
 		var promise = eventServices.eventCopier(source_event, source_subevent, target_event, target_subevent, 'optionsonly');
@@ -99,6 +126,7 @@ angular.module('eventsadmin')
 	data = eventServices.getEventOptions($stateParams.eventid, $scope.subevent);
 	data.then(function(resp){
 		$scope.eventOptionGroups = resp;
+		$scope.loading = false;
 	});
 }])
 
@@ -190,10 +218,11 @@ angular.module('eventsadmin')
 .controller('eventActivitiesController', ['$scope', 'eventServices', '$stateParams', '$state', function($scope, eventServices, $stateParams, $state){
 	$scope.subEvents = [];
 	
-
+	$scope.loading = true;
 	//passing the eventid gets the sub events when the subeventid is zero
 	data = eventServices.getSubEvents($stateParams.eventid, 0);
 	data.then(function(resp){
+		$scope.loading = false;
 		$scope.subEvents = resp;
 	});
 	
@@ -290,7 +319,7 @@ angular.module('eventsadmin')
 	//this fetches our form data
 	$scope.activityFields = activityFields;
 	$scope.eventActivities = eventActivities;
-									
+	$scope.loading = true;
 	$scope.eventid = $stateParams.eventid;
 	$scope.subevent = $stateParams.subevent;
 	$scope.updateActivities = function(){
@@ -298,6 +327,7 @@ angular.module('eventsadmin')
 		data_two.then(function(resp){
 			$scope.eventActivities = resp;
 			$scope.$digest();
+			$scope.loading = false;
 		});
 	};
 	
@@ -352,6 +382,8 @@ angular.module('eventsadmin')
 			else
 				console.log(resp[i].subevent + '!=' + $scope.subevent);
 		
+		
+		
 	});
 	
 	
@@ -362,6 +394,7 @@ angular.module('eventsadmin')
 	$scope.eventFields = 	[];
 	$scope.sourceEventID = $stateParams.sourceEventID;
 	$scope.targetEventID = $stateParams.eventid;
+	$scope.loading = true;
 	$scope.sourceTitle = $scope.event.ShortTitle;
 	//if we have a source event, we copy that into the event object if we are creating an event
 	//this basically allows us the "copy" event feature to pull in the event details
@@ -372,6 +405,7 @@ angular.module('eventsadmin')
 	
 	eventServices.getFormData('p_eventregistration_events').then(function(d){
 		$scope.eventFields = d;
+		$scope.loading = false;
 	});
 
 	$scope.optionGroupFields = [];
@@ -439,9 +473,10 @@ angular.module('eventsadmin')
 		eventServices.deletePrice(priceid).then(function(res){
 			$state.go('eventDetails.eventpricelist', {eventid: $stateParams.eventid, subevent: $scope.subevent}, {reload: true});
 		});
-		
-		$event.stopPropagation();
-		$event.preventDefault();
+		try{
+			$event.stopPropagation();
+			$event.preventDefault();
+		}catch(e){}
 		
 	}
 	data = eventServices.getPrices($stateParams.eventid,0, $scope.subevent);
@@ -458,6 +493,7 @@ angular.module('eventsadmin')
 	$scope.coordinators = [];
 	$scope.eventid = $stateParams.eventid;
 	$scope.subevent = $stateParams.subevent;
+	$scope.loading = true;
 	if(typeof $scope.subevent == 'undefined' || $scope.subevent == null){
 		$scope.subevent = -1;
 		$stateParams.subevent = -1;
@@ -476,6 +512,7 @@ angular.module('eventsadmin')
 	data = eventServices.getcoordinators($stateParams.eventid,0, $scope.subevent);
 	data.then(function(resp){
 		$scope.coordinators = resp;
+		$scope.loading = false;
 	});
 }])
 
@@ -556,7 +593,7 @@ angular.module('eventsadmin')
 	$scope.configs = [];
 	//we need to figure out / decide if we are viewing a main events options for an acitivities events
 	$scope.siteid = $stateParams.siteid;
-	
+	$scope.loading = true;
 
 	
 	//here we load our form variables
@@ -571,6 +608,7 @@ angular.module('eventsadmin')
 			data = eventServices.getconfigs($stateParams.siteid);
 			data.then(function(resp){
 				$scope.configs = resp;
+				$scope.loading = false;
 			});
 		}
 	$scope.updateconfigData();
@@ -643,6 +681,7 @@ angular.module('eventsadmin')
 									   	function($scope, eventServices, $stateParams, $state, RegistrationDetails, $mdDialog){
 	$scope.paymentss = [];
 	$scope.eventid = $stateParams.eventid;
+	$scope.loading = true;
 	$scope.subevent = $stateParams.subevent;
 	if(typeof $scope.subevent == 'undefined' || $scope.subevent == null){
 		$scope.subevent = -1;
@@ -676,6 +715,7 @@ angular.module('eventsadmin')
 	data = eventServices.getpaymentss($stateParams.eventid,0, $scope.subevent);
 	data.then(function(resp){
 		$scope.paymentss = resp;
+		$scope.loading = false;
 	});
 	$scope.viewRegistration = function(regid){
 		RegistrationDetails.showDetailsPopup(regid, $scope);
@@ -689,6 +729,7 @@ angular.module('eventsadmin')
 	$scope.eventid = $stateParams.eventid;
 	$scope.payment_id = $stateParams.payment_id;
 	$scope.subevent = $stateParams.subevent;
+	$scope.registration_id = $stateParams.targetRegistration;
 	if(typeof $scope.subevent == 'undefined' || $scope.subevent == null){
 		$scope.subevent = -1;
 		$stateParams.subevent = -1;
@@ -698,6 +739,7 @@ angular.module('eventsadmin')
 	$scope.paymentsFields = 	[];
 	eventServices.getFormData('p_eventregistration_payments').then(function(d){
 		$scope.paymentsFields = d;
+		
 	});
 	
 	
@@ -706,6 +748,8 @@ angular.module('eventsadmin')
 			data = eventServices.getpaymentss($scope.eventid, $scope.payment_id, $scope.subevent );
 			data.then(function(resp){
 				$scope.paymentss = resp;
+				if( $scope.payment_id == -1 &&  $stateParams.targetRegistration)
+					$scope.paymentss[0].registration_id = $stateParams.targetRegistration;
 			});
 		}
 	$scope.updatepaymentsData();

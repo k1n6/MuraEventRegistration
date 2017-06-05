@@ -1,8 +1,8 @@
 angular.module('eventsadmin')
 	
 .controller('singleReportController', 
-			['reportsServices','$scope','$state','$stateParams', '$element', '$timeout','$compile', 'RegistrationDetails', '$uibModal', 'Flags',
-			function (reportsServices,  $scope, $state, $stateParams, $element, $timeout, $compile, RegistrationDetails, $uibModal, Flags){
+			['reportsServices','$scope','$state','$stateParams', '$element', '$timeout','$compile', 'RegistrationDetails', '$uibModal', 'Flags', 'SimplePopup', 
+			function (reportsServices,  $scope, $state, $stateParams, $element, $timeout, $compile, RegistrationDetails, $uibModal, Flags, SimplePopup){
 	
 	$scope.reportHTML = "";
 	$scope.data = {};
@@ -11,11 +11,78 @@ angular.module('eventsadmin')
 	$scope.underpayment 	= 1;
 	$scope.overpayment 		= 2;
 	$scope.exactlypayment 	= 3;
-				
+	$scope.filteredReports = {};
+	$scope.loading = true;
 	console.log($stateParams);
-	var promise = reportsServices.getReport($stateParams.eventid, '_' + $stateParams.type + '_');
+	
 				
 			
+	$scope.toggleFilterFlag = function(flag, $e){
+		if(typeof $scope.filteredReports[flag] == 'undefined')
+			$scope.filteredReports[flag] = 1;
+		else
+			delete $scope.filteredReports[flag];
+		
+		$($e.target).toggleClass('btn-primary');
+		
+		if($.fn.dataTableExt.afnFiltering.length == 0)
+			$.fn.dataTableExt.afnFiltering.push(
+				function( oSettings, aData, iDataIndex ) {
+					var value = aData[8];
+					var valueArr = value.split('|');
+					
+					if(Object.keys($scope.filteredReports).length == 0){
+						
+						return true;
+					}else{
+						for(i in $scope.filteredReports){
+							var matcher = function(d){
+								if (d == i)
+									return true;
+								else
+									return false;
+							}
+							if(typeof valueArr.find(matcher) != 'undefined'){
+								
+								return true;
+							}
+
+						}
+					}
+					
+					return false;
+				}
+			);
+			$('.tablesorter').DataTable().draw();
+			setTimeout(function(){$('.tablesorter').DataTable().draw();}, 250);
+
+		/*
+		var filteredData = $('.tablesorter').DataTable()
+			.column( 8 )
+			.data()
+			.filter( function ( value, index ) {
+				if(Object.keys($scope.filteredReports).length == 0){
+					console.log("no flags selected returning true");
+					return true;
+				}else{
+					for(i in $scope.filteredReports){
+						if(value.indexOf('>' + i + '<') != -1){
+							console.log(i + ":flag found");
+							return true;
+						}
+							
+					}
+				}
+				console.log("no flag found");
+				return false;
+			} );
+		*/
+
+	}
+	
+	$scope.addPayment = function(source_registration){
+		$state.go('eventDetails.reporting.payment', {payment_id: -1, targetRegistration: source_registration});
+	}
 	$scope.addFlags = function(){
 			
 			var searchIDs = $('input.action_checkbox:checked').map(function(){
@@ -23,49 +90,72 @@ angular.module('eventsadmin')
 			  return $(this).val();
 
 			});
+			
 			$scope.checked_boxes = searchIDs.get();
 			$scope.flags = [];
-			$scope.modalInstance = $uibModal.open({
-				templateUrl: 'templates/registration-flags.html',
-				scope: $scope,
-				controller : ['$scope', '$timeout', '$http',  function($scope, $timeout, $http){
-					Flags.getFlags().then(function(response){
-						$scope.flags = response.data;
-						console.log($scope.flags);
-					});
-					$scope.saveFlags = function(checked_boxes, flags, extra_flag){
-						var use_flags = [];
-						for(d in flags)
-							use_flags[d] = flags[d];
+			$scope.message="";
+			$scope.selected_flags = [];
+			$scope.extra_flag = "";
+			if($scope.checked_boxes.length == 0){
+				//user needs to select one or more registrations before adding flags
+				 
+					SimplePopup.showSimplePopup('Select A Registration First', 'Select registrations by checking their coresponding checkboxes under the ACTION column.');
+					
+				
+			}else{
+				$scope.modalInstance = $uibModal.open({
+					templateUrl: 'templates/registration-flags.html',
+					scope: $scope,
+					controller : ['$scope', '$timeout', '$http',  function($scope, $timeout, $http){
+						Flags.getFlags().then(function(response){
+							$scope.flags = response.data;
 						
-						if(extra_flag)
-								use_flags.push(extra_flag);
-						
-						console.log(checked_boxes);
-						console.log(use_flags);
-						Flags.saveFlags(checked_boxes, use_flags).then(function(resp){
-							if(resp)
-								$scope.modalInstance.close('');
-								
 						});
-					}
-				}],
-				windowClass: 'app-modal-window narrow-dialog'
-			});
+						$scope.saveFlags = function(checked_boxes, flags, extra_flag){
+							var use_flags = [];
+							for(d in flags)
+								use_flags[d] = flags[d];
+
+							if(extra_flag)
+									use_flags.push(extra_flag);
+
+
+							if(use_flags.length == 0){
+								$scope.message="Please select at least one flag or enter a new flag.";
+								return;
+							}
+							Flags.saveFlags(checked_boxes, use_flags).then(function(resp){
+								if(resp){
+									$scope.modalInstance.close('');
+									$scope.updateReportData();
+								}
+
+							});
+						}
+					}],
+					windowClass: 'app-modal-window narrow-dialog'
+				});
+			}
 	}
 	//this grabs the HTML from the server, loads in the data, loads in the HTML and then compiles it.
-	promise.then(function(d){
-		$element.find('.report-htmlclass').append(d.REPORTHTML);
-		
-		for(i in d.RETURNDATA)
-			$scope.data[i] = d.RETURNDATA[i];
-		
-		$timeout(function(){
-			//$compile($element)($scope);
-			$compile($element.find('.report-htmlclass'))($scope);
+	$scope.updateReportData = function(){
 
-		}, 10)
-	});
+		$scope.loading = true;
+		var promise = reportsServices.getReport($stateParams.eventid, '_' + $stateParams.type + '_');
+		promise.then(function(d){
+			$element.find('.report-htmlclass').html(d.REPORTHTML);
+
+			for(i in d.RETURNDATA)
+				$scope.data[i] = d.RETURNDATA[i];
+
+			$timeout(function(){
+				//$compile($element)($scope);
+				$compile($element.find('.report-htmlclass'))($scope);
+				$scope.loading = false;
+			}, 10)
+		});
+	}
+	$scope.updateReportData();
 	console.log('Reports Controller Completed'); 
 	
 	$scope.viewRegistration = function(regid){
@@ -106,6 +196,8 @@ angular.module('eventsadmin')
 	$scope.eventid = $stateParams.eventid;
 	$scope.subevent = $stateParams.subevent;
 	$scope.data = {};
+	$scope.loading = true;
+
 	if(typeof $scope.subevent == 'undefined' || $scope.subevent == null){
 		$scope.subevent = -1;
 		$stateParams.subevent = -1;
@@ -194,6 +286,7 @@ angular.module('eventsadmin')
 	data = reportsServices.getcustomreportss('', $stateParams.eventid);
 	data.then(function(resp){
 		$scope.customreportss = resp;
+		$scope.loading = false;
 	});
 }])
 
@@ -258,6 +351,7 @@ angular.module('eventsadmin')
 	$scope.selectedOptionGroups = [];
 	$scope.selectedPrices = [];
 	$scope.selectedActivities = [];
+	$scope.selectedFlags = [];
 	$scope.addReportFormVisible = false;
 	
 	var promise = reportsServices.getAllEventData($stateParams.eventid);
@@ -304,6 +398,17 @@ angular.module('eventsadmin')
 		}
 		//console.log($scope.selectedOptionGroups);
 	}
+	$scope.checkFlags = function(flag){
+		var targetFlags = [];
+		var oneChecked = false;
+		$('.custom_flag').each(function(){
+			//console.log($(this).prop("checked"));
+			if($(this).prop("checked"))
+				targetFlags.push($(this).val());
+		});
+		$scope.selectedFlags = targetFlags;
+		
+	}
 	$scope.checkPrices = function(){
 		var targetPrices = [];
 		var oneChecked = false;
@@ -336,7 +441,8 @@ angular.module('eventsadmin')
 		//console.log($scope.selectedPrices);
 	}
 	$scope.saveCustomReport = function(){
-		var promise = reportsServices.saveCustomReport($scope.selectedPrices, $scope.selectedActivities, $scope.selectedOptionGroups, $scope.report_name, $stateParams.eventid);
+		var promise = reportsServices.saveCustomReport($scope.selectedPrices, $scope.selectedActivities, $scope.selectedOptionGroups, $scope.report_name,
+													   $stateParams.eventid, $scope.selectedFlags);
 		
 		promise.then(function(d){
 			

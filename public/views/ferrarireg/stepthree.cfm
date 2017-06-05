@@ -17,6 +17,7 @@
 	
 </cfquery>
 <cfparam default="false" name="reviewmode">
+
 <cfif getChosenSubData.recordcount eq 0  and reviewmode neq "true">
 	<script>
 		$(function(){
@@ -99,6 +100,9 @@
 							.attr('disabled', true);
 					
 				}
+				<cfif reviewmode>
+					$('input, select').prop('disabled', 'true').prop("placeholder", "");	
+				</cfif>	
 				try{
 					$('.validated_form').validator()
 				}catch(e){

@@ -1,15 +1,24 @@
 <form  name="eventForm" novalidate>
-	<h2  ng-if="event.TContent_ID != -1">Edit An Event</h2>
-	<h2  ng-if="event.TContent_ID == -1">Create An Event</h2>
-	<!--
-	<h2>{{sourceEventID}}</h2>
-	<h2>{{sourceevent}}</h2>
-	<h2>{{event}}</h2>
-	-->
-	 <div class="">
-		<formly-form model="event" fields="eventFields" form="eventForm" class="">
-			<button id="SaveEventButton" type="button" ng-click="saveEvent(event,creatingCopy);" class="btn btn-primary" ng-disabled="eventForm.$invalid">Save Event</button>
-		</formly-form>
+	<div ng-show="loading" class="loading-div-outer">
+		<div class="loading-div-inner">
+
+		</div>
+	</div>
+
+
+	<div ng-show="!loading">
+		<h2  ng-if="event.TContent_ID != -1">Edit An Event</h2>
+		<h2  ng-if="event.TContent_ID == -1">Create An Event</h2>
+		<!--
+		<h2>{{sourceEventID}}</h2>
+		<h2>{{sourceevent}}</h2>
+		<h2>{{event}}</h2>
+		-->
+		 <div class="">
+			<formly-form model="event" fields="eventFields" form="eventForm" class="">
+				<button id="SaveEventButton" type="button" ng-click="saveEvent(event,creatingCopy);" class="btn btn-primary" ng-disabled="eventForm.$invalid">Save Event</button>
+			</formly-form>
+		</div>
 	</div>
 </form>
-<div eventpricelist></div>
+<div eventpricelist  ng-show="!loading"></div>

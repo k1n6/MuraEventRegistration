@@ -3,11 +3,42 @@
 	<button class="btn btn-primary" ng-click="modalInstance.close('');">OK</button>
 </div>
 <div class="modal-body">
-	<div class="flag_list">
-		<div class="flag_title">Flags</div>
-		<button class="flag btn" ng-repeat="flag in flags" ng-click="removeFlag(flag.flag, reg_id)">
-			{{flag.flag}}
-		</button>
+	<div class="row">
+		<div class="admin_notes col-md-12">
+			<h5>Flags</h5>
+		</div>
+	</div>
+	
+	<div class="row">
+		<div class="admin_notes col-md-12">
+			<div class="flag_list well box">
+
+				<div ng-show="flags.length == 0">No Flags Set</div>
+				<button class="flag btn green-flag-btn" ng-repeat="flag in flags" ng-click="removeFlag(reg_id, flag.flag)">
+					{{flag.flag}}
+					<span class="glyphicon glyphicon-remove"></span>
+				</button>
+				<br clear="all" ng-show="flags.length > 0" />
+			</div>
+		</div>
+	</div>
+	<div class="row" ng-show="admin_notes != ''">
+		<div class="admin_notes col-md-12">
+			<h5>Admin Checkout Notes</h5>
+		</div>
+	</div>
+	<div class="row" ng-show="admin_notes == ''">
+		<div class="admin_notes col-md-12">
+			No Admin Notes
+		</div>
+	</div>
+	<div class=" well box"  ng-show="admin_notes != ''">
+
+		<div class="row">
+			<div class="admin_notes col-md-12">
+				{{admin_notes}}
+			</div>
+		</div>
 	</div>
 	<div id="{{useid}}">
 	</div>

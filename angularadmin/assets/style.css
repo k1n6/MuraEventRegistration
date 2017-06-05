@@ -183,14 +183,14 @@ a, label{
 .underpayment, .underpayment td{
 	background-color: #FFA0A0 !important;
 }
-.overpayment, .overpayment td{
+.overpayment, .overpayment td, .futureevents, .futureevents td{
 	background-color: #d0d0d0 !important;
 }
-.exactpayment, .exactpayment td{
+.exactpayment, .exactpayment td, .pastevents, .pastevents td{
 	background-color: #8CCC6B !important;
 }
 
-.underpayment label, .overpayment label, .exactpayment label{
+.underpayment label, .overpayment label, .exactpayment label, .futureevents label, .pastevents label{
 	width: 100%;
 	display: block;
 	padding:10px;
@@ -216,7 +216,8 @@ a, label{
 }
 
 .dataTables_filter{
-	margin-right: 10px;
+	margin-right: 13px;
+	margin-left: 13px;
 }
 
 #http_request_in_progress{
@@ -275,4 +276,35 @@ a, label{
 	padding: 5px;
 	margin: 3px;
 	background-color: #FFCA13;
+}
+.custom-list-table-a{
+	display: flex !important;
+}
+.flex-table-list-column{
+	flex: 1;
+}
+.custom-list-table-header > div{
+	background-color: #efefef;
+}
+.text-align-right{
+	text-align: right;
+}
+.form-control.borderless{
+	border: 0 !important;
+	box-shadow: none !important;
+}
+.mura .content a.btn-primary{ 
+		color: white !important;
+}
+.modal-title{
+	color: #000;
+	font-size: 20px !important;
+	margin-bottom: 2em;
+}
+td > .btn{
+	margin-bottom: 5px;
+}
+
+button.flag.btn.green-flag-btn{
+	background-color: #8CCC6B !important;
 }

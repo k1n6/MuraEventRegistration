@@ -8,7 +8,10 @@
 
 		</a>
 		 <span class="input-group-btn">
-			<button id="deletePricebutton" ng-click="deletePrice(price.price_id, $event);" type="button" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span> Delete</button>
+		 	<!--
+		 	
+		 	-->
+			<button id="deletePricebutton" confirmation-needed="Delete this price?" ng-click="deletePrice(price.price_id, $event);" type="button" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span> Delete</button>
 		</span>
 	</div>
 

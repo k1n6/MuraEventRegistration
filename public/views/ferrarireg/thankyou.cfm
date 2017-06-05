@@ -1,7 +1,7 @@
 <cfsavecontent variable="session.lastRegistration">
 	<cfif isdefined("session.summary_data")>
 
-		<cfset reg_results = rc.FERRARI_REG.saveRegistration(session.reg_options, session.summary_data, session.runningTotal, session.total_items,session.reg_options[2].eventid, session.useTax)>
+		<cfset reg_results = rc.FERRARI_REG.saveRegistration(session.reg_options, session.summary_data, session.runningTotal, session.total_items,session.reg_options[2].eventid, session.useTax, session.target_total)>
 
 		<cfset bcc_list = rc.FERRARI_REG.getBCCList(session.reg_options[2].eventid)>
 

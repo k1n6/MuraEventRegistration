@@ -1,3 +1,10 @@
+<!---   
+	first we need to check if this user is from the admin attempting to Edit a user's registration
+	
+	then log them in on the front-end as this user if possible.
+--->
+
+
 
 <script src="/global/chained.js"></script>
 <cfparam name="session.reg_options" default="#arraynew(1)#">
@@ -17,13 +24,19 @@
 <cfinclude template="../main/createMuraUserIfneeded.cfm">
 	
 
+
 <cfif ( 
 		val(session.event_config.allow_guests) neq 1 
 		or rc.event_data.main_data.allow_guest_registration neq 1
 	)
-		and  ((not isdefined('session.stmember.id')) or val(session.stmember.id) eq 0)>
+		and  ((not isdefined('session.target_user_session.stmember.id')) or val(session.target_user_session.stmember.id) eq 0)>
 
-	<cflocation url="#$.siteConfig('memberloginpage')#?logintoregisterforevents=true&returnto=#cgi.path_info#?#urlencodedformat(cgi.query_string)#" addtoken="false">
+		<cfif session.target_user_session.admin_user>
+			<h3>Bypassing membership requirement for registration for an admin user</h3>
+		<cfelse>
+			<cflocation url="#$.siteConfig('memberloginpage')#?logintoregisterforevents=true&returnto=#cgi.path_info#?#urlencodedformat(cgi.query_string)#" addtoken="false">
+		</cfif>
+		
 </cfif>
 
 <!---   
@@ -66,6 +79,19 @@
 	<div class="">
 	<div class="row">
 		<div class="col-md-12">
+			<h2>Registering for '#rc.event_data.main_data.shortTitle#'</h2>
+		</div>
+	</div>
+	<cfif reviewmode neq 'true' and rc.event_data.main_data.longdescription neq "<p><br></p>">
+		<div class="row">
+			<div class="col-md-12 vertical_padding_1">
+				#rc.event_data.main_data.longdescription#
+			</div>
+		</div>
+	</cfif>
+	
+	<div class="row">
+		<div class="col-md-12">
 			<h2>Basic Information</h2>		
 			<p>Provide your contact information and select which activities you'd like to participate in below.</p>
 		</div>
@@ -88,20 +114,9 @@
 			</div>
 		</div>
 	</cfif>
-	<!---   
-	<div class="row">
-		<div class="col-md-12">
-			<h4>#rc.event_data.main_data.shortTitle#</h4>
-		</div>
-	</div>
-	<cfif reviewmode neq 'true'>
-		<div class="row">
-			<div class="col-md-12 vertical_padding_1">
-				#rc.event_data.main_data.longdescription#
-			</div>
-		</div>
-	</cfif>
-	--->
+	 
+	
+	
 	
 <cfif reviewmode neq 'true'>
 	<script>
@@ -136,6 +151,11 @@
 		<div class="panel panel-default">
 			<form method="post" action="?EventRegistrationaction=public:ferrarireg.steptwo&EventID=#rc.eventid#" role="form" data-toggle="validator">
 			<input type="hidden" name="eventid" value="#url.eventid#">
+			<cfif structkeyexists(input_struct, 'editing_registration')>
+				<input type="hidden" name="editing_registration" value="#input_struct['editing_registration']#" />
+			<cfelse>
+				<input type="hidden" name="editing_registration" value="" />
+			</cfif>
 			<div class="panel-body">
 				<fieldset>
 						<legend>Your Contact Information</legend>

@@ -25,11 +25,49 @@ angular.module('eventsadmin')
 			return promise;
 		}
 		,
-		saveFlags : function (checked_boxes, use_flags){
+		removeFlags : function (registrations, use_flags){
 			var promise;
-			if(checked_boxes && use_flags && checked_boxes.length > 0 && use_flags.length > 0){
+			if(registrations && use_flags && registrations.length > 0 && use_flags.length > 0){
 			 	var url = '/Taffy/index.cfm/flags';
-				promise = $http.put(url, {flags: use_flags, objects : checked_boxes});
+				promise = $http.delete(url, {flags: use_flags, objects : registrations});
+				return promise;
+			}else{
+				//nothing to save
+			}			 
+			return promise;
+		}
+		,
+		removeFlag : function (registrations, use_flags){
+			var promise;
+			var flags_arr = [];
+			var regs_arr = [];
+			regs_arr[0] = registrations;
+			flags_arr[0] = use_flags;
+			if(registrations && use_flags ){
+			 	var url = '/Taffy/index.cfm/flags';
+				promise = $http({
+					url: url,
+					method: 'DELETE',
+					data: 
+						{flags: flags_arr, objects : regs_arr}
+					,
+					headers: {
+						"Content-Type": "application/json;charset=utf-8"
+					}
+				});
+
+				return promise;
+			}else{
+				//nothing to save
+			}			 
+			return promise;
+		}
+		,
+		saveFlags : function (registrations, use_flags){
+			var promise;
+			if(registrations && use_flags && registrations.length > 0 && use_flags.length > 0){
+			 	var url = '/Taffy/index.cfm/flags';
+				promise = $http.put(url, {flags: use_flags, objects : registrations});
 				return promise;
 			}else{
 				//nothing to save

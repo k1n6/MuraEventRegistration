@@ -11,6 +11,9 @@
 <cfset cnt = 0>
 <cfset eventWasVisible = false>
 <cfoutput query="getChosenSubData" group="subeventid">
+<cfif not structkeyexists(rc.counts.subeventCounts,subeventid)>
+	<cfset rc.counts.subeventCounts[subeventid] = 0>
+</cfif>
 <cfset activity_chosen = false>
 	<cfif (
 		( guestsuffix eq '_0' and 
@@ -33,9 +36,15 @@
 						value ="#subeventid#"
 						class="sub_event_checkbox"
 						data-subeventid = "#subeventid##guestsuffix#"
-						   <cfif subevent_required eq '1'>disabled</cfif>
-						<cfif subevent_required eq '1'
-						or listfindnocase(input_struct['subevent#guestsuffix#'], subeventid)
+						   <cfif subevent_required eq '1'
+						   	or (val(subevent_maxparticipation) gt 0 and subevent_maxparticipation - rc.counts.subeventCounts[subeventid] lte 0)>
+						   	disabled
+						   </cfif>
+						<cfif 
+								(subevent_required eq '1'
+								or listfindnocase(input_struct['subevent#guestsuffix#'], subeventid)
+								)
+								and not ((val(subevent_maxparticipation) gt 0 and subevent_maxparticipation - rc.counts.subeventCounts[subeventid] lte 0))
 							>
 							<cfset activity_chosen = true>
 							checked="true"
@@ -43,6 +52,10 @@
 							<cfset request.total_items['subevent_#val(guest)#'] = {id = subeventid, price=val(subevent_price), guest=val(guest)}>
 						</cfif>
 					/>
+						<cfif val(subevent_maxparticipation) gt 0>
+							<br />						
+							#numberformat(max(0, subevent_maxparticipation - rc.counts.subeventCounts[subeventid]), ',')# left
+						</cfif>
 					<cfif subevent_required eq '1'>
 						<input type="hidden" name="subevent#guestsuffix#" value ="#subeventid#">
 						
@@ -50,12 +63,13 @@
 							</div><div class="col-xs-10">
 							
 					<label for="subevent#guestsuffix#_#subeventid#">
-						#subevent_name#  
+					 
 							<cfif val(subevent_price) gt 0>
-								
+								#dollarformat(subevent_price)# -
 							<cfelse>
 
 							</cfif>
+						#subevent_name# 
 						<div class="pull-right">&nbsp;
 						#dateformat(subevent_start, 'long')# #timeformat(subevent_startTime, 'short')# 
 								to 
@@ -71,8 +85,17 @@
 		<div id="sub_event_options_#subevent##guestsuffix#">
 			<cfset lastgroup = "">
 			<cfoutput group="optiongroupid">
+				<cfif not structkeyexists(rc.counts.optionGroupCounts,optiongroupid)>
+					<cfset rc.counts.optionGroupCounts[optiongroupid] = 0>
+				</cfif>
+			
 				<cfset optiongroup_chosen = false>
-				<cfif  (
+				<cfif   (not (
+						val(optiongroup_maxparticipation) gt 0 
+						and max(0, optiongroup_maxparticipation - rc.counts.optionGroupCounts[optiongroupid]) eq 0
+					))
+							and
+							(
 						( guestsuffix eq '_0' and 
 							(optiongroup_available_to eq 3 
 							or ( optiongroup_available_to eq 2 and not session.isMember)
@@ -124,7 +147,13 @@
 								#subevent_name#
 							<cfelse>
 								#group_name#
+								<cfif val(optiongroup_maxparticipation) gt 0>
+									(#numberformat(max(0, optiongroup_maxparticipation - rc.counts.optionGroupCounts[optiongroupid]), ',')# left)
+								</cfif>
+
 							</cfif>
+							
+
 
 
 
@@ -160,8 +189,17 @@
 													<option value="">Make a selection..</option>
 												</cfif>
 												<cfoutput>
+													<cfif not structkeyexists(rc.counts.optionCounts,option_id)>
+														<cfset rc.counts.optionCounts[option_id] = 0>
+													</cfif>
 													<cfset cnt += 1>
-													<cfif not structkeyexists(usedOptions, option_id)
+													<cfif 
+													(not (
+														val(option_max_participation) gt 0 
+														and max(0, option_max_participation - rc.counts.optionCounts[option_id]) eq 0
+													))
+													and
+													not structkeyexists(usedOptions, option_id)
 														and (
 															( guestsuffix eq '_0' and 
 																(option_available_to eq 3 
@@ -188,7 +226,12 @@
 														</cfif>
 														>
 															#name#
-															#dollarformat(price)#
+															<cfif price gt 0>
+																#dollarformat(price)#
+															</cfif>
+															<cfif val(option_max_participation) gt 0>
+																(#numberformat(max(0, option_max_participation - rc.counts.optionCounts[option_id]), ',')# left)
+															</cfif>
 														</option>
 														
 													</cfif>

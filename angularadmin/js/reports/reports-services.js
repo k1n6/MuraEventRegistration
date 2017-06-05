@@ -63,7 +63,7 @@ angular.module('eventsadmin')
 			$('#csvform').submit();
 		}
 		,
-			saveCustomReport : function(target_prices, target_activities, target_options, report_name, eventid){
+			saveCustomReport : function(target_prices, target_activities, target_options, report_name, eventid, selected_flags){
 				var promise;
 				 var url = '/Taffy/index.cfm/customreports/' + $window.siteid + '/' + eventid;
 					promise = $http.put(url, 
@@ -72,7 +72,8 @@ angular.module('eventsadmin')
 												target_options : target_options,
 												target_activities : target_activities,
 												report_name : report_name,
-												userid : ""}
+												userid : "",
+												selected_flags : selected_flags}
 									  )
 					 .then(function (response) {
 						response = setBooleans(response);

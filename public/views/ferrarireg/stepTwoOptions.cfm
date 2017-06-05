@@ -21,36 +21,57 @@
 				</div>
 				<div class="col-sm-4">
 					<cfset usedPrices = {}>
-				
-					<select name="main_eventprice#guestsuffix#"  class="form-control">
+					<select name="main_eventprice#guestsuffix#"  class="form-control"
+						
+						
+						>
 						<cfloop query="rc.event_data.price_data">
-							<cfif not structkeyexists(usedPrices, price_id)
-								and (
-									( guestsuffix eq '_0' and 
-										(available_to eq 3 
-										or ( available_to eq 2 and not session.isMember)
-										or ( available_to eq 1 and session.isMember)
-										)
-									) or (
-										guestsuffix neq '' and listfindnocase('2,3', available_to)
-									))
-									
-									
+							<cfif not structkeyexists(rc.counts.eventCounts,price_id)>
+								<cfset rc.counts.eventCounts[price_id] = 0>
+							</cfif>
+							<cfif val(price_max_participation) gt 0 and max(0, price_max_participation - rc.counts.eventCounts[price_id]) eq 0>
+							
+							<cfelse>
+
+								
+
+								<cfif not structkeyexists(usedPrices, price_id)
+									and (
+										( guestsuffix eq '_0' and 
+											(available_to eq 3 
+											or ( available_to eq 2 and not session.isMember)
+											or ( available_to eq 1 and session.isMember)
+											)
+										) or (
+											guestsuffix neq '' and listfindnocase('2,3', available_to)
+										))
+
+
+										>
+									<cfset usedPrices[price_id] = 1>
+									<option value="#price_id#"
+											<cfif listfindnocase(input_struct['main_eventprice#guestsuffix#'], price_id)>
+												<cfset request.runningTotal += val(price)>
+												<cfset request.total_items['main_eventprice_#val(guest)#'] = {id = price_id, price=val(price), guest=val(guest)}>
+
+												selected 
+											</cfif>
 									>
-								<cfset usedPrices[price_id] = 1>
-								<option value="#price_id#"
-										<cfif listfindnocase(input_struct['main_eventprice#guestsuffix#'], price_id)>
-											<cfset request.runningTotal += val(price)>
-											<cfset request.total_items['main_eventprice_#val(guest)#'] = {id = price_id, price=val(price), guest=val(guest)}>
-											
-											selected 
+									<cfif price gt 0>
+										#dollarformat(price)# 
+											/ 
+									</cfif>
+										#price_name#
+										<cfif val(price_max_participation) gt 0>
+											<br />						
+											(#numberformat(max(0, price_max_participation - rc.counts.eventCounts[price_id]), ',')# left)
+										<cfelse>
+											(no cost)
 										</cfif>
-								>
-								#dollarformat(price)# / 
-									#price_name#
 
-								</option>
+									</option>
 
+								</cfif>
 							</cfif>
 						</cfloop>
 					</select>							
@@ -59,8 +80,20 @@
 		</cfoutput>
 		
 		<cfset lastgroup = "">
+
 		<cfoutput query="rc.event_data.main_data" group="optiongroupid">
-			<cfif ( guestsuffix eq '_0' and 
+			<cfif not structkeyexists(rc.counts.optionGroupCounts,optiongroupid)>
+				<cfset rc.counts.optionGroupCounts[optiongroupid] = 0>
+			</cfif>
+		
+			<cfif 
+					 (not (
+						val(optiongroup_maxparticipation) gt 0 
+						and max(0, optiongroup_maxparticipation - rc.counts.optionGroupCounts[optiongroupid]) eq 0
+					))
+							and
+								
+									( guestsuffix eq '_0' and 
 										(optiongroup_available_to eq 3 
 										or ( optiongroup_available_to eq 2 and not session.isMember)
 										or ( optiongroup_available_to eq 1 and session.isMember)
@@ -88,7 +121,9 @@
 								type="checkbox" id="optiongroup#optiongroupid##guestsuffix#" name='optiongroup#guestsuffix#' value='#optiongroupid#' >
 						</cfif>
 						#group_name#
-
+						<cfif val(optiongroup_maxparticipation) gt 0>
+							(#numberformat(max(0, optiongroup_maxparticipation - rc.counts.optionGroupCounts[optiongroupid]), ',')# left)
+						</cfif>
 					</label>
 					<div class="col-sm-9">
 						<div class="flexparent">
@@ -118,8 +153,19 @@
 										<option value="">Make a selection..</option>
 									</cfif>
 									<cfoutput>
+										<cfif not structkeyexists(rc.counts.optionCounts,option_id)>
+											<cfset rc.counts.optionCounts[option_id] = 0>
+										</cfif>
+									
 										<cfset cnt += 1>
-										<cfif not structkeyexists(usedOptions, option_id)
+										<cfif 
+											(not (
+												val(option_max_participation) gt 0 
+												and max(0, option_max_participation - rc.counts.optionCounts[option_id]) eq 0
+											))
+											and
+										
+											not structkeyexists(usedOptions, option_id)
 										and (
 											( guestsuffix eq '_0' and 
 												(option_available_to eq 3 
@@ -139,7 +185,14 @@
 													</cfif>
 													>
 												#name#
-												#dollarformat(price)#
+												<cfif price gt 0>
+													#dollarformat(price)#
+												<cfelse>
+										   	 
+											 	</cfif>
+											 	<cfif val(option_max_participation) gt 0>
+													(#numberformat(max(0, option_max_participation - rc.counts.optionCounts[option_id]), ',')# left)
+												</cfif>
 											</option>
 
 										</cfif>

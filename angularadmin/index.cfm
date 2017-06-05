@@ -20,6 +20,9 @@
 	<script src="node_modules/angular-filter/dist/angular-filter.min.js"></script>
 	<script src="node_modules/angular-ui-router/release/angular-ui-router.min.js"></script>
     <script src="node_modules/angular-ui-bootstrap-datetimepicker/datetimepicker.js"></script>
+    <!--
+	<script src="node_modules/angular-ui-bootstrap/dist/ui-bootstrap.js"></script>
+	-->
 	<script src="node_modules/angular-scroll/angular-scroll.min.js"></script>
 	<script src="js/checklist-model.js"></script>
     <script src="ui-bootstrap-tpls-2.4.0.min.js"></script>
@@ -35,8 +38,9 @@
 	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angular_material/1.0.7/angular-material.min.js"></script>
 	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/angular_material/1.0.7/angular-material.min.css">
-
+	
     <script src="assets/eventsAdminApp.js"></script>
+    <script src="js/UI.js"></script>
     <script src="js/events/event-controllers.js"></script>
     <script src="js/events/event-services.js"></script>
     <script src="js/reports/reports-controllers.js"></script> 
@@ -44,7 +48,7 @@
 	<script src="js/flags/flags-controllers.js"></script> 
     <script src="js/flags/flags-services.js"></script>
     <script src="js/directives.js"></script>
-    <script src="js/UI.js"></script>
+    
     <script src="js/table2csv.js"></script>
 	 
    
@@ -106,7 +110,7 @@
             <h1>
                Ferrari Regional / Chapter Events Administration
             </h1>
-            <div ng-http-loader  ttl="1" template="templates/loader.html">
+            <div ng-http-loader  ttl=".25" template="templates/loader.html">
         </div>
 	
     </header>

@@ -40,7 +40,7 @@ app
 
  var eventDetailsReportingSinglePayment = {
 	name: 'eventDetails.reporting.payment',
-	url: '/report/payment/{payment_id}',
+	url: '/report/payment/{payment_id}/:targetRegistration?',
 	templateUrl: 'templates/payment-single.html'
  }
   
@@ -291,67 +291,81 @@ angular.module('eventsadmin')
 						});
 
 					});
-					$(".tablesorter").not('.hassorter').addClass('hassorter').DataTable(
-							{
-								"columnDefs": [ {
-									  "targets": 'no-sort',
-									  "orderable": false,
-								} ],
-								paging: false,
-								"footerCallback": function ( row, data, start, end, display ) {
+					var default_sort = [[0, "desc"]];
+					$(".tablesorter").not('.hassorter').addClass('hassorter')
+							.each(function(){
+								if($(this).attr("default-sort") != ''){
+									var use_sort = $(this).attr("default-sort");
+									var sort_obj = eval(use_sort);
+								}else{
+									var sort_obj = default_sort;
+									
+								}
+								$(this)
+								.DataTable(
+								{
+									"order" : sort_obj,
+									"columnDefs": [ {
+										  "targets": 'no-sort',
+										  "orderable": false,
+									} ],
+									paging: false,
+									"footerCallback": function ( row, data, start, end, display ) {
 
-									var api = this.api(), data;
+										var api = this.api(), data;
 
-									// Remove the formatting to get integer data for summation
-									var intVal = function ( i ) {
-										return typeof i === 'string' ?
-											i.replace(/[\$,]/g, '')*1.0 :
-											typeof i === 'number' ?
-												i : 0;
-									};
+										// Remove the formatting to get integer data for summation
+										var intVal = function ( i ) {
+											return typeof i === 'string' ?
+												i.replace(/[\$,]/g, '')*1.0 :
+												typeof i === 'number' ?
+													i : 0;
+										};
 
-									// Total over all pages
-									for(i =0; i < 21; i++){
-										//console.log("Starting: " + i + "-------------------------------------")
-										try{
-											if($(api.column(i).header() && api.column(i).header()).hasClass('showtotal')){
-
-
+										// Total over all pages
+										for(i =0; i < 21; i++){
+											//console.log("Starting: " + i + "-------------------------------------")
+											try{
+												if($(api.column(i).header() && api.column(i).header()).hasClass('showtotal')){
 
 
 
-												// Total over this page
-												pageTotal = api
-													.column( i , {page : 'current'})
-													.data()
-													.reduce( function (a, b, c) {
-														//console.log(c);
-														var $tr = $('#' + api.table().toJQuery().context[0].sTableId + ' tbody tr').get(c);
 
 
-														if($($tr).filter(':visible').length > 0){
-															$td = $($tr).find('td').get(i);
-															useval = $td.innerHTML;
-															//console.log(c + ': (visible) a: ' + a + " b:" + intVal(useval));
-															return intVal(a) + intVal(useval);
-														}else{
-															//console.log(c + ': (hidden) a: ' + a + " b:" + intVal(useval));	
-															return intVal(a);
-														}
-													}, 0 );
+													// Total over this page
+													pageTotal = api
+														.column( i , {page : 'current'})
+														.data()
+														.reduce( function (a, b, c) {
+															//console.log(c);
+															var $tr = $('#' + api.table().toJQuery().context[0].sTableId + ' tbody tr').get(c);
 
-												// Update footer
-												$( api.column( i ).footer() ).html(
-													 pageTotal.toFixed(2)
-												);
+
+															if($($tr).filter(':visible').length > 0){
+																$td = $($tr).find('td').get(i);
+																useval = $td.innerHTML;
+																//console.log(c + ': (visible) a: ' + a + " b:" + intVal(useval));
+																return intVal(a) + intVal(useval);
+															}else{
+																//console.log(c + ': (hidden) a: ' + a + " b:" + intVal(useval));	
+																return intVal(a);
+															}
+														}, 0 );
+
+													// Update footer
+													$( api.column( i ).footer() ).html(
+														 pageTotal.toFixed(2)
+													);
+												}
+											}catch(e){
+
 											}
-										}catch(e){
-
 										}
 									}
-								}
-							} 
-				);
+								} )
+							});
+							
+				
 			
 				//updates our required fields
 				$('.ng-valid-required').not('form').parent().parent().addClass("field-required");
@@ -419,13 +433,13 @@ angular.module('eventsadmin')
 		$window.checkToUpdateTables = function(){
 			if($('#http_request_in_progress').filter(":visible").length > 0){
 				console.log("rescheduling");
-				$timeout($window.checkToUpdateTables, 125);
+				$timeout($window.checkToUpdateTables, 5);
 			}else{
 				console.log("setting to update");
-				$window.lastTimeout = $timeout($window.updateTables, 125);		
+				$window.lastTimeout = $timeout($window.updateTables, 5);		
 			}
 		}
-		$window.lastTimeout = $timeout($window.checkToUpdateTables, 250);	
+		$window.lastTimeout = $timeout($window.checkToUpdateTables, 5);	
 		
 		$timeout(function(){
 			$('.ng-valid-required').not('form').parent().parent().addClass("field-required");

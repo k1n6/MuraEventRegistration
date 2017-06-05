@@ -6,20 +6,146 @@
 			
 		</div>
 	</div>
-	<div class="input-group col-centered custom-list-item " ng-repeat="event in events">
-		<a  class="form-control"  ui-sref="eventDetails.eventinformation({eventid: event.TContent_ID})">
-				{{event.ShortTitle}}
-		</a>
-		 <span class="input-group-btn">
-			<button ng-click="copyEvent(event.TContent_ID, $event);" type="button" 
-					class="btn btn-green copyEventButton"><span class="glyphicon glyphicon-copy"></span> Copy</button>
-			<button ng-click="deleteEvent(event.TContent_ID, $event);" type="button" 
-				class="btn btn-danger deleteEventButton"><span class="glyphicon glyphicon-remove"></span> Delete</button>
-		</span>
+	<div ng-show="!loading">
+
+		<div class="flex-display">
+			<div class="flex-1 futureevents flex-pad">
+				<label for="futureevents">
+					<input type="checkbox"
+						ng-click="updateFooter()"
+						checklist-value="futureevents"
+						checklist-model="selectedEvents" 
+						id="futureevents">
+					Future Events
+				</label>
+			</div>
+			<div class="flex-1 pastevents flex-pad">
+				<label for="pastevents">
+					<input type="checkbox"
+						ng-click="updateFooter()"
+						checklist-value="pastevents"
+						checklist-model="selectedEvents" 
+						id="pastevents">
+					Past Events
+				</label>
+			</div>
+
+		</div>
+
+
+				<div class="table-responsive ">
+				<table class="table hascsv tablesorter">
+					<thead>
+						<tr>
+							<th class="header">Name</th>
+							<th class="header no-sort">Date </th>
+							<th class="header no-sort">Actions</th>
+						</tr>
+					</thead>
+					<tfoot>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tfoot>
+
+					<tbody>
+						<tr ng-repeat="event in events"
+							ng-show="
+									(
+										selectedEvents.indexOf(2) != -1
+										&&
+										getDateFromString(event.EventDate) > current_date
+									) ||
+									(
+										selectedEvents.indexOf(1) != -1
+										&&
+										getDateFromString(event.EventDate)<= current_date
+									) 
+									"
+							ng-class="
+									{'futureevent' : (
+										selectedEvents.indexOf(2) != -1
+										&&
+										getDateFromString(event.EventDate) > current_date
+									),
+									'pastevent' : (
+										selectedEvents.indexOf(1) != -1
+										&&
+										getDateFromString(event.EventDate) <= current_date
+									)}"
+
+						>
+							<td>
+								<a  ui-sref="eventDetails.eventinformation({eventid: event.TContent_ID})" class="form-control borderless">
+
+									<span class="">
+										{{event.ShortTitle}}
+									</span>
+								</a>
+							</td>
+							<td>
+								<a   ui-sref="eventDetails.eventinformation({eventid: event.TContent_ID})"  class="form-control borderless">
+									<span class="">
+										{{event.EventDate}}
+									</span>
+								</a>
+							</td>
+							<td>
+								 <span class="input-group-btn">
+									<button ui-sref="eventDetails.eventinformation({eventid: event.TContent_ID})" type="button" 
+											class="btn btn-primary copyEventButton "><span class="glyphicon glyphicon-edit"></span> Edit</button>
+									<button ng-click="copyEvent(event.TContent_ID, $event);" type="button" 
+											class="btn btn-green copyEventButton "><span class="glyphicon glyphicon-copy"></span> Copy</button>
+									<button ng-click="deleteEvent(event.TContent_ID, $event);" type="button" 
+										class="btn btn-danger deleteEventButton "><span class="glyphicon glyphicon-remove"></span> Delete</button>
+								</span>
+							</td>
+						</tr>				
+					</tbody>
+				</table>
+			</div>			
+			<div class="col-md-4 pull-right text-align-right">
+			<button id="AddEventButton" type="button" class="btn btn-primary ng-scope" ui-sref="eventDetails.eventinformation({eventid: -1})">
+				<span class="glyphicon glyphicon-plus"></span>
+			Create Event</button>
+		</div>
+
+			<!--
+		<div class="input-group col-centered custom-list-table custom-list-table-header  ">
+			<div  class="form-control  custom-list-table-a" >
+					<span class="flex-table-list-column">
+						Event Name
+					</span>
+					<span class="flex-table-list-column">
+						Event Date
+					</span>
+			</div>
+			 <span class="input-group-btn" style="visibility: hidden;">
+				<button type="button" 
+						class="btn btn-green copyEventButton flex-table-list-column"><span class="glyphicon glyphicon-copy"></span> Copy</button>
+				<button type="button" 
+					class="btn btn-danger deleteEventButton flex-table-list-column"><span class="glyphicon glyphicon-remove"></span> Delete</button>
+			</span>
+		</div>
+
+		<div class="input-group col-centered custom-list-table  " ng-repeat="event in events">
+			<a  class="form-control  custom-list-table-a"  ui-sref="eventDetails.eventinformation({eventid: event.TContent_ID})">
+					<span class="flex-table-list-column">
+						{{event.ShortTitle}}
+					</span>
+					<span class="flex-table-list-column">
+						{{event.EventDate}}
+					</span>
+			</a>
+			 <span class="input-group-btn">
+				<button ng-click="copyEvent(event.TContent_ID, $event);" type="button" 
+						class="btn btn-green copyEventButton flex-table-list-column"><span class="glyphicon glyphicon-copy"></span> Copy</button>
+				<button ng-click="deleteEvent(event.TContent_ID, $event);" type="button" 
+					class="btn btn-danger deleteEventButton flex-table-list-column"><span class="glyphicon glyphicon-remove"></span> Delete</button>
+			</span>
+		</div>
+		-->
 	</div>
-	
-	<div class="col-md-12">
-		<button id="AddEventButton" type="button" class="btn btn-primary ng-scope" ui-sref="eventDetails.eventinformation({eventid: -1})">Create Event</button>
-	</div>
+
 
 </div>

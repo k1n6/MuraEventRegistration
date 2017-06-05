@@ -5,7 +5,7 @@
 
 <cfparam default="false" name="reviewmode">
 <cfif isdefined('url.goingback') and url.goingback eq 'true' and arraylen(session.reg_options) gte curstep +1 and isstruct(session.reg_options[curstep + 1])>
-	
+
 	<cfset input_struct = session.reg_options[curstep + 1]>
 	<cfloop collection="#input_struct#" item='i'>
 		<cfset rc[i] = input_struct[i]>	
@@ -45,3 +45,9 @@
 		<cfset session.reg_options[curstep] = save_struct>
 	</cfif>
 </cfif>
+<!---
+	<cfif isdefined("session.target_user_session")>
+		<cfdump var="#session.target_user_session#">
+	</cfif>
+	<cfdump var="#session.reg_options#">
+--->

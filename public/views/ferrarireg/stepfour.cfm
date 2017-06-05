@@ -28,55 +28,65 @@
 				$('input, select').prop('disabled', 'true').prop("placeholder", "");
 			})
 	</script>
-		<cfset reviewmode = true>
-		<cfset url.goingback = 'true'>
-		<cfset curstep = 1>
-		<cfinclude template="default.cfm">
-		<cfset curstep = 2>
-		<cfinclude template="steptwo.cfm">
-		<cfset curstep = 3>
+	<cfset reviewmode = true>
+	<cfset url.goingback = 'true'>
+	<cfset curstep = 1>
+	<cfinclude template="default.cfm">
+	<cfset curstep = 2>
+	<cfinclude template="steptwo.cfm">
+	<cfset curstep = 3>
 
-		<cfinclude template="stepthree.cfm">
+	<cfinclude template="stepthree.cfm">
 	<br clear="all" />
-		<div class="container-fluid">
-			<div class="panel panel-default">
-				<form method="post" action="?EventRegistrationaction=public:ferrarireg.stepfive&EventID=<cfoutput>#rc.eventid#</cfoutput>" role="form" data-toggle="validator">
-					<div class="panel-body">
-						<fieldset>
-							<div class="form-group row">
-								<div class="col-sm-12 text-align-right">
-									<h3>Total price of all acivities and options selected: <cfoutput>#dollarformat(request.runningTotal)#</cfoutput><br></h3>
-									<cfif session.event_config.charge_tax eq 1 and val(session.event_config.taxrate) gt 0>
-										<cfoutput>
-											<h3>Tax: #dollarformat(rc.FERRARI_REG.roundPenniesUp(request.runningTotal * (session.event_config.taxrate / 100)))#</h3>
-											<h3>Total: #dollarformat(request.runningTotal + request.runningTotal * (session.event_config.taxrate / 100))#</h3>
-										</cfoutput>
-										<input type="hidden" name="taxAmount" value="#rc.FERRARI_REG.roundPenniesUp(request.runningTotal * (session.event_config.taxrate / 100))#">
-									<cfelse>
-										<input type="hidden" name="taxAmount" value="0">
-									</cfif>
-								</div>
-							</div>
-							
-							<div class="form-group row">
-								<div class="col-sm-6 pull-left">
-									<button class="btn btn-primary" onclick="window.location.href = '?EventRegistrationaction=public:ferrarireg.stepthree&EventID=<cfoutput>#rc.eventid#</cfoutput>&goingback=true'; return false;">&lt;- Go Back</button>
-								</div>
-								<div class="col-sm-6 pull-right text-align-right">
-									<button class="btn btn-primary" type="submit">Proceed To Checkout -></button>
-								</div>
 
-							</div>
-						</fieldset>
+	<div class="panel panel-default">
+		<form method="post" action="?EventRegistrationaction=public:ferrarireg.stepfive&EventID=<cfoutput>#rc.eventid#</cfoutput>" role="form" data-toggle="validator">
+			<div class="panel-body">
+				<fieldset>
+					<div class="form-group row">
+						<div class="col-sm-12 text-align-right">
+							<cfset use_total = request.runningTotal>
+							<cfinclude template="total_block.cfm">
+						</div>
+					</div>
+
+					<div class="form-group row">
+						<div class="col-sm-6 pull-left">
+							<button class="btn btn-primary" onclick="window.location.href = '?EventRegistrationaction=public:ferrarireg.stepthree&EventID=<cfoutput>#rc.eventid#</cfoutput>&goingback=true'; return false;">&lt;- Go Back</button>
+						</div>
+						<div class="col-sm-6 pull-right text-align-right">
+							<cfparam default="false" name="session.target_user_session.admin_user">
+								<cfif arraylen(session.reg_options) lt 5 or not structkeyexists(session.reg_options[5], 'admin_notes')>
+									<cfset use_notes = "">
+								<cfelse>
+									<cfset use_notes = session.reg_options[5].admin_notes>
+								</cfif>
+								<cfif session.target_user_session.admin_user>
+									<div class="form-group">
+										<label for="Country" class="control-label">Admin Notes</label>
+										<textarea name="admin_notes" class="form-control">
+											<cfoutput>
+												#use_notes#													
+											</cfoutput>
+										</textarea>
+									</div>
+
+								</cfif>
+
+
+							<cfif val(use_total) lte 0>
+								<button class="btn btn-primary" type="submit">Proceed -></button>
+							<cfelse>
+								<button class="btn btn-primary" type="submit">Proceed To Checkout -></button>
+							</cfif>
+						</div>
 
 					</div>
-				</form>
+				</fieldset>
+
 			</div>
-		</div>
-				
-			
-				
-					
+		</form>
+	</div>					
 </div>
 	
 
