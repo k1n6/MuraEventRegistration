@@ -32,7 +32,7 @@
 		and  ((not isdefined('session.target_user_session.stmember.id')) or val(session.target_user_session.stmember.id) eq 0)>
 
 		<cfif session.target_user_session.admin_user>
-			<h3>Bypassing membership requirement for registration for an admin user</h3>
+			<h3 class="alert alert-info">Bypassing membership requirement for registration for an admin user</h3>
 		<cfelse>
 			<cflocation url="#$.siteConfig('memberloginpage')#?logintoregisterforevents=true&returnto=#cgi.path_info#?#urlencodedformat(cgi.query_string)#" addtoken="false">
 		</cfif>

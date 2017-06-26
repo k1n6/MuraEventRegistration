@@ -144,7 +144,7 @@
 
 				<cfif Session.EventInfo.SelectedEvent.WebinarAvailable EQ 0 and Session.EventInfo.EventFacility.RecordCount NEQ 0 OR LEN(Session.EventInfo.SelectedEvent.WebinarAvailable) EQ 0 and Session.EventInfo.EventFacility.RecordCount NEQ 0>
 
-					<div class="row">
+					<div class="row" id="eventLocationRow">
 
 						<div class="col-sm-2">
 							<span class="event-info-header larger">Event Location:</span>
@@ -161,6 +161,7 @@
 						<div class="col-sm-7">
 							<link rel="stylesheet" href="/plugins/#Variables.Framework.Package#/library/LeafLet/leaflet.css" />
 							<script src="/plugins/#Variables.Framework.Package#/library/LeafLet/leaflet.js"></script>
+							<div id="no-location-notice" style="display: none;">No location set</div>
 							<script async defer
 								src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJQDNJTahP-R4mVSsySxNfrsNJTZI4-ok&callback=initMap">
 								</script>
@@ -226,7 +227,8 @@
 										}
 									else
 									{
-										alert("Not found");
+										$('##no-location-notice').css('display', 'block');
+										$('##map').remove();
 									}
 								  });
 								}
