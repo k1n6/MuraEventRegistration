@@ -1,5 +1,5 @@
 <cfsavecontent variable="pluginContent">
-
+	<cfset $ = application.serviceFactory.getBean('$')>
     
     <script src="node_modules/api-check/dist/api-check.js"></script>
     
@@ -106,7 +106,7 @@
 			app.factory('httpRequestInterceptor', function () {
 			  return {
 				request: function (config) {
-				  config.headers['X-Siteid'] = 'asdfasdf';
+				  config.headers['X-Siteid'] = '<cfoutput>#$.siteConfig("siteid")#</cfoutput>';
 				  return config;
 				}
 			  };
