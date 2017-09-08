@@ -103,7 +103,7 @@
 			$(function(){
 				$('.block-constrain').addClass('plugin-container').removeClass('block-constrain');
 			})
-			eventsadmin.factory('httpRequestInterceptor', function () {
+			app.factory('httpRequestInterceptor', function () {
 			  return {
 				request: function (config) {
 				  config.headers['X-Siteid'] = 'asdfasdf';
