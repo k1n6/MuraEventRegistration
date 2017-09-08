@@ -111,7 +111,9 @@
 				}
 			  };
 			});
-			
+			app.config(function ($httpProvider) {
+			  $httpProvider.interceptors.push('httpRequestInterceptor');
+			});
 		</script>
 <div role="main">
     <header class="bs-header text-center" id="overview">
