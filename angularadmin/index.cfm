@@ -103,6 +103,15 @@
 			$(function(){
 				$('.block-constrain').addClass('plugin-container').removeClass('block-constrain');
 			})
+			myapp.factory('httpRequestInterceptor', function () {
+			  return {
+				request: function (config) {
+				  config.headers['X-Siteid'] = 'asdfasdf';
+				  return config;
+				}
+			  };
+			});
+			
 		</script>
 <div role="main">
     <header class="bs-header text-center" id="overview">
