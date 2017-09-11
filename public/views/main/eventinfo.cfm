@@ -141,8 +141,7 @@
 						</div>
 					</div>
 				</cfif>
-
-				<cfif Session.EventInfo.SelectedEvent.WebinarAvailable EQ 0 and Session.EventInfo.EventFacility.RecordCount NEQ 0 OR LEN(Session.EventInfo.SelectedEvent.WebinarAvailable) EQ 0 and Session.EventInfo.EventFacility.RecordCount NEQ 0>
+				<cfif len(Session.EventInfo.SelectedEvent.location)>
 
 					<div class="row" id="eventLocationRow">
 
