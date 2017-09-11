@@ -27,7 +27,7 @@ angular.module('eventsadmin')
 			return promise;
 			
 		},
-		eventCopier(source_event, source_subevent, target_event, target_subevent, mode){
+		eventCopier  : function(source_event, source_subevent, target_event, target_subevent, mode){
 			
 			if(typeof $window.siteid == 'undefined' || $window.siteid == ''){
 				console.log('Error siteid not defined, unable to copy event.');
