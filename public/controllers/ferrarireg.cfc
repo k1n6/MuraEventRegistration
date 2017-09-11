@@ -112,7 +112,7 @@ http://www.apache.org/licenses/LICENSE-2.0
 				This forces our admin control variables off if the user is logged into a mura session which is a public account, or if the mure memberships don't exist in the session.
 			--->
 			<cfif isdefined("session.mura.memberships")>
-				<cfif session.mura.memberships contains "s2ispublic">
+				<cfif session.mura.memberships contains "s2ispublic" or session.mura.memberships eq "">
 					<cfset session.target_user_session.admin_user = false>
 					<cfset session.target_user_session.editing_registration = 0>
 					<cfset  session.target_user_session.reg_payments = 0>

@@ -61,6 +61,7 @@
 								<cfelse>
 									<cfset use_notes = session.reg_options[5].admin_notes>
 								</cfif>
+
 								<cfif session.target_user_session.admin_user>
 									<div class="form-group">
 										<label for="Country" class="control-label">Admin Notes</label>
