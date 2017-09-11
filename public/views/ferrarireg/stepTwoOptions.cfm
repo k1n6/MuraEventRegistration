@@ -66,7 +66,7 @@
 											<br />						
 											(#numberformat(max(0, price_max_participation - rc.counts.eventCounts[price_id]), ',')# left)
 										<cfelse>
-											(no cost)
+										
 										</cfif>
 
 									</option>
